@@ -1,0 +1,40 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  background: rgb(255 255 255 / 78%);
+  color: var(--color-text-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-xs);
+}
+
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+.online {
+  background: var(--color-success);
+  box-shadow: 0 0 0 4px rgb(39 132 92 / 12%);
+}
+
+.offline {
+  background: var(--color-danger);
+  box-shadow: 0 0 0 4px rgb(178 65 65 / 12%);
+}
+
+.checking {
+  background: var(--color-warning);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

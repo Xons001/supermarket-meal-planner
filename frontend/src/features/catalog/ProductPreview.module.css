@@ -1,0 +1,176 @@
+.section {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.headingRow {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.headingRow h2 {
+  margin: 0.3rem 0 0.45rem;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.6rem);
+  letter-spacing: -0.045em;
+}
+
+.headingRow p {
+  margin: 0;
+  color: var(--color-text-soft);
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.demoBadge {
+  flex: 0 0 auto;
+  border: 1px solid #e4c98d;
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem;
+  background: #fff8e8;
+  color: #795b17;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.cardTop,
+.priceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.category {
+  overflow: hidden;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.availability {
+  color: var(--color-success);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.card h3 {
+  margin: 1rem 0 0.2rem;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  letter-spacing: -0.02em;
+}
+
+.brand {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 1.2rem 0;
+}
+
+.metrics div {
+  border-radius: var(--radius-sm);
+  padding: 0.7rem;
+  background: var(--color-surface-muted);
+}
+
+.metrics dt {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+
+.metrics dd {
+  margin: 0.2rem 0 0;
+  color: var(--color-heading);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.priceRow {
+  margin-top: auto;
+}
+
+.priceRow strong {
+  color: var(--color-heading);
+  font-size: 1.2rem;
+}
+
+.priceRow span {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.card small {
+  margin-top: 0.55rem;
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.state {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  background: var(--color-surface);
+  color: var(--color-text-soft);
+}
+
+.error {
+  border-color: #eccaca;
+  background: #fff5f5;
+  color: var(--color-danger);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .headingRow {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

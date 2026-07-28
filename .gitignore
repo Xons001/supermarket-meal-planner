@@ -1,0 +1,28 @@
+# Environment
+.env
+.env.local
+
+# IDEs and operating systems
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Backend
+backend/target/
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Airflow runtime (not used in phase 0)
+airflow/logs/
+airflow/airflow.db
+airflow/airflow.cfg
+
+# Local data and temporary files
+*.tmp
+*.swp

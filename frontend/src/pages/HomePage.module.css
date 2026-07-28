@@ -1,0 +1,497 @@
+.page {
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 5%, rgb(214 232 208 / 55%), transparent 28rem),
+    var(--color-background);
+}
+
+.header {
+  display: grid;
+  width: min(1180px, calc(100% - 2rem));
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 2rem;
+  margin: 0 auto;
+  padding: 1.25rem 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.brand > span:last-child,
+.footerBrand > div {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.brand small,
+.footerBrand small {
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brandMark {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: var(--color-heading);
+  color: #e9f5e7;
+  font-family: var(--font-display);
+  font-weight: 900;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1.7rem;
+}
+
+.nav a {
+  color: var(--color-text-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--color-primary);
+}
+
+.header > :last-child {
+  justify-self: end;
+}
+
+.hero {
+  display: grid;
+  width: min(1180px, calc(100% - 2rem));
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.72fr);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 6rem);
+  margin: 0 auto;
+  padding: clamp(4.5rem, 9vw, 8.5rem) 0 5.5rem;
+}
+
+.kicker,
+.sectionHeading > span {
+  color: var(--color-primary);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 47rem;
+  margin: 1rem 0 1.35rem;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 5.7rem);
+  font-weight: 900;
+  letter-spacing: -0.068em;
+  line-height: 0.95;
+}
+
+.hero h1 span {
+  color: var(--color-primary);
+}
+
+.heroCopy > p {
+  max-width: 43rem;
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  line-height: 1.75;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 2rem 0;
+}
+
+.primaryAction,
+.secondaryAction {
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.primaryAction {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 12px 28px rgb(24 86 63 / 20%);
+}
+
+.secondaryAction {
+  border: 1px solid var(--color-border-strong);
+  background: rgb(255 255 255 / 60%);
+  color: var(--color-heading);
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+  transform: translateY(-1px);
+}
+
+.trustRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.trustRow span::before {
+  margin-right: 0.35rem;
+  color: var(--color-success);
+  content: '✓';
+}
+
+.heroPanel {
+  position: relative;
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: 1.65rem;
+  padding: 1.5rem;
+  background: linear-gradient(155deg, #183e31, #0c2b21);
+  color: white;
+  box-shadow: 0 28px 70px rgb(13 51 38 / 24%);
+}
+
+.heroPanel::before {
+  position: absolute;
+  inset: -1rem 2rem auto;
+  z-index: -1;
+  height: 100%;
+  border-radius: inherit;
+  background: #bfd6b8;
+  content: '';
+  transform: rotate(3deg);
+}
+
+.panelLabel {
+  color: #b9d3c5;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.weekHeader,
+.budgetRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.weekHeader {
+  margin: 1.4rem 0;
+}
+
+.weekHeader div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.weekHeader small {
+  color: #b9d3c5;
+}
+
+.weekHeader span {
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  color: #d8e8df;
+  font-size: 0.63rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.macroGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+.macroGrid div {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: rgb(255 255 255 / 6%);
+}
+
+.macroGrid span {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.macroGrid small {
+  color: #abc8b9;
+}
+
+.budgetRow {
+  margin-top: 1.4rem;
+  color: #c5dacf;
+  font-size: 0.8rem;
+}
+
+.budgetRow strong {
+  color: white;
+  font-size: 1rem;
+}
+
+.progressTrack {
+  height: 0.35rem;
+  margin: 0.65rem 0 1.2rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+}
+
+.progressTrack span {
+  display: block;
+  width: 72%;
+  height: 100%;
+  border-radius: inherit;
+  background: #8fcf9c;
+}
+
+.heroPanel > p {
+  margin: 0;
+  color: #9fbcad;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.notice,
+.selectorSection,
+.workflow,
+main > :global(section):last-child {
+  width: min(1180px, calc(100% - 2rem));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #ead4a6;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  background: #fff9ec;
+}
+
+.noticeIcon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #f0d89e;
+  color: #6d5317;
+  font-family: serif;
+  font-weight: 900;
+}
+
+.notice strong {
+  color: #5e4919;
+}
+
+.notice p {
+  margin: 0.2rem 0 0;
+  color: #786538;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.selectorSection {
+  margin-top: 5rem;
+  margin-bottom: 6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.4rem;
+  padding: clamp(1.3rem, 4vw, 2.4rem);
+  background: rgb(255 255 255 / 72%);
+  box-shadow: var(--shadow-sm);
+}
+
+.loading,
+.loadError {
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  color: var(--color-text-soft);
+}
+
+.loadError {
+  background: #fff5f5;
+  color: var(--color-danger);
+}
+
+.workflow {
+  padding: 5.5rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.sectionHeading {
+  max-width: 45rem;
+}
+
+.sectionHeading h2 {
+  margin: 0.65rem 0 0.8rem;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+}
+
+.sectionHeading p {
+  margin: 0;
+  color: var(--color-text-soft);
+  line-height: 1.65;
+}
+
+.workflowGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.workflowGrid article {
+  border-top: 2px solid var(--color-primary);
+  padding: 1.4rem 0.4rem 0;
+}
+
+.workflowGrid article > span {
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.workflowGrid h3 {
+  margin: 1rem 0 0.45rem;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.workflowGrid p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+main > :global(section):last-child {
+  padding: 5rem 0 7rem;
+}
+
+.footer {
+  display: grid;
+  width: min(1180px, calc(100% - 2rem));
+  grid-template-columns: minmax(13rem, 0.5fr) 1fr;
+  gap: 3rem;
+  margin: 0 auto;
+  padding: 2.5rem 0 3rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-heading);
+}
+
+.legal {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.legal p {
+  margin: 0 0 0.6rem;
+}
+
+@media (max-width: 960px) {
+  .header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .heroCopy {
+    max-width: 50rem;
+  }
+
+  .heroPanel {
+    width: min(100%, 29rem);
+  }
+}
+
+@media (max-width: 680px) {
+  .header {
+    gap: 0.7rem;
+  }
+
+  .header > :last-child {
+    overflow: hidden;
+    max-width: 1.2rem;
+    border: 0;
+    padding: 0.55rem;
+    background: transparent;
+    box-shadow: none;
+    white-space: nowrap;
+  }
+
+  .hero {
+    padding-top: 3.5rem;
+  }
+
+  .hero h1 {
+    overflow-wrap: break-word;
+    font-size: clamp(2.5rem, 12.5vw, 3.35rem);
+    letter-spacing: -0.055em;
+  }
+
+  .workflowGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
