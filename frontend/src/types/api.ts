@@ -21,6 +21,16 @@ export interface Nutrition {
   updatedAt: string
 }
 
+export interface DietaryTag {
+  id: string
+  code: string
+  name: string
+}
+
+export interface Allergen extends DietaryTag {
+  presenceType: 'CONTAINS' | 'MAY_CONTAIN' | 'TRACES' | 'UNKNOWN'
+}
+
 export interface Product {
   id: string
   supermarketCode: string
@@ -32,6 +42,7 @@ export interface Product {
   name: string
   brand: string | null
   description: string | null
+  imageUrl: string | null
   currentPrice: number
   unitPrice: number
   packageQuantity: number
@@ -40,7 +51,46 @@ export interface Product {
   source: string
   lastSyncedAt: string
   nutrition: Nutrition | null
+  dietaryTags: DietaryTag[]
+  allergens: Allergen[]
   demonstrationData: boolean
+}
+
+export interface Category {
+  id: string
+  externalId: string
+  name: string
+  parentCategoryId: string | null
+  supermarketCode: string
+}
+
+export interface CatalogOption {
+  id: string
+  code: string
+  name: string
+}
+
+export interface PriceHistoryEntry {
+  id: string
+  price: number
+  unitPrice: number
+  recordedAt: string
+  demonstrationData: boolean
+}
+
+export interface ProductFilters {
+  supermarketCode?: string
+  categoryId?: string
+  query?: string
+  available?: boolean
+  maximumPrice?: string
+  maximumCalories?: string
+  minimumProtein?: string
+  dietaryTags?: string[]
+  excludedAllergens?: string[]
+  page: number
+  size: number
+  sort: string
 }
 
 export interface PageResponse<T> {

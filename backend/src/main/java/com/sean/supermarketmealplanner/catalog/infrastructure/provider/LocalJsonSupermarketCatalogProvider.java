@@ -1,13 +1,17 @@
 package com.sean.supermarketmealplanner.catalog.infrastructure.provider;
 
 import com.sean.supermarketmealplanner.catalog.application.port.ExternalCategory;
+import com.sean.supermarketmealplanner.catalog.application.port.ExternalAllergen;
+import com.sean.supermarketmealplanner.catalog.application.port.ExternalPriceHistory;
 import com.sean.supermarketmealplanner.catalog.application.port.ExternalProduct;
 import com.sean.supermarketmealplanner.catalog.application.port.SupermarketCatalogProvider;
 import com.sean.supermarketmealplanner.catalog.domain.PackageUnit;
+import com.sean.supermarketmealplanner.catalog.domain.PresenceType;
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogFileReader;
 import com.sean.supermarketmealplanner.supermarket.domain.SupermarketCode;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -65,7 +69,21 @@ public class LocalJsonSupermarketCatalogProvider implements SupermarketCatalogPr
                 product.currentPrice(),
                 product.unitPrice(),
                 product.available(),
-                product.source()
+                product.source(),
+                product.allergens().stream()
+                        .map(allergen -> new ExternalAllergen(
+                                allergen.code(),
+                                PresenceType.valueOf(allergen.presenceType())
+                        ))
+                        .toList(),
+                Set.copyOf(product.dietaryTags()),
+                product.priceHistory().stream()
+                        .map(price -> new ExternalPriceHistory(
+                                price.price(),
+                                price.unitPrice(),
+                                price.recordedAt()
+                        ))
+                        .toList()
         );
     }
 }

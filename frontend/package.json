@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "node -e \"const fs=require('fs');['dist','coverage'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}))\""

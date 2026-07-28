@@ -2,6 +2,8 @@ package com.sean.supermarketmealplanner.catalog.application.port;
 
 import com.sean.supermarketmealplanner.catalog.domain.PackageUnit;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Set;
 
 public record ExternalProduct(
         String externalId,
@@ -15,6 +17,9 @@ public record ExternalProduct(
         BigDecimal currentPrice,
         BigDecimal unitPrice,
         boolean available,
-        String source
+        String source,
+        List<ExternalAllergen> allergens,
+        Set<String> dietaryTags,
+        List<ExternalPriceHistory> priceHistory
 ) {
 }

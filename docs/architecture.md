@@ -40,8 +40,11 @@ comportamiento real. No se crean paquetes o clases vacíos para simular avance.
 3. `LocalJsonSupermarketCatalogProvider` normaliza categorías y productos.
 4. `LocalJsonNutritionDataProvider` aporta nutrición por código o nombre.
 5. El importador actualiza de forma idempotente y nunca elimina productos.
-6. Los servicios de consulta mapean entidades persistentes a DTOs.
-7. El frontend obtiene supermercados, salud y productos con TanStack Query.
+6. `ProductSpecifications` compone búsqueda y filtros sin multiplicar métodos
+   de repositorio.
+7. Los servicios de consulta enriquecen por lote y mapean entidades a DTOs.
+8. El frontend obtiene metadatos, productos y detalle con TanStack Query; los
+   filtros son estado navegable en la URL.
 
 ## Proveedores de supermercado
 

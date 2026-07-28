@@ -38,6 +38,7 @@ const products = {
       name: 'Pechuga de pollo',
       brand: 'Marca genérica',
       description: 'Producto ficticio',
+      imageUrl: null,
       currentPrice: 4.75,
       unitPrice: 9.5,
       packageQuantity: 500,
@@ -46,6 +47,14 @@ const products = {
       source: 'DEMO_JSON',
       lastSyncedAt: '2026-07-28T00:00:00Z',
       demonstrationData: true,
+      dietaryTags: [
+        {
+          id: '30000000-0000-0000-0000-000000000001',
+          code: 'HIGH_PROTEIN',
+          name: 'Alto en proteína',
+        },
+      ],
+      allergens: [],
       nutrition: {
         caloriesPer100g: 110,
         proteinPer100g: 23.1,

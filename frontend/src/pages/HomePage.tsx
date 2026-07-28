@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BackendStatus } from '../components/BackendStatus'
 import { ProductPreview } from '../features/catalog/ProductPreview'
 import { SupermarketSelector } from '../features/supermarkets/SupermarketSelector'
@@ -44,7 +45,7 @@ export function HomePage() {
         <nav className={styles.nav} aria-label="Navegación principal">
           <a href="#supermercados">Supermercados</a>
           <a href="#como-funcionara">Cómo funcionará</a>
-          <a href="#catalogo">Catálogo</a>
+          <Link to="/products">Catálogo completo</Link>
         </nav>
         <BackendStatus />
       </header>
@@ -62,9 +63,9 @@ export function HomePage() {
               un menú semanal basado en productos concretos, paquetes y precios estimados.
             </p>
             <div className={styles.heroActions}>
-              <a className={styles.primaryAction} href="#supermercados">
-                Explorar demostración
-              </a>
+              <Link className={styles.primaryAction} to="/products">
+                Explorar catálogo
+              </Link>
               <a className={styles.secondaryAction} href="#como-funcionara">
                 Ver cómo funcionará
               </a>
@@ -103,8 +104,8 @@ export function HomePage() {
               <span />
             </div>
             <p>
-              Este panel ilustra el producto futuro. La FASE 0 solo sirve datos controlados de
-              catálogo.
+              Este panel ilustra el producto futuro. La FASE 1 permite explorar y filtrar el
+              catálogo controlado.
             </p>
           </aside>
         </section>
@@ -175,7 +176,7 @@ export function HomePage() {
           </span>
           <div>
             <strong>Supermarket Meal Planner</strong>
-            <small>Proyecto independiente · FASE 0</small>
+            <small>Proyecto independiente · FASE 1</small>
           </div>
         </div>
         <div className={styles.legal}>

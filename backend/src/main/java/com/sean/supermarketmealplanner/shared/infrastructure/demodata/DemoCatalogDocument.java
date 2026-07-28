@@ -38,9 +38,20 @@ public record DemoCatalogDocument(
             BigDecimal unitPrice,
             boolean available,
             String source,
-            List<String> allergens,
+            List<DemoAllergen> allergens,
             List<String> dietaryTags,
-            DemoNutrition nutrition
+            DemoNutrition nutrition,
+            List<DemoPriceHistory> priceHistory
+    ) {
+    }
+
+    public record DemoAllergen(String code, String presenceType) {
+    }
+
+    public record DemoPriceHistory(
+            BigDecimal price,
+            BigDecimal unitPrice,
+            OffsetDateTime recordedAt
     ) {
     }
 

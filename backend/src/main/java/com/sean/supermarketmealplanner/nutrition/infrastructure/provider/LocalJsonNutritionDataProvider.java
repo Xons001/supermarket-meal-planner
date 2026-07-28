@@ -23,6 +23,7 @@ public class LocalJsonNutritionDataProvider implements NutritionDataProvider {
         }
         return fileReader.read().products().stream()
                 .filter(product -> barcode.equalsIgnoreCase(product.barcode()))
+                .filter(product -> product.nutrition() != null)
                 .findFirst()
                 .map(product -> mapNutrition(product.nutrition()));
     }
@@ -34,6 +35,7 @@ public class LocalJsonNutritionDataProvider implements NutritionDataProvider {
         }
         return fileReader.read().products().stream()
                 .filter(product -> name.equalsIgnoreCase(product.name()))
+                .filter(product -> product.nutrition() != null)
                 .findFirst()
                 .map(product -> mapNutrition(product.nutrition()));
     }

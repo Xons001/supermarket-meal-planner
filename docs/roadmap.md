@@ -1,55 +1,52 @@
 # Roadmap
 
-## FASE 0 — Fundación y arquitectura
+## FASE 0 — Fundación y arquitectura ✅
 
 Monorepo, monolito modular, PostgreSQL, Flyway, Docker, proveedores
 intercambiables, catálogo vertical, frontend inicial, pruebas y documentación.
 
-## FASE 1 — Catálogo mock
+## FASE 1 — Catálogo completo y frontend ✅
 
-Búsqueda, filtros, alérgenos, etiquetas dietéticas, disponibilidad e histórico
-de precios.
+Búsqueda y filtros combinables, alérgenos, etiquetas dietéticas, disponibilidad,
+histórico de precios, navegación, paginación, detalle, estados vacíos y filtros
+persistidos en la URL.
 
-## FASE 2 — Frontend de catálogo
-
-Navegación, filtros accesibles, paginación, detalle y estados vacíos.
-
-## FASE 3 — Plantillas de comidas
+## FASE 2 — Plantillas de comidas
 
 Plantillas, ingredientes, cantidades e instrucciones comprobables.
 
-## FASE 4 — Generador basado en scoring
+## FASE 3 — Generador basado en scoring
 
 Motor determinista para calorías, proteína, presupuesto y variedad.
 
-## FASE 5 — Lista de compra y desperdicio
+## FASE 4 — Lista de compra y desperdicio
 
 Paquetes requeridos, coste total, cantidad utilizada y sobrante.
 
-## FASE 6 — Sustituciones
+## FASE 5 — Sustituciones
 
 Reemplazos de comidas y productos conservando restricciones.
 
-## FASE 7 — Airflow y sincronización
+## FASE 6 — Airflow y sincronización
 
 DAGs idempotentes de catálogo, precios, bajas lógicas e informes.
 
-## FASE 8 — Nutrición externa
+## FASE 7 — Nutrición externa
 
 Evaluación de Open Food Facts, matching y confianza verificable.
 
-## FASE 9 — Usuarios y preferencias
+## FASE 8 — Usuarios y preferencias
 
 Autenticación, perfiles, favoritos, historial y planes guardados.
 
-## FASE 10 — OR-Tools
+## FASE 9 — OR-Tools
 
 Optimización avanzada como estrategia intercambiable.
 
-## FASE 11 — IA opcional
+## FASE 10 — IA opcional
 
 Interpretación de lenguaje natural sin delegar cálculos de negocio.
 
-## FASE 12 — CI/CD, despliegue y Kubernetes
+## FASE 11 — CI/CD, despliegue y Kubernetes
 
 Pipeline, observabilidad, despliegue reproducible y demostración Kubernetes.

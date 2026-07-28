@@ -47,22 +47,29 @@ por 100 g, `dataSource`, `verificationStatus`, `confidenceScore`, `updatedAt`.
 La relación con producto es uno a uno. Coincidir solo por nombre no convierte un
 dato en verificado.
 
-## Entidades previstas de catálogo
+## Entidades de catálogo de la FASE 1
 
 ### ProductPriceHistory
 
-`id`, `productId`, `price`, `unitPrice`, `recordedAt`. Solo se añadirá una fila
-cuando cambie el precio total o unitario.
+`id`, `productId`, `price`, `unitPrice`, `recordedAt`. La clave por producto y
+fecha de registro hace idempotente la importación JSON.
 
 ### DietaryTag y ProductDietaryTag
 
 `DietaryTag(id, code, name)` y relación
 `ProductDietaryTag(productId, dietaryTagId)`.
 
+Los códigos actuales son `HIGH_PROTEIN`, `VEGETARIAN`, `VEGAN`, `GLUTEN_FREE`,
+`LACTOSE_FREE`, `LOW_CALORIE` y `HIGH_FIBER`.
+
 ### Allergen y ProductAllergen
 
 `Allergen(id, code, name)` y relación
 `ProductAllergen(productId, allergenId, presenceType)`.
+
+`presenceType` admite `CONTAINS`, `MAY_CONTAIN`, `TRACES` y `UNKNOWN`. Los
+alérgenos controlados son gluten, leche, huevo, pescado, soja y frutos de
+cáscara.
 
 ## Entidades previstas del planificador
 
@@ -86,6 +93,10 @@ erDiagram
     CATEGORY ||--o{ PRODUCT : classifies
     PRODUCT ||--o| NUTRITION : has
     PRODUCT ||--o{ PRODUCT_PRICE_HISTORY : records
+    PRODUCT ||--o{ PRODUCT_DIETARY_TAG : tagged
+    DIETARY_TAG ||--o{ PRODUCT_DIETARY_TAG : classifies
+    PRODUCT ||--o{ PRODUCT_ALLERGEN : declares
+    ALLERGEN ||--o{ PRODUCT_ALLERGEN : identifies
     MEAL_PLAN ||--|{ MEAL_PLAN_DAY : contains
     MEAL_PLAN_DAY ||--|{ MEAL : contains
     MEAL ||--|{ MEAL_ITEM : contains

@@ -1,386 +1,659 @@
 {
   "metadata": {
-    "datasetName": "Supermarket Meal Planner demo catalog",
+    "datasetName": "Catálogo controlado FASE 1",
     "classification": "DEMONSTRATION_DATA",
-    "priceDisclaimer": "Datos de demostración. Los precios no son reales ni actuales.",
+    "priceDisclaimer": "Todos los productos, identificadores y precios son ficticios.",
     "generatedAt": "2026-07-28T00:00:00Z"
   },
   "supermarketCode": "MERCADONA",
   "categories": [
-    {
-      "externalId": "demo-cat-proteins",
-      "name": "Proteínas",
-      "parentExternalId": null
-    },
-    {
-      "externalId": "demo-cat-pantry",
-      "name": "Despensa",
-      "parentExternalId": null
-    },
-    {
-      "externalId": "demo-cat-dairy",
-      "name": "Lácteos y refrigerados",
-      "parentExternalId": null
-    },
-    {
-      "externalId": "demo-cat-bakery",
-      "name": "Panadería",
-      "parentExternalId": null
-    },
-    {
-      "externalId": "demo-cat-produce",
-      "name": "Frutas y verduras",
-      "parentExternalId": null
-    }
+    { "externalId": "demo-cat-meat-eggs", "name": "Carnes y huevos", "parentExternalId": null },
+    { "externalId": "demo-cat-dairy", "name": "Lácteos y alternativas", "parentExternalId": null },
+    { "externalId": "demo-cat-cereals", "name": "Cereales y pasta", "parentExternalId": null },
+    { "externalId": "demo-cat-bakery", "name": "Panadería", "parentExternalId": null },
+    { "externalId": "demo-cat-legumes", "name": "Legumbres", "parentExternalId": null },
+    { "externalId": "demo-cat-produce", "name": "Frutas y verduras", "parentExternalId": null },
+    { "externalId": "demo-cat-preserves", "name": "Conservas", "parentExternalId": null },
+    { "externalId": "demo-cat-plant", "name": "Proteína vegetal", "parentExternalId": null }
   ],
   "products": [
     {
       "externalId": "demo-mercadona-chicken-breast",
       "barcode": "DEMO-000001",
-      "categoryExternalId": "demo-cat-proteins",
+      "categoryExternalId": "demo-cat-meat-eggs",
       "name": "Pechuga de pollo",
-      "brand": "Marca genérica",
-      "description": "Pechuga de pollo en bandeja. Producto ficticio para demostración.",
-      "packageQuantity": 500.000,
+      "brand": "Marca neutra",
+      "description": "Filetes de pechuga de pollo de demostración.",
+      "packageQuantity": 500,
       "packageUnit": "G",
       "currentPrice": 4.75,
       "unitPrice": 9.50,
       "available": true,
       "source": "DEMO_JSON",
       "allergens": [],
-      "dietaryTags": ["HIGH_PROTEIN", "GLUTEN_FREE"],
+      "dietaryTags": ["HIGH_PROTEIN", "GLUTEN_FREE", "LACTOSE_FREE"],
       "nutrition": {
-        "caloriesPer100g": 110.00,
-        "proteinPer100g": 23.10,
-        "carbohydratesPer100g": 0.00,
-        "fatPer100g": 1.90,
-        "fiberPer100g": 0.00,
-        "sugarPer100g": 0.00,
-        "saltPer100g": 0.13,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 110, "proteinPer100g": 23.1, "carbohydratesPer100g": 0,
+        "fatPer100g": 1.9, "fiberPer100g": 0, "sugarPer100g": 0, "saltPer100g": 0.13,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 4.75, "unitPrice": 9.50, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 4.55, "unitPrice": 9.10, "recordedAt": "2026-06-15T00:00:00Z" },
+        { "price": 4.35, "unitPrice": 8.70, "recordedAt": "2026-05-01T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-turkey-burger",
       "barcode": "DEMO-000002",
-      "categoryExternalId": "demo-cat-proteins",
+      "categoryExternalId": "demo-cat-meat-eggs",
       "name": "Hamburguesa de pavo",
-      "brand": "Marca genérica",
-      "description": "Hamburguesas de pavo sin marca comercial. Datos de demostración.",
-      "packageQuantity": 400.000,
+      "brand": "Selección demo",
+      "description": "Hamburguesas de pavo preparadas; datos ficticios.",
+      "packageQuantity": 400,
       "packageUnit": "G",
       "currentPrice": 3.60,
       "unitPrice": 9.00,
       "available": true,
       "source": "DEMO_JSON",
-      "allergens": [],
-      "dietaryTags": ["HIGH_PROTEIN"],
+      "allergens": [
+        { "code": "SOY", "presenceType": "CONTAINS" },
+        { "code": "GLUTEN", "presenceType": "MAY_CONTAIN" }
+      ],
+      "dietaryTags": ["HIGH_PROTEIN", "LACTOSE_FREE"],
       "nutrition": {
-        "caloriesPer100g": 145.00,
-        "proteinPer100g": 20.00,
-        "carbohydratesPer100g": 2.00,
-        "fatPer100g": 6.20,
-        "fiberPer100g": 0.00,
-        "sugarPer100g": 0.80,
-        "saltPer100g": 0.90,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 155, "proteinPer100g": 20.8, "carbohydratesPer100g": 3.2,
+        "fatPer100g": 6.7, "fiberPer100g": 0.4, "sugarPer100g": 0.8, "saltPer100g": 1.1,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 3.60, "unitPrice": 9.00, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 3.45, "unitPrice": 8.63, "recordedAt": "2026-06-10T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-eggs",
       "barcode": "DEMO-000003",
-      "categoryExternalId": "demo-cat-proteins",
-      "name": "Huevos",
-      "brand": "Marca genérica",
-      "description": "Docena de huevos. Precio y valores nutricionales ficticios.",
-      "packageQuantity": 12.000,
+      "categoryExternalId": "demo-cat-meat-eggs",
+      "name": "Huevos camperos",
+      "brand": "Granja ficticia",
+      "description": "Caja de doce huevos de demostración.",
+      "packageQuantity": 12,
       "packageUnit": "UNIT",
       "currentPrice": 2.40,
       "unitPrice": 0.20,
       "available": true,
       "source": "DEMO_JSON",
-      "allergens": ["EGG"],
-      "dietaryTags": ["VEGETARIAN", "HIGH_PROTEIN", "GLUTEN_FREE"],
+      "allergens": [{ "code": "EGG", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["VEGETARIAN", "HIGH_PROTEIN", "GLUTEN_FREE", "LACTOSE_FREE"],
       "nutrition": {
-        "caloriesPer100g": 143.00,
-        "proteinPer100g": 12.60,
-        "carbohydratesPer100g": 0.70,
-        "fatPer100g": 9.50,
-        "fiberPer100g": 0.00,
-        "sugarPer100g": 0.40,
-        "saltPer100g": 0.36,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
-    },
-    {
-      "externalId": "demo-mercadona-rice",
-      "barcode": "DEMO-000004",
-      "categoryExternalId": "demo-cat-pantry",
-      "name": "Arroz",
-      "brand": "Marca genérica",
-      "description": "Arroz de grano largo. Datos de demostración.",
-      "packageQuantity": 1000.000,
-      "packageUnit": "G",
-      "currentPrice": 1.45,
-      "unitPrice": 1.45,
-      "available": true,
-      "source": "DEMO_JSON",
-      "allergens": [],
-      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE"],
-      "nutrition": {
-        "caloriesPer100g": 356.00,
-        "proteinPer100g": 7.00,
-        "carbohydratesPer100g": 79.00,
-        "fatPer100g": 0.70,
-        "fiberPer100g": 1.30,
-        "sugarPer100g": 0.20,
-        "saltPer100g": 0.01,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
-    },
-    {
-      "externalId": "demo-mercadona-whole-wheat-pasta",
-      "barcode": "DEMO-000005",
-      "categoryExternalId": "demo-cat-pantry",
-      "name": "Pasta integral",
-      "brand": "Marca genérica",
-      "description": "Pasta integral seca. Datos de demostración.",
-      "packageQuantity": 500.000,
-      "packageUnit": "G",
-      "currentPrice": 1.25,
-      "unitPrice": 2.50,
-      "available": true,
-      "source": "DEMO_JSON",
-      "allergens": ["GLUTEN"],
-      "dietaryTags": ["VEGAN", "VEGETARIAN", "HIGH_FIBER"],
-      "nutrition": {
-        "caloriesPer100g": 348.00,
-        "proteinPer100g": 13.00,
-        "carbohydratesPer100g": 65.00,
-        "fatPer100g": 2.50,
-        "fiberPer100g": 8.00,
-        "sugarPer100g": 3.20,
-        "saltPer100g": 0.02,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
-    },
-    {
-      "externalId": "demo-mercadona-whole-wheat-bread",
-      "barcode": "DEMO-000006",
-      "categoryExternalId": "demo-cat-bakery",
-      "name": "Pan integral",
-      "brand": "Marca genérica",
-      "description": "Pan integral rebanado. Datos de demostración.",
-      "packageQuantity": 450.000,
-      "packageUnit": "G",
-      "currentPrice": 1.55,
-      "unitPrice": 3.44,
-      "available": true,
-      "source": "DEMO_JSON",
-      "allergens": ["GLUTEN"],
-      "dietaryTags": ["VEGAN", "VEGETARIAN", "HIGH_FIBER"],
-      "nutrition": {
-        "caloriesPer100g": 246.00,
-        "proteinPer100g": 9.20,
-        "carbohydratesPer100g": 41.00,
-        "fatPer100g": 4.00,
-        "fiberPer100g": 7.00,
-        "sugarPer100g": 3.50,
-        "saltPer100g": 1.05,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 143, "proteinPer100g": 12.6, "carbohydratesPer100g": 0.7,
+        "fatPer100g": 9.5, "fiberPer100g": 0, "sugarPer100g": 0.4, "saltPer100g": 0.36,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 2.40, "unitPrice": 0.20, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 2.28, "unitPrice": 0.19, "recordedAt": "2026-05-20T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-protein-yogurt",
-      "barcode": "DEMO-000007",
+      "barcode": "DEMO-000004",
       "categoryExternalId": "demo-cat-dairy",
       "name": "Yogur alto en proteína",
-      "brand": "Marca genérica",
-      "description": "Yogur natural alto en proteína. Datos de demostración.",
-      "packageQuantity": 200.000,
+      "brand": "Lácteo demo",
+      "description": "Yogur natural proteico ficticio.",
+      "packageQuantity": 200,
       "packageUnit": "G",
       "currentPrice": 1.20,
       "unitPrice": 6.00,
       "available": true,
       "source": "DEMO_JSON",
-      "allergens": ["MILK"],
+      "allergens": [{ "code": "MILK", "presenceType": "CONTAINS" }],
       "dietaryTags": ["VEGETARIAN", "HIGH_PROTEIN", "GLUTEN_FREE"],
       "nutrition": {
-        "caloriesPer100g": 68.00,
-        "proteinPer100g": 10.00,
-        "carbohydratesPer100g": 4.00,
-        "fatPer100g": 1.30,
-        "fiberPer100g": 0.00,
-        "sugarPer100g": 4.00,
-        "saltPer100g": 0.12,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 68, "proteinPer100g": 10.2, "carbohydratesPer100g": 4.1,
+        "fatPer100g": 0.9, "fiberPer100g": 0, "sugarPer100g": 3.8, "saltPer100g": 0.12,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.20, "unitPrice": 6.00, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.10, "unitPrice": 5.50, "recordedAt": "2026-06-01T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-lactose-free-milk",
-      "barcode": "DEMO-000008",
+      "barcode": "DEMO-000005",
       "categoryExternalId": "demo-cat-dairy",
       "name": "Leche sin lactosa",
-      "brand": "Marca genérica",
-      "description": "Leche semidesnatada sin lactosa. Datos de demostración.",
-      "packageQuantity": 1.000,
+      "brand": "Lácteo demo",
+      "description": "Leche semidesnatada sin lactosa de demostración.",
+      "packageQuantity": 1,
       "packageUnit": "L",
       "currentPrice": 1.15,
       "unitPrice": 1.15,
       "available": true,
       "source": "DEMO_JSON",
-      "allergens": ["MILK"],
-      "dietaryTags": ["VEGETARIAN", "LACTOSE_FREE", "GLUTEN_FREE"],
+      "allergens": [{ "code": "MILK", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["VEGETARIAN", "LACTOSE_FREE", "GLUTEN_FREE", "LOW_CALORIE"],
       "nutrition": {
-        "caloriesPer100g": 46.00,
-        "proteinPer100g": 3.20,
-        "carbohydratesPer100g": 4.80,
-        "fatPer100g": 1.60,
-        "fiberPer100g": 0.00,
-        "sugarPer100g": 4.80,
-        "saltPer100g": 0.13,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 46, "proteinPer100g": 3.2, "carbohydratesPer100g": 4.8,
+        "fatPer100g": 1.6, "fiberPer100g": 0, "sugarPer100g": 4.8, "saltPer100g": 0.13,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.15, "unitPrice": 1.15, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.08, "unitPrice": 1.08, "recordedAt": "2026-05-15T00:00:00Z" }
+      ]
     },
     {
-      "externalId": "demo-mercadona-canned-tuna",
-      "barcode": "DEMO-000009",
-      "categoryExternalId": "demo-cat-proteins",
-      "name": "Atún en conserva",
-      "brand": "Marca genérica",
-      "description": "Atún al natural en conserva. Datos de demostración.",
-      "packageQuantity": 180.000,
-      "packageUnit": "G",
-      "currentPrice": 2.95,
-      "unitPrice": 16.39,
+      "externalId": "demo-mercadona-soy-drink",
+      "barcode": "DEMO-000006",
+      "categoryExternalId": "demo-cat-dairy",
+      "name": "Bebida de soja",
+      "brand": "Alternativa demo",
+      "description": "Bebida vegetal sin azúcares añadidos.",
+      "packageQuantity": 1,
+      "packageUnit": "L",
+      "currentPrice": 1.35,
+      "unitPrice": 1.35,
       "available": true,
       "source": "DEMO_JSON",
-      "allergens": ["FISH"],
-      "dietaryTags": ["HIGH_PROTEIN", "GLUTEN_FREE"],
+      "allergens": [{ "code": "SOY", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "LACTOSE_FREE", "GLUTEN_FREE", "LOW_CALORIE"],
       "nutrition": {
-        "caloriesPer100g": 116.00,
-        "proteinPer100g": 26.00,
-        "carbohydratesPer100g": 0.00,
-        "fatPer100g": 1.00,
-        "fiberPer100g": 0.00,
-        "sugarPer100g": 0.00,
-        "saltPer100g": 1.00,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 33, "proteinPer100g": 3.0, "carbohydratesPer100g": 0.8,
+        "fatPer100g": 1.8, "fiberPer100g": 0.5, "sugarPer100g": 0.2, "saltPer100g": 0.09,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.35, "unitPrice": 1.35, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.29, "unitPrice": 1.29, "recordedAt": "2026-06-12T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-cottage-cheese",
+      "barcode": "DEMO-000007",
+      "categoryExternalId": "demo-cat-dairy",
+      "name": "Queso fresco batido",
+      "brand": "Lácteo demo",
+      "description": "Queso fresco batido alto en proteína.",
+      "packageQuantity": 500,
+      "packageUnit": "G",
+      "currentPrice": 1.85,
+      "unitPrice": 3.70,
+      "available": false,
+      "source": "DEMO_JSON",
+      "allergens": [{ "code": "MILK", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["VEGETARIAN", "HIGH_PROTEIN", "GLUTEN_FREE"],
+      "nutrition": {
+        "caloriesPer100g": 67, "proteinPer100g": 8.3, "carbohydratesPer100g": 4.0,
+        "fatPer100g": 1.9, "fiberPer100g": 0, "sugarPer100g": 4.0, "saltPer100g": 0.10,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.85, "unitPrice": 3.70, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.75, "unitPrice": 3.50, "recordedAt": "2026-04-30T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-rice",
+      "barcode": "DEMO-000008",
+      "categoryExternalId": "demo-cat-cereals",
+      "name": "Arroz largo",
+      "brand": "Despensa demo",
+      "description": "Arroz largo en paquete de un kilogramo.",
+      "packageQuantity": 1,
+      "packageUnit": "KG",
+      "currentPrice": 1.45,
+      "unitPrice": 1.45,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE"],
+      "nutrition": {
+        "caloriesPer100g": 354, "proteinPer100g": 7.2, "carbohydratesPer100g": 78.0,
+        "fatPer100g": 0.8, "fiberPer100g": 1.3, "sugarPer100g": 0.2, "saltPer100g": 0.01,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.45, "unitPrice": 1.45, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.39, "unitPrice": 1.39, "recordedAt": "2026-05-08T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-oats",
+      "barcode": "DEMO-000009",
+      "categoryExternalId": "demo-cat-cereals",
+      "name": "Copos de avena",
+      "brand": "Despensa demo",
+      "description": "Copos de avena integrales.",
+      "packageQuantity": 500,
+      "packageUnit": "G",
+      "currentPrice": 1.25,
+      "unitPrice": 2.50,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [
+        { "code": "GLUTEN", "presenceType": "CONTAINS" },
+        { "code": "NUTS", "presenceType": "MAY_CONTAIN" }
+      ],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "HIGH_FIBER", "LACTOSE_FREE"],
+      "nutrition": {
+        "caloriesPer100g": 370, "proteinPer100g": 13.0, "carbohydratesPer100g": 59.0,
+        "fatPer100g": 7.0, "fiberPer100g": 10.0, "sugarPer100g": 1.0, "saltPer100g": 0.01,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.25, "unitPrice": 2.50, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.19, "unitPrice": 2.38, "recordedAt": "2026-06-03T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-whole-wheat-pasta",
+      "barcode": "DEMO-000010",
+      "categoryExternalId": "demo-cat-cereals",
+      "name": "Pasta integral",
+      "brand": "Despensa demo",
+      "description": "Espirales integrales de trigo.",
+      "packageQuantity": 500,
+      "packageUnit": "G",
+      "currentPrice": 1.30,
+      "unitPrice": 2.60,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [
+        { "code": "GLUTEN", "presenceType": "CONTAINS" },
+        { "code": "EGG", "presenceType": "TRACES" }
+      ],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "HIGH_FIBER", "LACTOSE_FREE"],
+      "nutrition": {
+        "caloriesPer100g": 348, "proteinPer100g": 13.2, "carbohydratesPer100g": 65.0,
+        "fatPer100g": 2.5, "fiberPer100g": 8.0, "sugarPer100g": 3.0, "saltPer100g": 0.02,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.30, "unitPrice": 2.60, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.22, "unitPrice": 2.44, "recordedAt": "2026-05-22T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-gluten-free-pasta",
+      "barcode": "DEMO-000011",
+      "categoryExternalId": "demo-cat-cereals",
+      "name": "Pasta de maíz sin gluten",
+      "brand": "Especial demo",
+      "description": "Pasta de maíz apta para dieta sin gluten.",
+      "packageQuantity": 400,
+      "packageUnit": "G",
+      "currentPrice": 2.10,
+      "unitPrice": 5.25,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [{ "code": "SOY", "presenceType": "MAY_CONTAIN" }],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE"],
+      "nutrition": {
+        "caloriesPer100g": 356, "proteinPer100g": 7.0, "carbohydratesPer100g": 79.0,
+        "fatPer100g": 1.3, "fiberPer100g": 2.1, "sugarPer100g": 0.8, "saltPer100g": 0.03,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 2.10, "unitPrice": 5.25, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.95, "unitPrice": 4.88, "recordedAt": "2026-05-04T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-whole-wheat-bread",
+      "barcode": "DEMO-000012",
+      "categoryExternalId": "demo-cat-bakery",
+      "name": "Pan integral",
+      "brand": "Horno demo",
+      "description": "Pan de molde integral.",
+      "packageQuantity": 450,
+      "packageUnit": "G",
+      "currentPrice": 1.55,
+      "unitPrice": 3.44,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [
+        { "code": "GLUTEN", "presenceType": "CONTAINS" },
+        { "code": "SOY", "presenceType": "CONTAINS" },
+        { "code": "MILK", "presenceType": "TRACES" }
+      ],
+      "dietaryTags": ["VEGETARIAN", "HIGH_FIBER"],
+      "nutrition": {
+        "caloriesPer100g": 245, "proteinPer100g": 9.4, "carbohydratesPer100g": 41.0,
+        "fatPer100g": 4.0, "fiberPer100g": 7.0, "sugarPer100g": 3.5, "saltPer100g": 1.0,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.55, "unitPrice": 3.44, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.49, "unitPrice": 3.31, "recordedAt": "2026-06-09T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-chickpeas",
+      "barcode": "DEMO-000013",
+      "categoryExternalId": "demo-cat-legumes",
+      "name": "Garbanzos cocidos",
+      "brand": "Despensa demo",
+      "description": "Tarro de garbanzos cocidos.",
+      "packageQuantity": 400,
+      "packageUnit": "G",
+      "currentPrice": 0.95,
+      "unitPrice": 2.38,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "HIGH_FIBER"],
+      "nutrition": {
+        "caloriesPer100g": 126, "proteinPer100g": 6.8, "carbohydratesPer100g": 17.0,
+        "fatPer100g": 2.2, "fiberPer100g": 6.1, "sugarPer100g": 0.7, "saltPer100g": 0.65,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 0.95, "unitPrice": 2.38, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 0.89, "unitPrice": 2.23, "recordedAt": "2026-04-16T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-lentils",
+      "barcode": "DEMO-000014",
+      "categoryExternalId": "demo-cat-legumes",
+      "name": "Lentejas pardinas",
+      "brand": "Despensa demo",
+      "description": "Lenteja seca de demostración.",
+      "packageQuantity": 500,
+      "packageUnit": "G",
+      "currentPrice": 1.40,
+      "unitPrice": 2.80,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "HIGH_FIBER", "HIGH_PROTEIN"],
+      "nutrition": {
+        "caloriesPer100g": 310, "proteinPer100g": 24.0, "carbohydratesPer100g": 48.0,
+        "fatPer100g": 1.5, "fiberPer100g": 11.0, "sugarPer100g": 2.0, "saltPer100g": 0.02,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.40, "unitPrice": 2.80, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.32, "unitPrice": 2.64, "recordedAt": "2026-05-11T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-tofu",
+      "barcode": "DEMO-000015",
+      "categoryExternalId": "demo-cat-plant",
+      "name": "Tofu firme",
+      "brand": "Vegetal demo",
+      "description": "Bloque de tofu natural.",
+      "packageQuantity": 400,
+      "packageUnit": "G",
+      "currentPrice": 2.25,
+      "unitPrice": 5.63,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [{ "code": "SOY", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "HIGH_PROTEIN"],
+      "nutrition": {
+        "caloriesPer100g": 128, "proteinPer100g": 13.5, "carbohydratesPer100g": 1.7,
+        "fatPer100g": 7.2, "fiberPer100g": 1.1, "sugarPer100g": 0.4, "saltPer100g": 0.08,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 2.25, "unitPrice": 5.63, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 2.10, "unitPrice": 5.25, "recordedAt": "2026-06-05T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-vegan-burger",
+      "barcode": "DEMO-000016",
+      "categoryExternalId": "demo-cat-plant",
+      "name": "Hamburguesa vegetal",
+      "brand": "Vegetal demo",
+      "description": "Preparado vegetal ficticio sin ficha nutricional.",
+      "packageQuantity": 240,
+      "packageUnit": "G",
+      "currentPrice": 2.80,
+      "unitPrice": 11.67,
+      "available": false,
+      "source": "DEMO_JSON",
+      "allergens": [
+        { "code": "SOY", "presenceType": "CONTAINS" },
+        { "code": "GLUTEN", "presenceType": "CONTAINS" },
+        { "code": "NUTS", "presenceType": "TRACES" }
+      ],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "LACTOSE_FREE"],
+      "nutrition": null,
+      "priceHistory": [
+        { "price": 2.80, "unitPrice": 11.67, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 2.65, "unitPrice": 11.04, "recordedAt": "2026-05-28T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-spinach",
-      "barcode": "DEMO-000010",
+      "barcode": "DEMO-000017",
       "categoryExternalId": "demo-cat-produce",
-      "name": "Espinacas",
-      "brand": "Producto fresco genérico",
-      "description": "Bolsa de espinacas frescas. Datos de demostración.",
-      "packageQuantity": 300.000,
+      "name": "Espinacas frescas",
+      "brand": "Huerta demo",
+      "description": "Bolsa de espinacas frescas.",
+      "packageQuantity": 300,
       "packageUnit": "G",
       "currentPrice": 1.35,
       "unitPrice": 4.50,
       "available": true,
       "source": "DEMO_JSON",
       "allergens": [],
-      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "HIGH_FIBER"],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "LOW_CALORIE", "HIGH_FIBER"],
       "nutrition": {
-        "caloriesPer100g": 23.00,
-        "proteinPer100g": 2.90,
-        "carbohydratesPer100g": 1.40,
-        "fatPer100g": 0.40,
-        "fiberPer100g": 2.20,
-        "sugarPer100g": 0.40,
-        "saltPer100g": 0.20,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 23, "proteinPer100g": 2.9, "carbohydratesPer100g": 1.4,
+        "fatPer100g": 0.4, "fiberPer100g": 2.2, "sugarPer100g": 0.4, "saltPer100g": 0.20,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.35, "unitPrice": 4.50, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.25, "unitPrice": 4.17, "recordedAt": "2026-06-20T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-tomato",
-      "barcode": "DEMO-000011",
+      "barcode": "DEMO-000018",
       "categoryExternalId": "demo-cat-produce",
-      "name": "Tomate",
-      "brand": "Producto fresco genérico",
-      "description": "Tomate fresco a granel. Datos de demostración.",
-      "packageQuantity": 500.000,
+      "name": "Tomate pera",
+      "brand": "Huerta demo",
+      "description": "Paquete de tomate pera.",
+      "packageQuantity": 500,
       "packageUnit": "G",
       "currentPrice": 1.50,
       "unitPrice": 3.00,
       "available": true,
       "source": "DEMO_JSON",
       "allergens": [],
-      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE"],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "LOW_CALORIE"],
       "nutrition": {
-        "caloriesPer100g": 18.00,
-        "proteinPer100g": 0.90,
-        "carbohydratesPer100g": 3.90,
-        "fatPer100g": 0.20,
-        "fiberPer100g": 1.20,
-        "sugarPer100g": 2.60,
-        "saltPer100g": 0.01,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 18, "proteinPer100g": 0.9, "carbohydratesPer100g": 2.7,
+        "fatPer100g": 0.2, "fiberPer100g": 1.2, "sugarPer100g": 2.6, "saltPer100g": 0.01,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.50, "unitPrice": 3.00, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.35, "unitPrice": 2.70, "recordedAt": "2026-06-25T00:00:00Z" },
+        { "price": 1.65, "unitPrice": 3.30, "recordedAt": "2026-05-02T00:00:00Z" }
+      ]
     },
     {
       "externalId": "demo-mercadona-banana",
-      "barcode": "DEMO-000012",
+      "barcode": "DEMO-000019",
       "categoryExternalId": "demo-cat-produce",
       "name": "Plátano",
-      "brand": "Producto fresco genérico",
-      "description": "Plátanos frescos. Datos de demostración.",
-      "packageQuantity": 1000.000,
-      "packageUnit": "G",
+      "brand": "Fruta demo",
+      "description": "Plátano vendido en paquete ficticio.",
+      "packageQuantity": 1,
+      "packageUnit": "KG",
       "currentPrice": 1.90,
       "unitPrice": 1.90,
       "available": true,
       "source": "DEMO_JSON",
       "allergens": [],
-      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE"],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE"],
       "nutrition": {
-        "caloriesPer100g": 89.00,
-        "proteinPer100g": 1.10,
-        "carbohydratesPer100g": 22.80,
-        "fatPer100g": 0.30,
-        "fiberPer100g": 2.60,
-        "sugarPer100g": 12.20,
-        "saltPer100g": 0.01,
-        "dataSource": "CONTROLLED_DEMO_DATA",
-        "verificationStatus": "DEMO",
-        "confidenceScore": 1.00,
-        "updatedAt": "2026-07-28T00:00:00Z"
-      }
+        "caloriesPer100g": 89, "proteinPer100g": 1.1, "carbohydratesPer100g": 20.2,
+        "fatPer100g": 0.3, "fiberPer100g": 2.6, "sugarPer100g": 12.2, "saltPer100g": 0.01,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.90, "unitPrice": 1.90, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.80, "unitPrice": 1.80, "recordedAt": "2026-05-18T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-apple",
+      "barcode": "DEMO-000020",
+      "categoryExternalId": "demo-cat-produce",
+      "name": "Manzana roja",
+      "brand": "Fruta demo",
+      "description": "Manzana de demostración sin ficha nutricional.",
+      "packageQuantity": 1,
+      "packageUnit": "KG",
+      "currentPrice": 2.15,
+      "unitPrice": 2.15,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "LOW_CALORIE"],
+      "nutrition": null,
+      "priceHistory": [
+        { "price": 2.15, "unitPrice": 2.15, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 2.05, "unitPrice": 2.05, "recordedAt": "2026-06-17T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-broccoli",
+      "barcode": "DEMO-000021",
+      "categoryExternalId": "demo-cat-produce",
+      "name": "Brócoli congelado",
+      "brand": "Huerta demo",
+      "description": "Brócoli congelado de demostración.",
+      "packageQuantity": 750,
+      "packageUnit": "G",
+      "currentPrice": 2.20,
+      "unitPrice": 2.93,
+      "available": false,
+      "source": "DEMO_JSON",
+      "allergens": [],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "LOW_CALORIE", "HIGH_FIBER"],
+      "nutrition": {
+        "caloriesPer100g": 34, "proteinPer100g": 2.8, "carbohydratesPer100g": 4.0,
+        "fatPer100g": 0.4, "fiberPer100g": 3.0, "sugarPer100g": 1.7, "saltPer100g": 0.04,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 2.20, "unitPrice": 2.93, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 2.05, "unitPrice": 2.73, "recordedAt": "2026-04-12T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-canned-tuna",
+      "barcode": "DEMO-000022",
+      "categoryExternalId": "demo-cat-preserves",
+      "name": "Atún en conserva",
+      "brand": "Mar demo",
+      "description": "Pack de latas de atún al natural.",
+      "packageQuantity": 180,
+      "packageUnit": "G",
+      "currentPrice": 2.95,
+      "unitPrice": 16.39,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [{ "code": "FISH", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["HIGH_PROTEIN", "GLUTEN_FREE", "LACTOSE_FREE", "LOW_CALORIE"],
+      "nutrition": {
+        "caloriesPer100g": 116, "proteinPer100g": 25.5, "carbohydratesPer100g": 0,
+        "fatPer100g": 1.2, "fiberPer100g": 0, "sugarPer100g": 0, "saltPer100g": 1.0,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 2.95, "unitPrice": 16.39, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 2.80, "unitPrice": 15.56, "recordedAt": "2026-06-08T00:00:00Z" },
+        { "price": 2.70, "unitPrice": 15.00, "recordedAt": "2026-04-20T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-sardines",
+      "barcode": "DEMO-000023",
+      "categoryExternalId": "demo-cat-preserves",
+      "name": "Sardinas en conserva",
+      "brand": "Mar demo",
+      "description": "Sardinas en aceite de oliva ficticias.",
+      "packageQuantity": 120,
+      "packageUnit": "G",
+      "currentPrice": 1.75,
+      "unitPrice": 14.58,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [{ "code": "FISH", "presenceType": "CONTAINS" }],
+      "dietaryTags": ["HIGH_PROTEIN", "GLUTEN_FREE", "LACTOSE_FREE"],
+      "nutrition": {
+        "caloriesPer100g": 208, "proteinPer100g": 24.0, "carbohydratesPer100g": 0,
+        "fatPer100g": 12.0, "fiberPer100g": 0, "sugarPer100g": 0, "saltPer100g": 1.2,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 1.75, "unitPrice": 14.58, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 1.69, "unitPrice": 14.08, "recordedAt": "2026-05-30T00:00:00Z" }
+      ]
+    },
+    {
+      "externalId": "demo-mercadona-almond-butter",
+      "barcode": "DEMO-000024",
+      "categoryExternalId": "demo-cat-plant",
+      "name": "Crema de almendras",
+      "brand": "Vegetal demo",
+      "description": "Crema de almendras 100 % ficticia.",
+      "packageQuantity": 250,
+      "packageUnit": "G",
+      "currentPrice": 3.95,
+      "unitPrice": 15.80,
+      "available": true,
+      "source": "DEMO_JSON",
+      "allergens": [
+        { "code": "NUTS", "presenceType": "CONTAINS" },
+        { "code": "SOY", "presenceType": "TRACES" },
+        { "code": "MILK", "presenceType": "MAY_CONTAIN" }
+      ],
+      "dietaryTags": ["VEGAN", "VEGETARIAN", "GLUTEN_FREE", "LACTOSE_FREE", "HIGH_PROTEIN", "HIGH_FIBER"],
+      "nutrition": {
+        "caloriesPer100g": 620, "proteinPer100g": 21.0, "carbohydratesPer100g": 9.0,
+        "fatPer100g": 55.0, "fiberPer100g": 11.0, "sugarPer100g": 4.2, "saltPer100g": 0.02,
+        "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
+        "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
+      },
+      "priceHistory": [
+        { "price": 3.95, "unitPrice": 15.80, "recordedAt": "2026-07-28T00:00:00Z" },
+        { "price": 3.75, "unitPrice": 15.00, "recordedAt": "2026-06-02T00:00:00Z" }
+      ]
     }
   ]
 }

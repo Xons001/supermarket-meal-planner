@@ -1,6 +1,7 @@
 package com.sean.supermarketmealplanner.shared.infrastructure.web;
 
 import com.sean.supermarketmealplanner.catalog.application.ProductNotFoundException;
+import com.sean.supermarketmealplanner.catalog.application.InvalidFilterException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -28,6 +29,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler({
+            InvalidFilterException.class,
             MethodArgumentTypeMismatchException.class,
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class

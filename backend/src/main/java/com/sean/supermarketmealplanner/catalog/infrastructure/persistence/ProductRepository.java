@@ -1,6 +1,5 @@
 package com.sean.supermarketmealplanner.catalog.infrastructure.persistence;
 
-import com.sean.supermarketmealplanner.supermarket.domain.SupermarketCode;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -8,8 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.domain.Specification;
 
-public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
+public interface ProductRepository extends JpaRepository<ProductEntity, UUID>,
+        JpaSpecificationExecutor<ProductEntity> {
 
     Optional<ProductEntity> findBySupermarketIdAndExternalId(UUID supermarketId, String externalId);
 
@@ -23,6 +25,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     @EntityGraph(attributePaths = {"supermarket", "category", "nutrition"})
     Page<ProductEntity> findAll(Pageable pageable);
 
+    @Override
     @EntityGraph(attributePaths = {"supermarket", "category", "nutrition"})
-    Page<ProductEntity> findAllBySupermarketCode(SupermarketCode code, Pageable pageable);
+    Page<ProductEntity> findAll(Specification<ProductEntity> specification, Pageable pageable);
 }

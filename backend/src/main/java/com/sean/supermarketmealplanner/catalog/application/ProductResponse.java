@@ -2,6 +2,7 @@ package com.sean.supermarketmealplanner.catalog.application;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record ProductResponse(
@@ -15,6 +16,7 @@ public record ProductResponse(
         String name,
         String brand,
         String description,
+        String imageUrl,
         BigDecimal currentPrice,
         BigDecimal unitPrice,
         BigDecimal packageQuantity,
@@ -23,6 +25,8 @@ public record ProductResponse(
         String source,
         OffsetDateTime lastSyncedAt,
         NutritionResponse nutrition,
+        List<DietaryTagResponse> dietaryTags,
+        List<AllergenResponse> allergens,
         boolean demonstrationData
 ) {
 }

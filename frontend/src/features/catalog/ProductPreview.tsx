@@ -19,7 +19,15 @@ const formatMoney = new Intl.NumberFormat('es-ES', {
 })
 
 export function ProductPreview({ supermarketCode }: ProductPreviewProps) {
-  const products = useProducts(supermarketCode)
+  const products = useProducts(
+    {
+      supermarketCode,
+      page: 0,
+      size: 6,
+      sort: 'name,asc',
+    },
+    Boolean(supermarketCode),
+  )
 
   if (!supermarketCode) {
     return null

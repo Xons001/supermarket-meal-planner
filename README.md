@@ -4,12 +4,12 @@ Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.
 
-> **Estado:** FASE 0 — Fundación y arquitectura, con un vertical slice del
-> catálogo de demostración.
+> **Estado:** FASE 1 — Catálogo completo de demostración y filtros.
 
-La versión actual permite seleccionar un supermercado, consultar 12 productos
-controlados, comprobar sus datos nutricionales y validar la conexión completa
-React → Spring Boot → PostgreSQL.
+La versión actual permite explorar 24 productos controlados, combinar filtros de
+texto, categoría, disponibilidad, precio, nutrición, etiquetas y alérgenos,
+ordenar y paginar resultados, consultar el detalle y revisar un histórico de
+precios ficticio. Los filtros del frontend se conservan en la URL.
 
 ## Avisos importantes
 
@@ -122,8 +122,12 @@ Los puertos se pueden cambiar en `.env`.
 
 ```text
 GET /api/v1/supermarkets
-GET /api/v1/products?supermarketCode=MERCADONA&page=0&size=20
+GET /api/v1/categories?supermarketCode=MERCADONA
+GET /api/v1/dietary-tags
+GET /api/v1/allergens
+GET /api/v1/products?supermarketCode=MERCADONA&page=0&size=12
 GET /api/v1/products/{id}
+GET /api/v1/products/{id}/price-history
 GET /actuator/health
 GET /v3/api-docs
 GET /swagger-ui/index.html
@@ -133,23 +137,35 @@ Los errores propios se devuelven como `application/problem+json`.
 
 ## Datos mock
 
-`data/mock/mercadona-catalog.json` contiene cinco categorías y doce productos:
+`data/mock/mercadona-catalog.json` contiene ocho categorías y 24 productos:
 
-- pechuga de pollo;
-- hamburguesa de pavo;
-- huevos;
-- arroz;
-- pasta integral;
-- pan integral;
-- yogur alto en proteína;
-- leche sin lactosa;
-- atún en conserva;
-- espinacas;
-- tomate;
-- plátano.
+- carnes, huevos y lácteos;
+- alternativas sin lactosa y vegetales;
+- cereales, pasta convencional y sin gluten, y pan;
+- legumbres y proteína vegetal;
+- frutas, verduras y conservas.
 
 El importador es idempotente. Actualiza por `(supermarket_id, external_id)` y
-marca como no disponibles los productos que desaparecen, sin borrarlos.
+marca como no disponibles los productos que desaparecen, sin borrarlos. También
+sincroniza etiquetas dietéticas, alérgenos con tipo de presencia e histórico de
+precios sin duplicar registros. Dos productos carecen deliberadamente de ficha
+nutricional para validar ese estado.
+
+## Catálogo y filtros
+
+La pantalla completa está disponible en <http://localhost:5173/products>. Cada
+tarjeta abre `/products/{id}`.
+
+```text
+/products?supermarket=MERCADONA&query=pollo
+/products?tags=HIGH_PROTEIN,LACTOSE_FREE&exclude=MILK,GLUTEN
+GET /api/v1/products?minimumProtein=20&maximumCalories=250
+GET /api/v1/products?available=true&maximumPrice=3&sort=currentPrice,asc
+```
+
+La búsqueda usa un debounce de 400 ms. Los filtros, ordenación y página se
+reflejan en query parameters. Consulta
+[Filtrado del catálogo](docs/catalog-filtering.md) para la semántica completa.
 
 ## Comandos
 
@@ -198,6 +214,7 @@ npm ci
 npm run format:check
 npm run lint
 npm run test
+npm run typecheck
 npm run build
 ```
 
@@ -205,21 +222,22 @@ npm run build
 
 - Todos los precios y datos nutricionales son de demostración.
 - Solo Mercadona está habilitado; los demás proveedores son informativos.
-- No existe todavía generación de planes, lista de compra ni histórico de
-  precios.
+- No existe todavía generación de planes ni lista de compra.
 - No hay autenticación, IA, scraping, Open Food Facts, Redis, Airflow funcional
   ni Kubernetes.
 - Los puertos estándar 8080 y 5432 no se usan por defecto para evitar colisiones
   con otros proyectos locales.
-- `npm audit` informa de un advisory alto en el modo RSC/Actions de React Router.
-  Esta aplicación es una SPA cliente y no usa RSC, acciones de servidor ni SSR;
-  se mantiene la última versión estable y deberá actualizarse cuando upstream
-  publique una corrección aplicable.
+- `npm audit` informa de dos entradas altas que corresponden al mismo advisory
+  transitivo de React Router en modo RSC/Actions. Esta aplicación es una SPA
+  cliente y no usa RSC, acciones de servidor ni SSR. `react-router-dom` 7.18.1
+  es la última versión estable publicada; la corrección está en `react-router`
+  8.3, todavía sin versión equivalente de `react-router-dom`. No se fuerza una
+  actualización incompatible.
 
 ## Roadmap
 
 El desarrollo continúa en fases pequeñas. La siguiente tarea recomendada es la
-**FASE 1 — Catálogo mock**, ampliando búsqueda, filtros, histórico de precios y
-persistencia de alérgenos/etiquetas sin iniciar todavía el planificador.
+**FASE 2 — Plantillas de comidas**, sin iniciar todavía la generación automática
+de planes.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.
