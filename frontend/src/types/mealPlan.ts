@@ -44,8 +44,21 @@ export interface PlannedMeal {
   ingredients: {
     productId: string
     productName: string
+    brand?: string | null
+    categoryId?: string | null
+    categoryName?: string | null
     quantity: number
     quantityUnit: string
+    measurementType?: 'WEIGHT' | 'VOLUME' | 'UNIT' | null
+    packageQuantity?: number | null
+    packageUnit?: string | null
+    packagePrice?: number | null
+    unitPrice?: number | null
+    available?: boolean
+    consumedCost?: number | null
+    calculationComplete?: boolean
+    warnings?: string[]
+    quantityBasis?: 'MEAL_TOTAL'
   }[]
   nutrition: NutritionBreakdown
   consumedCost: number

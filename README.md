@@ -4,13 +4,15 @@ Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.
 
-> **Estado:** FASE 3 — Generador semanal determinista basado en scoring.
+> **Estado:** FASE 4 — Lista de compra, paquetes y desperdicio.
 
 La versión actual permite explorar 24 productos controlados, mantener plantillas
 de comidas y generar planes de 1 a 14 días con 1 a 6 comidas diarias. El motor
 usa objetivos, presupuesto, disponibilidad y restricciones para construir un
 resultado reproducible, puntuarlo y explicar sus advertencias. Los planes se
-pueden previsualizar, guardar como snapshot, consultar y archivar.
+pueden previsualizar, guardar como snapshot, consultar y archivar. Desde un plan
+guardado se genera una lista de compra agregada que calcula envases enteros,
+coste real de compra, sobrante y diferencia frente al presupuesto semanal.
 
 ## Avisos importantes
 
@@ -51,6 +53,7 @@ Más detalle:
 - [Contrato API](docs/api.md)
 - [Plantillas de comidas y reglas de cálculo](docs/meal-templates.md)
 - [Generación semanal, scoring y determinismo](docs/meal-plan-generation.md)
+- [Listas de compra, paquetes y desperdicio](docs/shopping-lists.md)
 - [Roadmap](docs/roadmap.md)
 - [Decisiones arquitectónicas](docs/adr/)
 
@@ -138,6 +141,19 @@ PUT /api/v1/meal-templates/{id}
 PATCH /api/v1/meal-templates/{id}/status
 DELETE /api/v1/meal-templates/{id}
 POST /api/v1/meal-templates/preview
+POST /api/v1/meal-plans/generate
+GET /api/v1/meal-plans
+GET /api/v1/meal-plans/{id}
+PATCH /api/v1/meal-plans/{id}/status
+DELETE /api/v1/meal-plans/{id}
+POST /api/v1/meal-plans/{id}/shopping-list
+GET /api/v1/meal-plans/{id}/shopping-list
+POST /api/v1/meal-plans/{id}/shopping-list/regenerate
+PATCH /api/v1/meal-plans/{id}/shopping-list/status
+DELETE /api/v1/meal-plans/{id}/shopping-list
+GET /api/v1/shopping-lists
+GET /api/v1/shopping-lists/{id}
+GET /api/v1/shopping-lists/{id}/export?format=csv
 GET /actuator/health
 GET /v3/api-docs
 GET /swagger-ui/index.html
@@ -186,8 +202,8 @@ El editor está disponible en `/meal-templates/new` y
 
 El selector de ingredientes consulta el catálogo de forma remota y limita los
 resultados. La previsualización valida y calcula sin guardar. El coste mostrado
-en esta fase es el **coste proporcional consumido**; todavía no es el coste de
-compra de paquetes completos que implementará la lista de compra.
+en las plantillas es el **coste proporcional consumido**. El coste de paquetes
+completos se calcula después, en la lista de compra del plan.
 
 El arranque importa de forma idempotente 16 plantillas controladas:
 4 desayunos, 4 comidas, 3 meriendas y 5 cenas. Hay casos deliberadamente
@@ -215,6 +231,28 @@ curl -X POST http://localhost:8081/api/v1/meal-plans/generate \
 
 El algoritmo y los pesos se explican en
 [docs/meal-plan-generation.md](docs/meal-plan-generation.md).
+
+## Listas de compra
+
+- Listado: <http://localhost:5173/shopping-lists>
+- Detalle: `/shopping-lists/{id}`
+- Acceso desde el detalle de cualquier plan guardado.
+
+La lista agrega cada producto en toda la semana antes de calcular paquetes. Por
+ejemplo, 1.200 g requeridos de un envase de 500 g producen 3 paquetes, 1.500 g
+comprados y 300 g de sobrante. El presupuesto se compara con el coste de esos
+paquetes, mientras que el coste consumido del plan se conserva como métrica
+separada.
+
+Cada lista es un snapshot: mantiene nombres, marcas, categorías, formato,
+precios y disponibilidad usados al generarla. Un plan antiguo que no contenga
+esos datos sigue siendo legible, pero sus artículos no calculables aparecen con
+valores nulos y avisos explícitos; nunca se inventan precios o formatos. La
+regeneración reemplaza la lista activa dentro de una transacción y conserva la
+anterior archivada. El detalle permite exportar CSV UTF-8 e imprimir.
+
+Las fórmulas, redondeos y límites están en
+[docs/shopping-lists.md](docs/shopping-lists.md).
 
 ## Comandos
 
@@ -271,8 +309,10 @@ npm run build
 
 - Todos los precios y datos nutricionales son de demostración.
 - Solo Mercadona está habilitado; los demás proveedores son informativos.
-- El coste del plan es coste proporcional consumido, no coste de paquetes
-  completos; la lista de compra sigue fuera de alcance.
+- El scoring del plan continúa usando coste proporcional consumido. La lista de
+  compra calcula por separado el coste estimado de paquetes completos.
+- Un plan guardado antes de la FASE 4 carece de snapshots de formato y precio;
+  su lista se genera como parcial y explica qué artículos no puede calcular.
 - No existe sustitución de comidas ni edición manual de un plan guardado.
 - El filtrado de plantillas se calcula en memoria tras cargar el pequeño conjunto
   de demostración; se migrará a consulta SQL cuando el volumen lo justifique.
@@ -289,7 +329,8 @@ npm run build
 ## Roadmap
 
 El desarrollo continúa en fases pequeñas. La siguiente tarea recomendada es la
-**FASE 4 — Lista de compra y desperdicio**, usando el plan guardado para calcular
-paquetes completos sin iniciar todavía IA ni sincronización externa.
+**FASE 5 — Sustituciones**, para reemplazar comidas o productos respetando
+restricciones y recalculando el plan, sin iniciar todavía IA ni sincronización
+externa.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.

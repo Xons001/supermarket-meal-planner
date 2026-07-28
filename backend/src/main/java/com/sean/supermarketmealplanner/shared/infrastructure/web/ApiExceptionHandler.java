@@ -8,6 +8,7 @@ import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateVali
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanGenerationException;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanNotFoundException;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanValidationException;
+import com.sean.supermarketmealplanner.shoppinglist.application.ShoppingListException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -74,6 +75,30 @@ public class ApiExceptionHandler {
         problem.setProperty("conflictingConstraints", exception.getConflictingConstraints());
         problem.setProperty("suggestions", exception.getSuggestions());
         problem.setProperty("errorCode", "MEAL_PLAN_GENERATION_IMPOSSIBLE");
+        return problem;
+    }
+
+    @ExceptionHandler(ShoppingListException.class)
+    public ProblemDetail handleShoppingList(
+            ShoppingListException exception,
+            HttpServletRequest request
+    ) {
+        var status = HttpStatus.valueOf(exception.status());
+        var problem = createProblem(
+                status,
+                status == HttpStatus.NOT_FOUND
+                        ? "Shopping list resource not found"
+                        : "Shopping list request failed",
+                exception.getMessage(),
+                request
+        );
+        problem.setProperty("errorCode", exception.errorCode());
+        if (exception.productId() != null) {
+            problem.setProperty("productId", exception.productId());
+            problem.setProperty("productName", exception.productName());
+            problem.setProperty("unitsDetected", exception.unitsDetected());
+            problem.setProperty("expectedMeasurementType", exception.expectedMeasurementType());
+        }
         return problem;
     }
 

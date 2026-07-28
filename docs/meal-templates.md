@@ -48,8 +48,9 @@ coste consumido = precio del paquete × cantidad usada / cantidad base del paque
 ```
 
 No redondea a paquetes enteros. Por ejemplo, usar 200 g de un paquete de 500 g
-que cuesta 4,00 € aporta 1,60 € de coste consumido. La FASE 4 calculará el coste
-de compra real mediante paquetes completos, sobrante y aprovechamiento.
+que cuesta 4,00 € aporta 1,60 € de coste consumido. La lista de compra de la
+FASE 4 calcula por separado el coste real de paquetes completos, sobrante y
+aprovechamiento.
 
 ## Datos parciales
 

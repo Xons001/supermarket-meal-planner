@@ -12,6 +12,7 @@ flowchart LR
     API --> Application["Servicios de aplicación"]
     Application --> Domain["Modelo y puertos genéricos"]
     Application --> Calculator["MealTemplateCalculationService"]
+    Application --> Shopping["ShoppingListCalculationService"]
     Application --> Persistence["JPA / repositorios"]
     Persistence --> PostgreSQL[(PostgreSQL)]
     LocalJson["JSON controlado"] --> CatalogProvider["SupermarketCatalogProvider"]
@@ -28,9 +29,11 @@ flowchart LR
 - `catalog`: categorías, productos, consulta e importación.
 - `nutrition`: nutrición y proveedores de enriquecimiento.
 - `mealtemplate`: plantillas reutilizables, validación, cálculos y persistencia.
+- `mealplan`: generación determinista, preview, persistencia y snapshots.
+- `shoppinglist`: agregación global, paquetes, costes, desperdicio, snapshots,
+  persistencia, filtros y exportación.
 - `shared`: paginación, Problem Details y lectura de datos controlados.
 - `configuration`: OpenAPI y configuración transversal.
-- `mealplan` y `shoppinglist`: límites previstos, todavía sin implementación.
 
 Cada módulo separa `domain`, `application` e `infrastructure` cuando existe
 comportamiento real. No se crean paquetes o clases vacíos para simular avance.
@@ -52,6 +55,13 @@ comportamiento real. No se crean paquetes o clases vacíos para simular avance.
     delega cálculos puros y deterministas en `MealTemplateCalculationService`.
 11. La API devuelve totales, valores por ración, completitud y avisos. El
     frontend puede pedir el mismo cálculo con `/preview` sin persistir.
+12. `MealPlanService` genera un preview determinista y persiste el árbol
+    completo con snapshots de cada ingrediente.
+13. `ShoppingListService` lee exclusivamente ese snapshot, agrega por producto
+    en toda la semana y delega paquetes y costes en
+    `ShoppingListCalculationService`.
+14. La lista y sus artículos se persisten como un nuevo snapshot; regenerar
+    archiva la versión activa anterior dentro de la misma transacción.
 
 ## Flujo de una plantilla
 
@@ -106,7 +116,7 @@ compartido. No habrá scraping agresivo.
 - `BigDecimal`/`NUMERIC` se usan para dinero y cantidades.
 - Las marcas externas solo aparecen como datos o adaptadores de infraestructura.
 - Las plantillas calculan coste proporcional consumido. La lista de compra
-  futura calculará por separado paquetes completos, coste de compra y sobrante.
+  calcula por separado paquetes completos, coste de compra y sobrante.
 - Los cálculos financieros y nutricionales serán deterministas.
 - CQRS, microservicios, eventos distribuidos, Redis y Kubernetes quedan fuera
   de esta fase.
@@ -150,3 +160,29 @@ de una transacción. Véanse
 [generación semanal](meal-plan-generation.md),
 [ADR 0006](adr/0006-deterministic-scoring-generation.md) y
 [ADR 0008](adr/0008-preview-persistence-token.md).
+
+## Flujo de lista de compra
+
+```mermaid
+flowchart LR
+    PLAN[(Snapshot MealPlan)] --> READ[Leer ingredientes planificados]
+    READ --> AGG[Agregar globalmente por productId]
+    AGG --> NORMALIZE[Normalizar G/KG, ML/L o UNIT]
+    NORMALIZE --> PACKAGES["ceil(requerido / tamaño del paquete)"]
+    PACKAGES --> COSTS[Compra, consumo, sobrante y presupuesto]
+    COSTS --> SNAPSHOT[(ShoppingList + items + warnings)]
+    SNAPSHOT --> API2[REST, CSV e impresión]
+```
+
+No se consulta el catálogo ni la plantilla viva para reconstruir una lista. Los
+datos del producto y del paquete viajan en el snapshot del plan y vuelven a
+quedar fijados en el snapshot de la lista. Si un plan antiguo no tiene esa
+información, el artículo se conserva como no calculable y el resultado queda
+marcado como parcial.
+
+Las cantidades nunca se suman entre magnitudes: peso, volumen y unidades tienen
+resúmenes independientes. Las incompatibilidades repetidas para un mismo
+producto producen `422` con contexto seguro. Véanse
+[listas de compra](shopping-lists.md),
+[ADR 0009](adr/0009-shopping-list-snapshots.md) y
+[ADR 0010](adr/0010-whole-package-rounding.md).

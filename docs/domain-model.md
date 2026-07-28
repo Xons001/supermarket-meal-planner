@@ -118,14 +118,8 @@ Si falta nutrición, precio, formato o una base compatible, se conserva el
 ingrediente, se devuelve un aviso y el indicador de completitud correspondiente
 queda a `false`.
 
-## Entidades previstas del planificador
+## Entidades previstas posteriores
 
-- `MealPlan`: supermercado, periodo, objetivos, presupuesto y estado.
-- `MealPlanDay`: fecha, macros diarios y coste consumido estimado.
-- `Meal`: tipo, instrucciones, macros y coste consumido.
-- `MealItem`: producto, gramos/unidades, macros y coste.
-- `ShoppingList`: plan, precio total estimado y creación.
-- `ShoppingListItem`: cantidad requerida/comprada, paquetes, precio y sobrante.
 - `UserPreference`: gustos, exclusiones, alérgenos y restricciones; posterior a
   usuarios.
 
@@ -212,3 +206,49 @@ tablas hijas para días/comidas/advertencias, y JSON de criterios y resultado
 completo. El detalle se lee del snapshot, no se recalcula desde el catálogo.
 La decisión se formaliza en
 [ADR 0007](adr/0007-meal-plan-snapshots.md).
+
+## Lista de compra
+
+### ShoppingList
+
+`id`, `mealPlanId`, snapshots de nombre del plan y supermercado, `status`,
+`generatedAt`, `updatedAt`, conteos, costes consumido/compra/desperdicio,
+porcentaje global de desperdicio, resúmenes de cantidad por magnitud,
+presupuesto semanal y desviación, indicadores de completitud, duración y
+`demoData`.
+
+Solo puede existir una lista `GENERATED` por plan. Las versiones sustituidas
+quedan `ARCHIVED`; el borrado es lógico.
+
+### ShoppingListItem
+
+Conserva snapshots de producto, marca, categoría, magnitud, formato, precio y
+disponibilidad. Añade cantidad requerida, paquetes requeridos, cantidad
+comprada, sobrante, coste consumido, coste de compra, coste desperdiciado,
+porcentaje de sobrante, completitud, orden y avisos.
+
+La cantidad se agrega por `productId` en toda la semana antes de calcular:
+
+```text
+paquetes = ceil(cantidad requerida normalizada / cantidad por paquete)
+comprado = paquetes × cantidad por paquete
+sobrante = comprado - requerido
+coste de compra = paquetes × precio del paquete
+coste desperdiciado = coste de compra - coste consumido
+```
+
+El presupuesto se compara con el coste de compra, no con el coste proporcional
+consumido. Peso, volumen y unidades se resumen por separado; no existe un total
+global que mezcle magnitudes.
+
+### ShoppingListWarning
+
+`id`, `shoppingListId`, `itemId` opcional, `code`, `message` y `severity`. Un
+producto no disponible permanece visible. Si falta formato o precio, se
+preserva el artículo con campos calculados nulos y la lista queda parcial.
+La disponibilidad admite `null` únicamente para snapshots históricos donde el
+dato era desconocido.
+
+La lista se deriva exclusivamente del snapshot persistido del plan. No consulta
+el producto o la plantilla actuales. Esto preserva la reproducibilidad y hace
+explícita la compatibilidad con planes anteriores a la FASE 4.

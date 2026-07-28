@@ -420,11 +420,72 @@ Supermercado, etiquetas, alérgenos o UUID excluidos inexistentes; rangos,
 objetivos, presupuesto y cambios de estado inválidos producen `400`. Un plan
 inexistente produce `404`. No se exponen trazas.
 
-## Contratos futuros no implementados
+## Listas de compra
+
+### Crear, consultar, regenerar y archivar
 
 ```text
-GET    /api/v1/meal-plans/{id}/shopping-list
+POST   /api/v1/meal-plans/{mealPlanId}/shopping-list
+GET    /api/v1/meal-plans/{mealPlanId}/shopping-list
+POST   /api/v1/meal-plans/{mealPlanId}/shopping-list/regenerate
+PATCH  /api/v1/meal-plans/{mealPlanId}/shopping-list/status
+DELETE /api/v1/meal-plans/{mealPlanId}/shopping-list
 ```
 
-La lista de compra, sustituciones, autenticación, sincronización Airflow,
-OR-Tools e IA opcional permanecen fuera del runtime actual.
+`POST` crea desde el snapshot del plan y responde `201`. Si ya existe una lista
+activa responde `409`. `regenerate` archiva la anterior y crea el reemplazo
+dentro de una transacción; un error de cálculo conserva intacta la lista
+anterior. `DELETE` archiva lógicamente y responde `204`. `PATCH` acepta
+`{"status":"GENERATED"}` o `{"status":"ARCHIVED"}`.
+
+La respuesta agrupa artículos por categoría e incluye:
+
+- snapshot del plan y supermercado, estado y fechas;
+- cantidad requerida, formato, paquetes enteros, comprado y sobrante;
+- coste consumido, coste de compra, desperdicio y porcentajes;
+- resúmenes separados para `WEIGHT`, `VOLUME` y `UNIT`;
+- presupuesto, diferencia respecto a la compra e indicador de exceso;
+- completitud y avisos de lista y artículo.
+
+Los campos derivados de un artículo no calculable son `null`; no se inventan
+precios ni formatos. Los planes anteriores a la FASE 4 se admiten con resultado
+parcial. `available` también puede ser `null` cuando un snapshot histórico no
+contenía ese dato.
+
+### Listar, detalle y exportación
+
+```text
+GET /api/v1/shopping-lists
+GET /api/v1/shopping-lists/{id}
+GET /api/v1/shopping-lists/{id}/export?format=csv
+```
+
+Filtros del listado:
+
+| Parámetro | Valores |
+|---|---|
+| `supermarketCode` | Código existente |
+| `status` | `GENERATED`, `ARCHIVED` |
+| `generatedFrom`, `generatedTo` | Fecha y hora ISO inclusiva |
+| `calculationComplete` | `true`, `false` |
+| `budgetExceeded` | `true`, `false` |
+| `page` | Entero desde 0 |
+| `size` | 1–48 |
+| `sort` | `generatedAt`, `totalPurchaseCost`, `totalWasteCost` u `overallWastePercentage`, más `asc`/`desc` |
+
+El CSV se descarga como `text/csv;charset=UTF-8`, incluye BOM y usa el snapshot
+persistido de la lista.
+
+### Errores específicos
+
+- `404`: plan o lista inexistente.
+- `409`: ya existe una lista activa.
+- `422`: un mismo producto aparece con magnitudes o unidades incompatibles.
+- `400`: filtros, estados o formato de exportación no válidos.
+
+Todos usan `application/problem+json` sin trazas ni información interna.
+
+## Contratos futuros no implementados
+
+Las sustituciones, autenticación, sincronización Airflow, OR-Tools e IA
+opcional permanecen fuera del runtime actual.

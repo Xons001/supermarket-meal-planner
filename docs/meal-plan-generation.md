@@ -79,8 +79,10 @@ Los subpesos de distribución nutricional y variedad también son configurables.
 Además, la penalización parcial considera objetivos por comida y coste esperado
 para evitar mantener candidatos claramente peores.
 
-El coste es proporcional a la cantidad consumida. No equivale al coste de
-comprar paquetes completos; eso corresponde a la futura lista de compra.
+El scoring conserva el coste proporcional a la cantidad consumida. No equivale
+al coste de comprar paquetes completos: la lista de compra de la FASE 4 lo
+calcula después de agregar todos los ingredientes del snapshot. Esta separación
+mantiene estable la semántica y los pesos del generador.
 
 ## Determinismo
 
@@ -122,5 +124,10 @@ Se explican desviaciones calóricas mayores del 10 %, déficit de proteína,
 presupuesto superado, repetición preferida excedida, cálculos incompletos,
 adaptación de tipos y omisión de opcionales.
 
-Límites actuales: no hay lista de compra por paquetes, desperdicio,
-sustituciones, edición manual del plan, IA, OR-Tools ni recomendaciones médicas.
+Los ingredientes de un plan nuevo incluyen snapshots de producto, categoría,
+formato, precio y disponibilidad para que la lista no dependa del catálogo
+actual. Los planes anteriores siguen siendo legibles y producen listas
+parciales cuando esos campos faltan.
+
+Límites actuales: no hay sustituciones, edición manual del plan, IA, OR-Tools ni
+recomendaciones médicas. La lista de compra no modifica el scoring original.

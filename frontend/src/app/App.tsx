@@ -10,6 +10,8 @@ import { MealTemplateFormPage } from '../pages/MealTemplateFormPage'
 import { MealPlansPage } from '../pages/MealPlansPage'
 import { MealPlanFormPage } from '../pages/MealPlanFormPage'
 import { MealPlanDetailPage } from '../pages/MealPlanDetailPage'
+import { ShoppingListsPage } from '../pages/ShoppingListsPage'
+import { ShoppingListDetailPage } from '../pages/ShoppingListDetailPage'
 
 const queryClient = createQueryClient()
 
@@ -28,6 +30,8 @@ export function App() {
           <Route path="/meal-plans" element={<MealPlansPage />} />
           <Route path="/meal-plans/new" element={<MealPlanFormPage />} />
           <Route path="/meal-plans/:id" element={<MealPlanDetailPage />} />
+          <Route path="/shopping-lists" element={<ShoppingListsPage />} />
+          <Route path="/shopping-lists/:id" element={<ShoppingListDetailPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>

@@ -95,3 +95,16 @@
     white-space: nowrap;
   }
 }
+
+@media (max-width: 480px) {
+  .nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-radius: 1rem;
+  }
+
+  .nav a {
+    min-width: 0;
+    padding-inline: 0.35rem;
+  }
+}

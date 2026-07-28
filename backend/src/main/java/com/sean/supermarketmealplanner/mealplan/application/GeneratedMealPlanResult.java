@@ -97,8 +97,21 @@ public record GeneratedMealPlanResult(
     public record IngredientSummary(
             UUID productId,
             String productName,
+            String brand,
+            UUID categoryId,
+            String categoryName,
             BigDecimal quantity,
-            String quantityUnit
+            String quantityUnit,
+            String measurementType,
+            BigDecimal packageQuantity,
+            String packageUnit,
+            BigDecimal packagePrice,
+            BigDecimal unitPrice,
+            Boolean available,
+            BigDecimal consumedCost,
+            boolean calculationComplete,
+            List<String> warnings,
+            String quantityBasis
     ) {
     }
 

@@ -174,7 +174,12 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 increment(rejected, "incompleteCalculation");
                 continue;
             }
-            candidates.add(toCandidate(template, mandatoryOnly, command.servings()));
+            candidates.add(toCandidate(
+                    template,
+                    mandatoryOnly,
+                    command.servings(),
+                    products
+            ));
         }
         candidates.sort(Comparator.comparing(Candidate::name, String.CASE_INSENSITIVE_ORDER)
                 .thenComparing(Candidate::templateId));
@@ -385,7 +390,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
     private Candidate toCandidate(
             MealTemplateResponse original,
             MealTemplateResponse mandatoryOnly,
-            int requestedServings
+            int requestedServings,
+            Map<UUID, ProductEntity> products
     ) {
         var multiplier = BigDecimal.valueOf(requestedServings);
         var nutrition = multiply(mandatoryOnly.nutritionPerServing(), multiplier);
@@ -394,14 +400,35 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 .divide(BigDecimal.valueOf(original.servings()), 12, RoundingMode.HALF_UP);
         var ingredients = original.ingredients().stream()
                 .filter(ingredient -> !ingredient.optional())
-                .map(ingredient -> new GeneratedMealPlanResult.IngredientSummary(
-                        ingredient.productId(),
-                        ingredient.productName(),
-                        ingredient.quantity().multiply(ingredientMultiplier)
-                                .setScale(3, RoundingMode.HALF_UP)
-                                .stripTrailingZeros(),
-                        ingredient.quantityUnit()
-                ))
+                .map(ingredient -> {
+                    var product = products.get(ingredient.productId());
+                    var scaledCost = ingredient.calculatedConsumedCost() == null
+                            ? null
+                            : ingredient.calculatedConsumedCost()
+                                    .multiply(ingredientMultiplier)
+                                    .setScale(2, RoundingMode.HALF_UP);
+                    return new GeneratedMealPlanResult.IngredientSummary(
+                            ingredient.productId(),
+                            ingredient.productName(),
+                            product == null ? ingredient.brand() : product.getBrand(),
+                            product == null ? null : product.getCategory().getId(),
+                            product == null ? ingredient.category() : product.getCategory().getName(),
+                            ingredient.quantity().multiply(ingredientMultiplier)
+                                    .setScale(3, RoundingMode.HALF_UP)
+                                    .stripTrailingZeros(),
+                            ingredient.quantityUnit(),
+                            product == null ? null : product.getMeasurementType().name(),
+                            product == null ? null : product.getPackageQuantity(),
+                            product == null ? null : product.getPackageUnit().name(),
+                            product == null ? null : product.getCurrentPrice(),
+                            product == null ? null : product.getUnitPrice(),
+                            product != null && product.isAvailable(),
+                            scaledCost,
+                            product != null && ingredient.costCalculationComplete(),
+                            ingredient.warnings(),
+                            "MEAL_TOTAL"
+                    );
+                })
                 .toList();
         return new Candidate(
                 original.id(),
@@ -872,6 +899,7 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 canonical.append('|').append(candidate.templateId())
                         .append(':').append(candidate.nutrition())
                         .append(':').append(candidate.cost())
+                        .append(':').append(candidate.ingredients())
                         .append(':').append(candidate.complete())
         );
         try {

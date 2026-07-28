@@ -224,6 +224,7 @@ public class MealPlanEntity {
     public long getDeterministicSeed() { return deterministicSeed; }
     public String getCriteriaJson() { return criteriaJson; }
     public String getResultJson() { return resultJson; }
+    public String getGenerationToken() { return generationToken; }
     public BigDecimal getTotalConsumedCost() { return totalConsumedCost; }
     public BigDecimal getOverallScore() { return overallScore; }
     public boolean isCalculationComplete() { return calculationComplete; }

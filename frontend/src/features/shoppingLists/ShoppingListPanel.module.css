@@ -1,0 +1,118 @@
+.panel {
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: white;
+  box-shadow: var(--shadow-xs);
+}
+.panel > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.panel header span {
+  color: var(--color-primary);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+.panel h2 {
+  margin: 0.2rem 0;
+  color: var(--color-heading);
+}
+.panel header p,
+.empty p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 0.75rem;
+}
+.panel header > strong {
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.metrics div {
+  display: grid;
+  gap: 0.15rem;
+  border-radius: 0.7rem;
+  padding: 0.65rem;
+  background: var(--color-background);
+}
+.metrics span {
+  color: var(--color-text-muted);
+  font-size: 0.58rem;
+}
+.metrics strong {
+  color: var(--color-heading);
+  font-size: 0.78rem;
+}
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  border-radius: 0.7rem;
+  padding: 0.8rem;
+  background: var(--color-background);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+.actions a,
+.actions button,
+.empty button {
+  border: 1px solid var(--color-primary);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  background: white;
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.actions a,
+.empty button {
+  background: var(--color-primary);
+  color: white;
+}
+.partial {
+  border-left: 3px solid #bd741d;
+  padding-left: 0.6rem;
+  color: #74420d;
+  font-size: 0.7rem;
+}
+.budget {
+  color: var(--color-text-soft);
+  font-size: 0.7rem;
+}
+.error {
+  color: var(--color-danger);
+  font-size: 0.7rem;
+}
+@media (max-width: 850px) {
+  .metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 500px) {
+  .panel > header,
+  .empty {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

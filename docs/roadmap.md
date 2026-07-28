@@ -22,9 +22,11 @@ parciales, filtros, previsualización, frontend responsive y pruebas integrales.
 Motor determinista para calorías, proteína, presupuesto y variedad; preview
 protegido por token, snapshots persistidos, listado, detalle y archivado lógico.
 
-## FASE 4 — Lista de compra y desperdicio
+## FASE 4 — Lista de compra y desperdicio ✅
 
-Paquetes requeridos, coste total, cantidad utilizada y sobrante.
+Agregación global del plan, paquetes enteros, coste real estimado de compra,
+cantidad utilizada y sobrante, presupuesto, avisos, snapshots, filtros,
+exportación CSV e impresión.
 
 ## FASE 5 — Sustituciones
 

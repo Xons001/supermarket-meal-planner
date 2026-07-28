@@ -19,6 +19,9 @@ describe('MealPlanDetailPage', () => {
     const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input)
       if (url.includes('/actuator/health')) return Promise.resolve(Response.json({ status: 'UP' }))
+      if (url.includes('/shopping-list')) {
+        return Promise.resolve(Response.json({ detail: 'No existe' }, { status: 404 }))
+      }
       if (init?.method === 'DELETE') return Promise.resolve(new Response(null, { status: 204 }))
       return Promise.resolve(
         Response.json({
