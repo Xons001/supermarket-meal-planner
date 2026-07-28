@@ -21,6 +21,8 @@ public record ProductResponse(
         BigDecimal unitPrice,
         BigDecimal packageQuantity,
         String packageUnit,
+        String measurementType,
+        boolean costDataComplete,
         boolean available,
         String source,
         OffsetDateTime lastSyncedAt,

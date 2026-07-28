@@ -4,12 +4,11 @@ import com.sean.supermarketmealplanner.catalog.application.CatalogImportService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(0)
 @ConditionalOnProperty(name = "app.catalog.seed-enabled", havingValue = "true", matchIfMissing = true)
 public class CatalogSeedRunner implements ApplicationRunner {
 

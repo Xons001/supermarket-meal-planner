@@ -1,0 +1,286 @@
+{
+  "classification": "DEMO",
+  "supermarketCode": "MERCADONA",
+  "templates": [
+    {
+      "name": "Tostadas con huevo y tomate",
+      "description": "Desayuno salado con pan integral, huevo y tomate.",
+      "mealType": "BREAKFAST",
+      "instructions": [
+        "Tostar el pan integral.",
+        "Cocinar el huevo al gusto.",
+        "Cortar el tomate y servirlo sobre las tostadas."
+      ],
+      "preparationMinutes": 12,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-whole-wheat-bread", "quantity": 80, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": "Dos rebanadas aproximadas" },
+        { "productExternalId": "demo-mercadona-eggs", "quantity": 2, "quantityUnit": "UNIT", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 100, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Yogur alto en proteína con plátano",
+      "description": "Desayuno rápido, cremoso y rico en proteína.",
+      "mealType": "BREAKFAST",
+      "instructions": [
+        "Servir el yogur en un cuenco.",
+        "Cortar el plátano y añadirlo por encima."
+      ],
+      "preparationMinutes": 5,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-protein-yogurt", "quantity": 200, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-banana", "quantity": 120, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null }
+      ]
+    },
+    {
+      "name": "Leche sin lactosa con pan integral",
+      "description": "Desayuno sencillo con leche sin lactosa y pan integral.",
+      "mealType": "BREAKFAST",
+      "instructions": [
+        "Calentar la leche si se desea.",
+        "Tostar el pan y servir."
+      ],
+      "preparationMinutes": 7,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-lactose-free-milk", "quantity": 250, "quantityUnit": "MILLILITER", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-whole-wheat-bread", "quantity": 70, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null }
+      ]
+    },
+    {
+      "name": "Tortilla de desayuno con espinacas",
+      "description": "Tortilla rápida con espinacas frescas.",
+      "mealType": "BREAKFAST",
+      "instructions": [
+        "Saltear brevemente las espinacas.",
+        "Batir los huevos y añadirlos a la sartén.",
+        "Cuajar la tortilla por ambos lados."
+      ],
+      "preparationMinutes": 15,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-eggs", "quantity": 2, "quantityUnit": "UNIT", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-spinach", "quantity": 80, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null }
+      ]
+    },
+    {
+      "name": "Arroz con pollo y espinacas",
+      "description": "Comida sencilla y alta en proteína.",
+      "mealType": "LUNCH",
+      "instructions": [
+        "Cocer el arroz.",
+        "Cocinar el pollo hasta que esté hecho.",
+        "Añadir las espinacas.",
+        "Mezclar y servir."
+      ],
+      "preparationMinutes": 30,
+      "servings": 2,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-rice", "quantity": 160, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": "Peso en seco" },
+        { "productExternalId": "demo-mercadona-chicken-breast", "quantity": 300, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-spinach", "quantity": 150, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Pasta integral con atún y tomate",
+      "description": "Plato de pasta integral con atún y tomate fresco.",
+      "mealType": "LUNCH",
+      "instructions": [
+        "Cocer la pasta siguiendo el tiempo indicado.",
+        "Escurrir el atún.",
+        "Trocear el tomate, mezclar y servir."
+      ],
+      "preparationMinutes": 22,
+      "servings": 2,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-whole-wheat-pasta", "quantity": 180, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": "Peso en seco" },
+        { "productExternalId": "demo-mercadona-canned-tuna", "quantity": 120, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": "Peso escurrido de demostración" },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 180, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Lentejas con verduras",
+      "description": "Lentejas con brócoli y tomate para una comida vegetal.",
+      "mealType": "LUNCH",
+      "instructions": [
+        "Cocer las lentejas hasta que estén tiernas.",
+        "Cocinar el brócoli.",
+        "Añadir el tomate troceado y mezclar."
+      ],
+      "preparationMinutes": 35,
+      "servings": 2,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-lentils", "quantity": 180, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": "Peso en seco" },
+        { "productExternalId": "demo-mercadona-broccoli", "quantity": 250, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 150, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Hamburguesa de pavo con arroz",
+      "description": "Hamburguesa de pavo acompañada de arroz.",
+      "mealType": "LUNCH",
+      "instructions": [
+        "Cocer el arroz.",
+        "Cocinar la hamburguesa de pavo.",
+        "Servir ambos componentes juntos."
+      ],
+      "preparationMinutes": 25,
+      "servings": 2,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-turkey-burger", "quantity": 240, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-rice", "quantity": 150, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": "Peso en seco" }
+      ]
+    },
+    {
+      "name": "Yogur con plátano y manzana opcional",
+      "description": "Merienda de yogur y plátano con manzana opcional.",
+      "mealType": "SNACK",
+      "instructions": [
+        "Servir el yogur.",
+        "Añadir el plátano cortado.",
+        "Incorporar la manzana si se desea."
+      ],
+      "preparationMinutes": 6,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-protein-yogurt", "quantity": 150, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-banana", "quantity": 100, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-apple", "quantity": 80, "quantityUnit": "GRAM", "optional": true, "sortOrder": 2, "notes": "Sin ficha nutricional demo" }
+      ]
+    },
+    {
+      "name": "Tostada con atún y tomate",
+      "description": "Merienda salada con pan integral, atún y tomate.",
+      "mealType": "SNACK",
+      "instructions": [
+        "Tostar el pan.",
+        "Escurrir y repartir el atún.",
+        "Añadir el tomate troceado."
+      ],
+      "preparationMinutes": 10,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-whole-wheat-bread", "quantity": 60, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-canned-tuna", "quantity": 60, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 80, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Huevo cocido con pan integral",
+      "description": "Merienda sencilla de huevo cocido y pan integral.",
+      "mealType": "SNACK",
+      "instructions": [
+        "Cocer el huevo y dejarlo enfriar.",
+        "Tostar el pan.",
+        "Servir el huevo con el pan."
+      ],
+      "preparationMinutes": 14,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-eggs", "quantity": 1, "quantityUnit": "UNIT", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-whole-wheat-bread", "quantity": 50, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null }
+      ]
+    },
+    {
+      "name": "Tortilla de espinacas con tomate opcional",
+      "description": "Cena ligera de tortilla con espinacas y tomate opcional.",
+      "mealType": "DINNER",
+      "instructions": [
+        "Saltear las espinacas.",
+        "Añadir los huevos batidos.",
+        "Cuajar a fuego medio y acompañar con tomate si se desea."
+      ],
+      "preparationMinutes": 18,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-eggs", "quantity": 2, "quantityUnit": "UNIT", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-spinach", "quantity": 100, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 100, "quantityUnit": "GRAM", "optional": true, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Ensalada de lentejas y atún",
+      "description": "Ensalada completa de lentejas, atún y tomate.",
+      "mealType": "DINNER",
+      "instructions": [
+        "Cocer y enfriar las lentejas.",
+        "Escurrir el atún.",
+        "Mezclar con el tomate troceado."
+      ],
+      "preparationMinutes": 28,
+      "servings": 2,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-lentils", "quantity": 160, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": "Peso en seco" },
+        { "productExternalId": "demo-mercadona-canned-tuna", "quantity": 120, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 200, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Pollo con verduras",
+      "description": "Cena proteica de pollo con brócoli y espinacas.",
+      "mealType": "DINNER",
+      "instructions": [
+        "Cocinar el pollo.",
+        "Saltear el brócoli y las espinacas.",
+        "Servir las verduras junto al pollo."
+      ],
+      "preparationMinutes": 24,
+      "servings": 2,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-chicken-breast", "quantity": 300, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-broccoli", "quantity": 250, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-spinach", "quantity": 120, "quantityUnit": "GRAM", "optional": false, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Hamburguesa de pavo con tomate",
+      "description": "Cena rápida de hamburguesa de pavo con tomate y espinacas opcionales.",
+      "mealType": "DINNER",
+      "instructions": [
+        "Cocinar la hamburguesa de pavo.",
+        "Cortar el tomate.",
+        "Añadir espinacas frescas si se desea."
+      ],
+      "preparationMinutes": 16,
+      "servings": 1,
+      "active": true,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-turkey-burger", "quantity": 120, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": null },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 150, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null },
+        { "productExternalId": "demo-mercadona-spinach", "quantity": 50, "quantityUnit": "GRAM", "optional": true, "sortOrder": 2, "notes": null }
+      ]
+    },
+    {
+      "name": "Hamburguesa vegetal con tomate",
+      "description": "Cena vegetal de demostración con información parcial.",
+      "mealType": "DINNER",
+      "instructions": [
+        "Cocinar la hamburguesa vegetal.",
+        "Cortar el tomate y servir como acompañamiento."
+      ],
+      "preparationMinutes": 15,
+      "servings": 1,
+      "active": false,
+      "ingredients": [
+        { "productExternalId": "demo-mercadona-vegan-burger", "quantity": 120, "quantityUnit": "GRAM", "optional": false, "sortOrder": 0, "notes": "Producto demo sin nutrición ni coste verificable" },
+        { "productExternalId": "demo-mercadona-tomato", "quantity": 150, "quantityUnit": "GRAM", "optional": false, "sortOrder": 1, "notes": null }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import com.sean.supermarketmealplanner.catalog.application.port.ExternalPriceHis
 import com.sean.supermarketmealplanner.catalog.application.port.ExternalProduct;
 import com.sean.supermarketmealplanner.catalog.application.port.SupermarketCatalogProvider;
 import com.sean.supermarketmealplanner.catalog.domain.PackageUnit;
+import com.sean.supermarketmealplanner.catalog.domain.MeasurementType;
 import com.sean.supermarketmealplanner.catalog.domain.PresenceType;
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogFileReader;
 import com.sean.supermarketmealplanner.supermarket.domain.SupermarketCode;
@@ -57,6 +58,7 @@ public class LocalJsonSupermarketCatalogProvider implements SupermarketCatalogPr
     private ExternalProduct mapProduct(
             com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogDocument.DemoProduct product
     ) {
+        var packageUnit = PackageUnit.valueOf(product.packageUnit());
         return new ExternalProduct(
                 product.externalId(),
                 product.barcode(),
@@ -65,7 +67,9 @@ public class LocalJsonSupermarketCatalogProvider implements SupermarketCatalogPr
                 product.brand(),
                 product.description(),
                 product.packageQuantity(),
-                PackageUnit.valueOf(product.packageUnit()),
+                packageUnit,
+                MeasurementType.from(packageUnit),
+                product.costDataComplete() == null || product.costDataComplete(),
                 product.currentPrice(),
                 product.unitPrice(),
                 product.available(),

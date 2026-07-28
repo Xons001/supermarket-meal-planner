@@ -11,6 +11,7 @@ public record NutritionResponse(
         BigDecimal fiberPer100g,
         BigDecimal sugarPer100g,
         BigDecimal saltPer100g,
+        NutritionPerUnitResponse perUnit,
         String dataSource,
         String verificationStatus,
         BigDecimal confidenceScore,

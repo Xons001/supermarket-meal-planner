@@ -1,6 +1,7 @@
 package com.sean.supermarketmealplanner.catalog.infrastructure.persistence;
 
 import com.sean.supermarketmealplanner.catalog.domain.PackageUnit;
+import com.sean.supermarketmealplanner.catalog.domain.MeasurementType;
 import com.sean.supermarketmealplanner.nutrition.infrastructure.persistence.NutritionEntity;
 import com.sean.supermarketmealplanner.supermarket.infrastructure.persistence.SupermarketEntity;
 import jakarta.persistence.Column;
@@ -66,6 +67,13 @@ public class ProductEntity {
     @Column(name = "package_unit", nullable = false, length = 30)
     private PackageUnit packageUnit;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "measurement_type", nullable = false, length = 20)
+    private MeasurementType measurementType;
+
+    @Column(name = "cost_data_complete", nullable = false)
+    private boolean costDataComplete;
+
     @Column(nullable = false)
     private boolean available;
 
@@ -108,6 +116,8 @@ public class ProductEntity {
             BigDecimal unitPrice,
             BigDecimal packageQuantity,
             PackageUnit packageUnit,
+            MeasurementType measurementType,
+            boolean costDataComplete,
             boolean available,
             String source,
             OffsetDateTime syncedAt
@@ -121,6 +131,8 @@ public class ProductEntity {
         this.unitPrice = unitPrice;
         this.packageQuantity = packageQuantity;
         this.packageUnit = packageUnit;
+        this.measurementType = measurementType;
+        this.costDataComplete = costDataComplete;
         this.available = available;
         this.source = source;
         this.lastSyncedAt = syncedAt;
@@ -187,6 +199,14 @@ public class ProductEntity {
 
     public PackageUnit getPackageUnit() {
         return packageUnit;
+    }
+
+    public MeasurementType getMeasurementType() {
+        return measurementType;
+    }
+
+    public boolean isCostDataComplete() {
+        return costDataComplete;
     }
 
     public boolean isAvailable() {

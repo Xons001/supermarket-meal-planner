@@ -19,6 +19,7 @@ export function SiteHeader() {
           Inicio
         </NavLink>
         <NavLink to="/products">Catálogo</NavLink>
+        <NavLink to="/meal-templates">Plantillas</NavLink>
       </nav>
       <BackendStatus />
     </header>

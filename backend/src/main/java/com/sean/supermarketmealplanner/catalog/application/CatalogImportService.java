@@ -146,6 +146,8 @@ public class CatalogImportService {
                     externalProduct.unitPrice(),
                     externalProduct.packageQuantity(),
                     externalProduct.packageUnit(),
+                    externalProduct.measurementType(),
+                    externalProduct.costDataComplete(),
                     externalProduct.available(),
                     externalProduct.source(),
                     syncedAt
@@ -174,6 +176,7 @@ public class CatalogImportService {
         var nutrition = nutritionRepository.findByProductId(product.getId())
                 .orElseGet(() -> new NutritionEntity(product));
         var nutritionData = externalNutrition.orElseThrow();
+        var perUnit = nutritionData.perUnit();
         nutrition.update(
                 nutritionData.caloriesPer100g(),
                 nutritionData.proteinPer100g(),
@@ -182,6 +185,13 @@ public class CatalogImportService {
                 nutritionData.fiberPer100g(),
                 nutritionData.sugarPer100g(),
                 nutritionData.saltPer100g(),
+                perUnit == null ? null : perUnit.calories(),
+                perUnit == null ? null : perUnit.protein(),
+                perUnit == null ? null : perUnit.carbohydrates(),
+                perUnit == null ? null : perUnit.fat(),
+                perUnit == null ? null : perUnit.fiber(),
+                perUnit == null ? null : perUnit.sugar(),
+                perUnit == null ? null : perUnit.salt(),
                 nutritionData.dataSource(),
                 nutritionData.verificationStatus(),
                 nutritionData.confidenceScore(),

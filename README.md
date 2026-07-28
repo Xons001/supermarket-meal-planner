@@ -4,12 +4,13 @@ Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.
 
-> **Estado:** FASE 1 — Catálogo completo de demostración y filtros.
+> **Estado:** FASE 2 — Plantillas de comidas reutilizables.
 
-La versión actual permite explorar 24 productos controlados, combinar filtros de
-texto, categoría, disponibilidad, precio, nutrición, etiquetas y alérgenos,
-ordenar y paginar resultados, consultar el detalle y revisar un histórico de
-precios ficticio. Los filtros del frontend se conservan en la URL.
+La versión actual permite explorar 24 productos controlados y crear, editar,
+activar, desactivar y archivar plantillas de comidas. Cada plantilla usa
+ingredientes reales del catálogo de demostración y calcula nutrición y coste
+consumido total y por ración. Los filtros del catálogo y de las plantillas se
+conservan en la URL.
 
 ## Avisos importantes
 
@@ -48,6 +49,7 @@ Más detalle:
 - [Arquitectura](docs/architecture.md)
 - [Modelo de dominio](docs/domain-model.md)
 - [Contrato API](docs/api.md)
+- [Plantillas de comidas y reglas de cálculo](docs/meal-templates.md)
 - [Roadmap](docs/roadmap.md)
 - [Decisiones arquitectónicas](docs/adr/)
 
@@ -128,6 +130,13 @@ GET /api/v1/allergens
 GET /api/v1/products?supermarketCode=MERCADONA&page=0&size=12
 GET /api/v1/products/{id}
 GET /api/v1/products/{id}/price-history
+GET /api/v1/meal-templates
+GET /api/v1/meal-templates/{id}
+POST /api/v1/meal-templates
+PUT /api/v1/meal-templates/{id}
+PATCH /api/v1/meal-templates/{id}/status
+DELETE /api/v1/meal-templates/{id}
+POST /api/v1/meal-templates/preview
 GET /actuator/health
 GET /v3/api-docs
 GET /swagger-ui/index.html
@@ -166,6 +175,22 @@ GET /api/v1/products?available=true&maximumPrice=3&sort=currentPrice,asc
 La búsqueda usa un debounce de 400 ms. Los filtros, ordenación y página se
 reflejan en query parameters. Consulta
 [Filtrado del catálogo](docs/catalog-filtering.md) para la semántica completa.
+
+## Plantillas de comidas
+
+La pantalla principal está en <http://localhost:5173/meal-templates>. Desde
+ella se puede filtrar, ordenar y paginar, abrir el detalle o crear una plantilla.
+El editor está disponible en `/meal-templates/new` y
+`/meal-templates/{id}/edit`.
+
+El selector de ingredientes consulta el catálogo de forma remota y limita los
+resultados. La previsualización valida y calcula sin guardar. El coste mostrado
+en esta fase es el **coste proporcional consumido**; todavía no es el coste de
+compra de paquetes completos que implementará la lista de compra.
+
+El arranque importa de forma idempotente 16 plantillas controladas:
+4 desayunos, 4 comidas, 3 meriendas y 5 cenas. Hay casos deliberadamente
+incompletos para comprobar avisos de nutrición y precio.
 
 ## Comandos
 
@@ -223,21 +248,22 @@ npm run build
 - Todos los precios y datos nutricionales son de demostración.
 - Solo Mercadona está habilitado; los demás proveedores son informativos.
 - No existe todavía generación de planes ni lista de compra.
+- El filtrado de plantillas se calcula en memoria tras cargar el pequeño conjunto
+  de demostración; se migrará a consulta SQL cuando el volumen lo justifique.
 - No hay autenticación, IA, scraping, Open Food Facts, Redis, Airflow funcional
   ni Kubernetes.
 - Los puertos estándar 8080 y 5432 no se usan por defecto para evitar colisiones
   con otros proyectos locales.
 - `npm audit` informa de dos entradas altas que corresponden al mismo advisory
   transitivo de React Router en modo RSC/Actions. Esta aplicación es una SPA
-  cliente y no usa RSC, acciones de servidor ni SSR. `react-router-dom` 7.18.1
-  es la última versión estable publicada; la corrección está en `react-router`
-  8.3, todavía sin versión equivalente de `react-router-dom`. No se fuerza una
-  actualización incompatible.
+  cliente y no usa RSC, acciones de servidor ni SSR. La corrección automática
+  propuesta fuerza un cambio incompatible y una bajada de versión, por lo que
+  no se ha aplicado sin una validación específica del router.
 
 ## Roadmap
 
 El desarrollo continúa en fases pequeñas. La siguiente tarea recomendada es la
-**FASE 2 — Plantillas de comidas**, sin iniciar todavía la generación automática
-de planes.
+**FASE 3 — Generador determinista basado en scoring**, reutilizando estas
+plantillas sin iniciar todavía lista de compra, IA ni sincronización externa.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.

@@ -24,6 +24,9 @@ app:
   catalog:
     demo-resource: classpath:data/mock/mercadona-catalog.json
     seed-enabled: ${CATALOG_SEED_ENABLED:true}
+  meal-templates:
+    demo-resource: classpath:data/mock/meal-templates.json
+    seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
 
 management:
   endpoints:

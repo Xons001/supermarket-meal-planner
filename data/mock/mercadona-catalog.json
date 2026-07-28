@@ -91,6 +91,10 @@
       "nutrition": {
         "caloriesPer100g": 143, "proteinPer100g": 12.6, "carbohydratesPer100g": 0.7,
         "fatPer100g": 9.5, "fiberPer100g": 0, "sugarPer100g": 0.4, "saltPer100g": 0.36,
+        "perUnit": {
+          "calories": 78, "protein": 6.9, "carbohydrates": 0.4,
+          "fat": 5.2, "fiber": 0, "sugar": 0.2, "salt": 0.20
+        },
         "dataSource": "CONTROLLED_DEMO_DATA", "verificationStatus": "DEMO",
         "confidenceScore": 1, "updatedAt": "2026-07-28T00:00:00Z"
       },
@@ -430,6 +434,7 @@
       "description": "Preparado vegetal ficticio sin ficha nutricional.",
       "packageQuantity": 240,
       "packageUnit": "G",
+      "costDataComplete": false,
       "currentPrice": 2.80,
       "unitPrice": 11.67,
       "available": false,

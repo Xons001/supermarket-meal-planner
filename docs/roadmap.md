@@ -11,9 +11,11 @@ Búsqueda y filtros combinables, alérgenos, etiquetas dietéticas, disponibilid
 histórico de precios, navegación, paginación, detalle, estados vacíos y filtros
 persistidos en la URL.
 
-## FASE 2 — Plantillas de comidas
+## FASE 2 — Plantillas de comidas ✅
 
-Plantillas, ingredientes, cantidades e instrucciones comprobables.
+CRUD y archivado lógico, ingredientes del catálogo, unidades compatibles,
+instrucciones ordenadas, cálculo nutricional y de coste consumido, estados
+parciales, filtros, previsualización, frontend responsive y pruebas integrales.
 
 ## FASE 3 — Generador basado en scoring
 

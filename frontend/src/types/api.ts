@@ -15,6 +15,7 @@ export interface Nutrition {
   fiberPer100g: number
   sugarPer100g: number
   saltPer100g: number
+  perUnit: NutritionBreakdown | null
   dataSource: string
   verificationStatus: string
   confidenceScore: number
@@ -47,6 +48,8 @@ export interface Product {
   unitPrice: number
   packageQuantity: number
   packageUnit: string
+  measurementType: 'WEIGHT' | 'VOLUME' | 'UNIT'
+  costDataComplete: boolean
   available: boolean
   source: string
   lastSyncedAt: string
@@ -106,6 +109,100 @@ export interface PageResponse<T> {
 export interface HealthResponse {
   status: string
   components?: Record<string, unknown>
+}
+
+export type MealType = 'BREAKFAST' | 'LUNCH' | 'SNACK' | 'DINNER'
+export type QuantityUnit = 'GRAM' | 'MILLILITER' | 'UNIT'
+
+export interface NutritionBreakdown {
+  calories: number
+  protein: number
+  carbohydrates: number
+  fat: number
+  fiber: number
+  sugar: number
+  salt: number
+}
+
+export interface MealTemplateIngredient {
+  productId: string
+  productName: string
+  brand: string | null
+  category: string
+  quantity: number
+  quantityUnit: QuantityUnit
+  optional: boolean
+  sortOrder: number
+  notes: string | null
+  calculatedNutrition: NutritionBreakdown | null
+  calculatedConsumedCost: number | null
+  nutritionCalculationComplete: boolean
+  costCalculationComplete: boolean
+  calculationComplete: boolean
+  warnings: string[]
+}
+
+export interface MealTemplate {
+  id: string
+  supermarketCode: string
+  supermarketName: string
+  name: string
+  description: string
+  mealType: MealType
+  instructions: string[]
+  preparationMinutes: number
+  servings: number
+  active: boolean
+  imageUrl: string | null
+  ingredients: MealTemplateIngredient[]
+  totalNutrition: NutritionBreakdown
+  nutritionPerServing: NutritionBreakdown
+  totalConsumedCost: number
+  consumedCostPerServing: number
+  calculationComplete: boolean
+  nutritionComplete: boolean
+  costComplete: boolean
+  warnings: string[]
+  createdAt: string
+  updatedAt: string
+  demoData: boolean
+}
+
+export interface MealTemplateIngredientRequest {
+  productId: string
+  quantity: number
+  quantityUnit: QuantityUnit
+  optional: boolean
+  sortOrder: number
+  notes?: string | null
+}
+
+export interface MealTemplateRequest {
+  supermarketCode: string
+  name: string
+  description: string
+  mealType: MealType
+  instructions: string[]
+  preparationMinutes: number
+  servings: number
+  active: boolean
+  imageUrl?: string | null
+  ingredients: MealTemplateIngredientRequest[]
+}
+
+export interface MealTemplateFilters {
+  supermarketCode?: string
+  mealType?: MealType
+  active?: boolean
+  query?: string
+  minimumProtein?: string
+  maximumCalories?: string
+  maximumPreparationMinutes?: string
+  excludedAllergens?: string[]
+  dietaryTags?: string[]
+  page: number
+  size: number
+  sort: string
 }
 
 export interface ProblemDetails {

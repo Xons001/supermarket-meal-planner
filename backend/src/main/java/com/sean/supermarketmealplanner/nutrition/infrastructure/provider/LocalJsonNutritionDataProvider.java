@@ -1,6 +1,7 @@
 package com.sean.supermarketmealplanner.nutrition.infrastructure.provider;
 
 import com.sean.supermarketmealplanner.nutrition.application.port.ExternalNutritionData;
+import com.sean.supermarketmealplanner.nutrition.application.port.ExternalUnitNutritionData;
 import com.sean.supermarketmealplanner.nutrition.application.port.NutritionDataProvider;
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogDocument.DemoNutrition;
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogFileReader;
@@ -49,6 +50,15 @@ public class LocalJsonNutritionDataProvider implements NutritionDataProvider {
                 nutrition.fiberPer100g(),
                 nutrition.sugarPer100g(),
                 nutrition.saltPer100g(),
+                nutrition.perUnit() == null ? null : new ExternalUnitNutritionData(
+                        nutrition.perUnit().calories(),
+                        nutrition.perUnit().protein(),
+                        nutrition.perUnit().carbohydrates(),
+                        nutrition.perUnit().fat(),
+                        nutrition.perUnit().fiber(),
+                        nutrition.perUnit().sugar(),
+                        nutrition.perUnit().salt()
+                ),
                 nutrition.dataSource(),
                 nutrition.verificationStatus(),
                 nutrition.confidenceScore(),

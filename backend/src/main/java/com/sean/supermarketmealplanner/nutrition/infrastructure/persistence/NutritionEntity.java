@@ -44,6 +44,27 @@ public class NutritionEntity {
     @Column(name = "salt_per_100g", nullable = false, precision = 10, scale = 2)
     private BigDecimal saltPer100g;
 
+    @Column(name = "calories_per_unit", precision = 10, scale = 2)
+    private BigDecimal caloriesPerUnit;
+
+    @Column(name = "protein_per_unit", precision = 10, scale = 2)
+    private BigDecimal proteinPerUnit;
+
+    @Column(name = "carbohydrates_per_unit", precision = 10, scale = 2)
+    private BigDecimal carbohydratesPerUnit;
+
+    @Column(name = "fat_per_unit", precision = 10, scale = 2)
+    private BigDecimal fatPerUnit;
+
+    @Column(name = "fiber_per_unit", precision = 10, scale = 2)
+    private BigDecimal fiberPerUnit;
+
+    @Column(name = "sugar_per_unit", precision = 10, scale = 2)
+    private BigDecimal sugarPerUnit;
+
+    @Column(name = "salt_per_unit", precision = 10, scale = 2)
+    private BigDecimal saltPerUnit;
+
     @Column(name = "data_source", nullable = false, length = 80)
     private String dataSource;
 
@@ -72,6 +93,13 @@ public class NutritionEntity {
             BigDecimal fiberPer100g,
             BigDecimal sugarPer100g,
             BigDecimal saltPer100g,
+            BigDecimal caloriesPerUnit,
+            BigDecimal proteinPerUnit,
+            BigDecimal carbohydratesPerUnit,
+            BigDecimal fatPerUnit,
+            BigDecimal fiberPerUnit,
+            BigDecimal sugarPerUnit,
+            BigDecimal saltPerUnit,
             String dataSource,
             String verificationStatus,
             BigDecimal confidenceScore,
@@ -84,6 +112,13 @@ public class NutritionEntity {
         this.fiberPer100g = fiberPer100g;
         this.sugarPer100g = sugarPer100g;
         this.saltPer100g = saltPer100g;
+        this.caloriesPerUnit = caloriesPerUnit;
+        this.proteinPerUnit = proteinPerUnit;
+        this.carbohydratesPerUnit = carbohydratesPerUnit;
+        this.fatPerUnit = fatPerUnit;
+        this.fiberPerUnit = fiberPerUnit;
+        this.sugarPerUnit = sugarPerUnit;
+        this.saltPerUnit = saltPerUnit;
         this.dataSource = dataSource;
         this.verificationStatus = verificationStatus;
         this.confidenceScore = confidenceScore;
@@ -124,6 +159,34 @@ public class NutritionEntity {
 
     public BigDecimal getSaltPer100g() {
         return saltPer100g;
+    }
+
+    public BigDecimal getCaloriesPerUnit() {
+        return caloriesPerUnit;
+    }
+
+    public BigDecimal getProteinPerUnit() {
+        return proteinPerUnit;
+    }
+
+    public BigDecimal getCarbohydratesPerUnit() {
+        return carbohydratesPerUnit;
+    }
+
+    public BigDecimal getFatPerUnit() {
+        return fatPerUnit;
+    }
+
+    public BigDecimal getFiberPerUnit() {
+        return fiberPerUnit;
+    }
+
+    public BigDecimal getSugarPerUnit() {
+        return sugarPerUnit;
+    }
+
+    public BigDecimal getSaltPerUnit() {
+        return saltPerUnit;
     }
 
     public String getDataSource() {

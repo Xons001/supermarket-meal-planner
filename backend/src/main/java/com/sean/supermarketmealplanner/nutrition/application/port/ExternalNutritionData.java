@@ -11,6 +11,7 @@ public record ExternalNutritionData(
         BigDecimal fiberPer100g,
         BigDecimal sugarPer100g,
         BigDecimal saltPer100g,
+        ExternalUnitNutritionData perUnit,
         String dataSource,
         String verificationStatus,
         BigDecimal confidenceScore,

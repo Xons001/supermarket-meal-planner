@@ -105,6 +105,8 @@ Respuesta:
       "unitPrice": 9.5,
       "packageQuantity": 500,
       "packageUnit": "G",
+      "measurementType": "WEIGHT",
+      "costDataComplete": true,
       "available": true,
       "source": "DEMO_JSON",
       "lastSyncedAt": "2026-07-28T12:00:00Z",
@@ -143,6 +145,9 @@ Respuesta:
 
 Los productos sin ficha controlada devuelven `nutrition: null`.
 
+Los productos por unidades pueden incluir `nutrition.perUnit` con los siete
+nutrientes explícitos. No se deduce ese bloque a partir de valores por 100 g.
+
 ## Detalle
 
 ```http
@@ -173,6 +178,139 @@ Ordenado del registro más reciente al más antiguo:
 ]
 ```
 
+## Plantillas de comidas
+
+### Listado y filtros
+
+```http
+GET /api/v1/meal-templates
+```
+
+Parámetros opcionales:
+
+| Parámetro | Tipo | Semántica |
+| --- | --- | --- |
+| `supermarketCode` | texto | Supermercado habilitado |
+| `mealType` | enum | `BREAKFAST`, `LUNCH`, `SNACK`, `DINNER` |
+| `active` | boolean | Estado público de la plantilla |
+| `query` | texto | Nombre o descripción, máximo 120 caracteres |
+| `minimumProtein` | decimal | Proteína mínima por ración |
+| `maximumCalories` | decimal | Calorías máximas por ración |
+| `maximumPreparationMinutes` | entero | Tiempo máximo |
+| `excludedAllergens` | CSV | Ningún ingrediente obligatorio puede contenerlos |
+| `dietaryTags` | CSV | Todos los ingredientes obligatorios deben cumplirlas |
+| `page` | entero | Índice desde cero; defecto `0` |
+| `size` | entero | Entre 1 y 48; defecto `9` |
+| `sort` | texto | `name`, `preparationMinutes`, `caloriesPerServing`, `proteinPerServing`, `costPerServing` o `updatedAt` |
+
+El resultado usa el mismo sobre paginado que productos. Las plantillas
+archivadas no se devuelven. Los filtros nutricionales se aplican sobre el valor
+calculado por ración y solo coinciden con cálculos completos.
+
+### Detalle, CRUD, estado y previsualización
+
+```http
+GET    /api/v1/meal-templates/{id}
+POST   /api/v1/meal-templates
+PUT    /api/v1/meal-templates/{id}
+PATCH  /api/v1/meal-templates/{id}/status
+DELETE /api/v1/meal-templates/{id}
+POST   /api/v1/meal-templates/preview
+```
+
+`POST` responde `201`; `DELETE` archiva lógicamente y responde `204`. `preview`
+valida y calcula el mismo contrato, pero no persiste nada.
+
+Petición de creación, reemplazo o previsualización:
+
+```json
+{
+  "supermarketCode": "MERCADONA",
+  "name": "Arroz con pollo",
+  "description": "Comida completa de demostración.",
+  "mealType": "LUNCH",
+  "instructions": ["Cocer el arroz.", "Cocinar y mezclar."],
+  "preparationMinutes": 30,
+  "servings": 2,
+  "active": true,
+  "imageUrl": null,
+  "ingredients": [
+    {
+      "productId": "c9eaf8a3-2e70-4eac-a451-ded01137a3b7",
+      "quantity": 200,
+      "quantityUnit": "GRAM",
+      "optional": false,
+      "sortOrder": 0,
+      "notes": null
+    }
+  ]
+}
+```
+
+Cambio aislado de estado:
+
+```json
+{ "active": false }
+```
+
+Fragmento de respuesta calculada:
+
+```json
+{
+  "id": "88d0edce-22b4-4de5-a3ed-2397315d1300",
+  "name": "Arroz con pollo",
+  "servings": 2,
+  "ingredients": [
+    {
+      "productName": "Pechuga de pollo",
+      "quantity": 200,
+      "quantityUnit": "GRAM",
+      "calculatedNutrition": {
+        "calories": 220.0,
+        "protein": 46.2,
+        "carbohydrates": 0.0,
+        "fat": 3.8,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "salt": 0.3
+      },
+      "calculatedConsumedCost": 1.90,
+      "calculationComplete": true,
+      "warnings": []
+    }
+  ],
+  "totalNutrition": {
+    "calories": 220.0,
+    "protein": 46.2,
+    "carbohydrates": 0.0,
+    "fat": 3.8,
+    "fiber": 0.0,
+    "sugar": 0.0,
+    "salt": 0.3
+  },
+  "nutritionPerServing": {
+    "calories": 110.0,
+    "protein": 23.1,
+    "carbohydrates": 0.0,
+    "fat": 1.9,
+    "fiber": 0.0,
+    "sugar": 0.0,
+    "salt": 0.1
+  },
+  "totalConsumedCost": 1.90,
+  "consumedCostPerServing": 0.95,
+  "calculationComplete": true,
+  "nutritionComplete": true,
+  "costComplete": true,
+  "warnings": [],
+  "demoData": true
+}
+```
+
+Los importes representan consumo proporcional, no paquetes enteros comprados.
+Si faltan nutrición o precio, el contrato devuelve valores parciales,
+indicadores `false` y avisos; nunca inventa datos.
+
 ## Errores
 
 El contrato es `application/problem+json` y no contiene stack traces:
@@ -190,7 +328,10 @@ El contrato es `application/problem+json` y no contiene stack traces:
 
 Producen `400`: supermercado, categoría, etiqueta, alérgeno o sort no válidos;
 `page`/`size` fuera de rango; números negativos; UUID, booleanos o decimales con
-formato incorrecto. Producto inexistente produce `404`.
+formato incorrecto. En plantillas también producen `400` las unidades
+incompatibles, productos repetidos, productos de otro supermercado e
+ingredientes o instrucciones vacíos. Producto o plantilla inexistente produce
+`404`.
 
 ## Sistema
 

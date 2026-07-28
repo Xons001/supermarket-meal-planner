@@ -8,7 +8,7 @@ como identificadores públicos.
 
 - Dinero: `BigDecimal` y `NUMERIC(12,2)`.
 - Cantidades: `BigDecimal` y `NUMERIC(12,3)`.
-- Nutrición: valores por 100 g con `NUMERIC`.
+- Nutrición: valores por 100 g o por unidad explícita con `NUMERIC`.
 - Tiempos: `OffsetDateTime`/`TIMESTAMPTZ`, normalizados a UTC.
 - Unidades: códigos explícitos (`G`, `KG`, `ML`, `L`, `UNIT`).
 
@@ -34,7 +34,7 @@ La clave `(supermarket_id, external_id)` es única.
 `id`, `supermarketId`, `categoryId`, `externalId`, `barcode`, `name`, `brand`,
 `description`, `imageUrl`, `productUrl`, `currentPrice`, `unitPrice`,
 `packageQuantity`, `packageUnit`, `available`, `source`, `lastSyncedAt`,
-`createdAt`, `updatedAt`.
+`measurementType`, `costDataComplete`, `createdAt`, `updatedAt`.
 
 Un producto ausente en una sincronización se conserva con `available=false`.
 La clave `(supermarket_id, external_id)` evita duplicados.
@@ -43,6 +43,7 @@ La clave `(supermarket_id, external_id)` evita duplicados.
 
 `id`, `productId`, calorías, proteína, carbohidratos, grasa, fibra, azúcar y sal
 por 100 g, `dataSource`, `verificationStatus`, `confidenceScore`, `updatedAt`.
+Para productos `UNIT` puede contener además los mismos nutrientes por unidad.
 
 La relación con producto es uno a uno. Coincidir solo por nombre no convierte un
 dato en verificado.
@@ -71,10 +72,54 @@ Los códigos actuales son `HIGH_PROTEIN`, `VEGETARIAN`, `VEGAN`, `GLUTEN_FREE`,
 alérgenos controlados son gluten, leche, huevo, pescado, soja y frutos de
 cáscara.
 
+## Entidades de plantillas de la FASE 2
+
+### MealTemplate
+
+`id`, `supermarketId`, `externalId`, `name`, `description`, `mealType`,
+`preparationMinutes`, `servings`, `active`, `archived`, `imageUrl`, `demoData`,
+`createdAt`, `updatedAt`.
+
+`mealType` admite `BREAKFAST`, `LUNCH`, `SNACK` y `DINNER`. La clave
+`(supermarket_id, external_id)` hace idempotente la semilla. El archivado es
+lógico y excluye el registro de consultas públicas.
+
+### MealTemplateInstruction
+
+`mealTemplateId`, `position`, `instruction`. Es una colección ordenada para
+conservar pasos con cualquier signo de puntuación sin serialización frágil.
+
+### MealTemplateIngredient
+
+`id`, `mealTemplateId`, `productId`, `quantity`, `quantityUnit`, `optional`,
+`sortOrder`, `notes`.
+
+`quantityUnit` admite `GRAM`, `MILLILITER` y `UNIT`; debe coincidir con
+`Product.measurementType`. La pareja `(meal_template_id, product_id)` es única.
+
+Compatibilidad:
+
+| MeasurementType | QuantityUnit | Base de cálculo |
+| --- | --- | --- |
+| `WEIGHT` | `GRAM` | nutrientes por 100 y paquete normalizado a gramos |
+| `VOLUME` | `MILLILITER` | nutrientes por 100 y envase normalizado a mililitros |
+| `UNIT` | `UNIT` | nutrientes explícitos por unidad y unidades por paquete |
+
+No se realizan conversiones por densidad ni se inventan pesos por unidad.
+
+Los nutrientes por peso o volumen se calculan como
+`valorPor100 × cantidad / 100`. El coste consumido es
+`precioPaquete × cantidadUsada / cantidadBasePaquete`. Los valores por ración
+dividen cada total entre `servings`. Los cálculos usan `BigDecimal`,
+`MathContext.DECIMAL128` y `RoundingMode.HALF_UP`; la API entrega una cifra
+decimal para nutrientes y dos para dinero.
+
+Si falta nutrición, precio, formato o una base compatible, se conserva el
+ingrediente, se devuelve un aviso y el indicador de completitud correspondiente
+queda a `false`.
+
 ## Entidades previstas del planificador
 
-- `MealTemplate`: nombre, tipo, instrucciones, preparación y estado.
-- `MealTemplateIngredient`: plantilla, producto, gramos y opcionalidad.
 - `MealPlan`: supermercado, periodo, objetivos, presupuesto y estado.
 - `MealPlanDay`: fecha, macros diarios y coste consumido estimado.
 - `Meal`: tipo, instrucciones, macros y coste consumido.
@@ -97,6 +142,10 @@ erDiagram
     DIETARY_TAG ||--o{ PRODUCT_DIETARY_TAG : classifies
     PRODUCT ||--o{ PRODUCT_ALLERGEN : declares
     ALLERGEN ||--o{ PRODUCT_ALLERGEN : identifies
+    SUPERMARKET ||--o{ MEAL_TEMPLATE : owns
+    MEAL_TEMPLATE ||--|{ MEAL_TEMPLATE_INSTRUCTION : orders
+    MEAL_TEMPLATE ||--|{ MEAL_TEMPLATE_INGREDIENT : contains
+    PRODUCT ||--o{ MEAL_TEMPLATE_INGREDIENT : uses
     MEAL_PLAN ||--|{ MEAL_PLAN_DAY : contains
     MEAL_PLAN_DAY ||--|{ MEAL : contains
     MEAL ||--|{ MEAL_ITEM : contains

@@ -34,6 +34,7 @@ public record DemoCatalogDocument(
             String description,
             BigDecimal packageQuantity,
             String packageUnit,
+            Boolean costDataComplete,
             BigDecimal currentPrice,
             BigDecimal unitPrice,
             boolean available,
@@ -63,10 +64,22 @@ public record DemoCatalogDocument(
             BigDecimal fiberPer100g,
             BigDecimal sugarPer100g,
             BigDecimal saltPer100g,
+            DemoUnitNutrition perUnit,
             String dataSource,
             String verificationStatus,
             BigDecimal confidenceScore,
             OffsetDateTime updatedAt
+    ) {
+    }
+
+    public record DemoUnitNutrition(
+            BigDecimal calories,
+            BigDecimal protein,
+            BigDecimal carbohydrates,
+            BigDecimal fat,
+            BigDecimal fiber,
+            BigDecimal sugar,
+            BigDecimal salt
     ) {
     }
 }

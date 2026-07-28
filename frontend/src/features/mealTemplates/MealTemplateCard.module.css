@@ -1,0 +1,136 @@
+.card {
+  display: grid;
+  min-width: 0;
+  gap: 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: white;
+  color: inherit;
+  box-shadow: var(--shadow-xs);
+  text-decoration: none;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.topline,
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.topline > span {
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.topline strong {
+  border-radius: 999px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.62rem;
+}
+
+.active {
+  background: var(--color-primary-soft);
+  color: var(--color-success);
+}
+
+.inactive {
+  background: #f8dddd;
+  color: var(--color-danger);
+}
+
+.card h3 {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: 1.15rem;
+}
+
+.card > p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.meta {
+  justify-content: flex-start;
+}
+
+.meta span {
+  border-radius: 999px;
+  padding: 0.32rem 0.48rem;
+  background: var(--color-surface-muted);
+  color: var(--color-text-soft);
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.ingredients {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--color-text-soft);
+  font-size: 0.7rem;
+}
+
+.values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.values div {
+  min-width: 0;
+  border-radius: 0.7rem;
+  padding: 0.55rem;
+  background: var(--color-surface-muted);
+}
+
+.values dt {
+  color: var(--color-text-muted);
+  font-size: 0.55rem;
+}
+
+.values dd {
+  overflow: hidden;
+  margin: 0.18rem 0 0;
+  color: var(--color-heading);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.warning {
+  border-radius: 0.65rem;
+  padding: 0.5rem;
+  background: #fff4d9;
+  color: #795b17 !important;
+  font-weight: 750;
+}
+
+.card small {
+  color: #795b17;
+  font-size: 0.6rem;
+}
+
+@media (max-width: 420px) {
+  .values {
+    grid-template-columns: 1fr;
+  }
+}
