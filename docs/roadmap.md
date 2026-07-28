@@ -17,9 +17,10 @@ CRUD y archivado lógico, ingredientes del catálogo, unidades compatibles,
 instrucciones ordenadas, cálculo nutricional y de coste consumido, estados
 parciales, filtros, previsualización, frontend responsive y pruebas integrales.
 
-## FASE 3 — Generador basado en scoring
+## FASE 3 — Generador basado en scoring ✅
 
-Motor determinista para calorías, proteína, presupuesto y variedad.
+Motor determinista para calorías, proteína, presupuesto y variedad; preview
+protegido por token, snapshots persistidos, listado, detalle y archivado lógico.
 
 ## FASE 4 — Lista de compra y desperdicio
 

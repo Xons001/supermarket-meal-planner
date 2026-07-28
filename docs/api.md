@@ -341,16 +341,90 @@ GET /v3/api-docs
 GET /swagger-ui/index.html
 ```
 
+## Planes semanales
+
+### Generar o guardar
+
+```text
+POST /api/v1/meal-plans/generate
+```
+
+El cuerpo completo está en
+[`docs/examples/generate-meal-plan.json`](examples/generate-meal-plan.json).
+Admite 1–14 días, 1–6 comidas y `persist=false|true`. Si la seed se omite,
+la respuesta incluye la generada.
+
+La respuesta contiene `generationToken`, criterios normalizados, días,
+comidas e ingredientes obligatorios, nutrición diaria y semanal, coste
+consumido, presupuesto y desviación, `overallScore`, `scoreBreakdown`,
+`varietyMetrics`, advertencias, restricciones y metadatos de generación.
+
+Para guardar exactamente un preview se repite el cuerpo con:
+
+```json
+{
+  "deterministicSeed": 123456,
+  "generationToken": "sha256-del-preview",
+  "persist": true
+}
+```
+
+El resto de criterios debe mantenerse. Una discrepancia de fingerprint produce
+`400` y no guarda.
+
+### Listar
+
+```text
+GET /api/v1/meal-plans
+```
+
+Filtros:
+
+| Parámetro | Valores |
+|---|---|
+| `supermarketCode` | Código existente |
+| `status` | `DRAFT`, `GENERATED`, `ARCHIVED` |
+| `startDateFrom`, `startDateTo` | Fecha ISO inclusiva |
+| `minimumScore` | 0–100 |
+| `page` | Entero desde 0 |
+| `size` | 1–48 |
+| `sort` | `name`, `startDate`, `overallScore`, `createdAt` o `totalConsumedCost`, más `asc`/`desc` |
+
+### Detalle y estado
+
+```text
+GET    /api/v1/meal-plans/{id}
+PATCH  /api/v1/meal-plans/{id}/status
+DELETE /api/v1/meal-plans/{id}
+```
+
+El `PATCH` acepta `{"status":"GENERATED"}` o `{"status":"ARCHIVED"}`. No se
+puede devolver un plan persistido a `DRAFT`. `DELETE` realiza archivado lógico
+y responde `204`.
+
+### Generación imposible
+
+```json
+{
+  "title": "Meal plan generation is impossible",
+  "status": 422,
+  "errorCode": "MEAL_PLAN_GENERATION_IMPOSSIBLE",
+  "candidateCounts": {"BREAKFAST": 0},
+  "rejectedByReason": {"excludedAllergen": 4},
+  "conflictingConstraints": ["excludedAllergens=[MILK]"],
+  "suggestions": ["Allow another meal type"]
+}
+```
+
+Supermercado, etiquetas, alérgenos o UUID excluidos inexistentes; rangos,
+objetivos, presupuesto y cambios de estado inválidos producen `400`. Un plan
+inexistente produce `404`. No se exponen trazas.
+
 ## Contratos futuros no implementados
 
 ```text
-POST   /api/v1/meal-plans/generate
-POST   /api/v1/meal-plans
-GET    /api/v1/meal-plans
-GET    /api/v1/meal-plans/{id}
-DELETE /api/v1/meal-plans/{id}
 GET    /api/v1/meal-plans/{id}/shopping-list
 ```
 
-La planificación, lista de compra, autenticación, sincronización Airflow e IA
-opcional permanecen fuera del runtime actual.
+La lista de compra, sustituciones, autenticación, sincronización Airflow,
+OR-Tools e IA opcional permanecen fuera del runtime actual.

@@ -27,6 +27,39 @@ app:
   meal-templates:
     demo-resource: classpath:data/mock/meal-templates.json
     seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
+  meal-plans:
+    scoring:
+      beam-width: 24
+      candidates-per-position: 8
+      calorie-weight: 25
+      protein-weight: 25
+      budget-weight: 15
+      variety-weight: 15
+      repetition-weight: 10
+      completeness-weight: 5
+      preparation-weight: 5
+      ideal-calorie-margin-percentage: 5
+      warning-calorie-margin-percentage: 10
+      nutritional-distribution-share: 20
+      template-variety-share: 60
+      ingredient-variety-share: 25
+      meal-type-variety-share: 15
+      calorie-deviation-penalty-factor: 4
+      protein-deficit-penalty-factor: 3
+      budget-exceeded-penalty-factor: 4
+      excess-repetition-penalty: 12
+      same-day-repetition-penalty: 20
+      consecutive-repetition-penalty: 8
+      incomplete-meal-penalty: 20
+      preparation-ratio-penalty: 20
+      candidate-calorie-penalty-factor: 0.40
+      candidate-protein-penalty-factor: 0.60
+      candidate-budget-penalty-factor: 0.30
+      candidate-preparation-minute-penalty: 0.15
+      candidate-incomplete-penalty: 50
+      beam-excess-repetition-penalty: 18
+      beam-same-day-repetition-penalty: 25
+      beam-consecutive-repetition-penalty: 12
 
 management:
   endpoints:

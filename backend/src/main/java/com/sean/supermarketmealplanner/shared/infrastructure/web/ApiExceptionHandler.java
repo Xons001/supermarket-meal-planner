@@ -5,6 +5,9 @@ import com.sean.supermarketmealplanner.catalog.application.InvalidFilterExceptio
 import com.sean.supermarketmealplanner.mealtemplate.application.InvalidMealTemplateFilterException;
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateNotFoundException;
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateValidationException;
+import com.sean.supermarketmealplanner.mealplan.application.MealPlanGenerationException;
+import com.sean.supermarketmealplanner.mealplan.application.MealPlanNotFoundException;
+import com.sean.supermarketmealplanner.mealplan.application.MealPlanValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -19,7 +22,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler({ProductNotFoundException.class, MealTemplateNotFoundException.class})
+    @ExceptionHandler({
+            ProductNotFoundException.class,
+            MealTemplateNotFoundException.class,
+            MealPlanNotFoundException.class
+    })
     public ProblemDetail handleNotFound(
             RuntimeException exception,
             HttpServletRequest request
@@ -36,6 +43,7 @@ public class ApiExceptionHandler {
             InvalidFilterException.class,
             InvalidMealTemplateFilterException.class,
             MealTemplateValidationException.class,
+            MealPlanValidationException.class,
             MethodArgumentTypeMismatchException.class,
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class,
@@ -48,6 +56,25 @@ public class ApiExceptionHandler {
                 exception.getMessage(),
                 request
         );
+    }
+
+    @ExceptionHandler(MealPlanGenerationException.class)
+    public ProblemDetail handleGenerationImpossible(
+            MealPlanGenerationException exception,
+            HttpServletRequest request
+    ) {
+        var problem = createProblem(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Meal plan generation is impossible",
+                exception.getMessage(),
+                request
+        );
+        problem.setProperty("candidateCounts", exception.getCandidateCounts());
+        problem.setProperty("rejectedByReason", exception.getRejectedByReason());
+        problem.setProperty("conflictingConstraints", exception.getConflictingConstraints());
+        problem.setProperty("suggestions", exception.getSuggestions());
+        problem.setProperty("errorCode", "MEAL_PLAN_GENERATION_IMPOSSIBLE");
+        return problem;
     }
 
     private ProblemDetail createProblem(

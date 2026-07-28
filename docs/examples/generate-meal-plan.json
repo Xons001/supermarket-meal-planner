@@ -1,0 +1,22 @@
+{
+  "supermarketCode": "MERCADONA",
+  "name": "Plan semanal alto en proteína",
+  "startDate": "2026-08-03",
+  "numberOfDays": 7,
+  "mealsPerDay": 4,
+  "servings": 1,
+  "dailyCaloriesTarget": 2200,
+  "dailyProteinTarget": 150,
+  "weeklyBudget": 70,
+  "allowedMealTypes": ["BREAKFAST", "LUNCH", "SNACK", "DINNER"],
+  "requiredDietaryTags": [],
+  "excludedAllergens": [],
+  "excludedTemplateIds": [],
+  "excludedProductIds": [],
+  "maximumPreparationMinutes": 40,
+  "maximumTemplateRepetitions": 2,
+  "varietyPreference": "HIGH",
+  "allowIncompleteCalculations": false,
+  "deterministicSeed": 123456,
+  "persist": false
+}

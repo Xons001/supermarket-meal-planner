@@ -4,13 +4,13 @@ Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.
 
-> **Estado:** FASE 2 — Plantillas de comidas reutilizables.
+> **Estado:** FASE 3 — Generador semanal determinista basado en scoring.
 
-La versión actual permite explorar 24 productos controlados y crear, editar,
-activar, desactivar y archivar plantillas de comidas. Cada plantilla usa
-ingredientes reales del catálogo de demostración y calcula nutrición y coste
-consumido total y por ración. Los filtros del catálogo y de las plantillas se
-conservan en la URL.
+La versión actual permite explorar 24 productos controlados, mantener plantillas
+de comidas y generar planes de 1 a 14 días con 1 a 6 comidas diarias. El motor
+usa objetivos, presupuesto, disponibilidad y restricciones para construir un
+resultado reproducible, puntuarlo y explicar sus advertencias. Los planes se
+pueden previsualizar, guardar como snapshot, consultar y archivar.
 
 ## Avisos importantes
 
@@ -50,6 +50,7 @@ Más detalle:
 - [Modelo de dominio](docs/domain-model.md)
 - [Contrato API](docs/api.md)
 - [Plantillas de comidas y reglas de cálculo](docs/meal-templates.md)
+- [Generación semanal, scoring y determinismo](docs/meal-plan-generation.md)
 - [Roadmap](docs/roadmap.md)
 - [Decisiones arquitectónicas](docs/adr/)
 
@@ -192,6 +193,29 @@ El arranque importa de forma idempotente 16 plantillas controladas:
 4 desayunos, 4 comidas, 3 meriendas y 5 cenas. Hay casos deliberadamente
 incompletos para comprobar avisos de nutrición y precio.
 
+## Planes semanales
+
+- Listado: <http://localhost:5173/meal-plans>
+- Generación: <http://localhost:5173/meal-plans/new>
+- Detalle: `/meal-plans/{id}`
+
+El formulario permite introducir directamente objetivos y restricciones. Primero
+genera un preview con `persist=false`: no escribe en PostgreSQL y devuelve la
+seed efectiva. Al pulsar **Guardar este plan**, el frontend repite la petición
+con la misma seed y el `generationToken`; el backend solo persiste si los datos
+de entrada siguen produciendo exactamente el mismo snapshot.
+
+Para una comprobación rápida de API:
+
+```bash
+curl -X POST http://localhost:8081/api/v1/meal-plans/generate \
+  -H "Content-Type: application/json" \
+  --data @docs/examples/generate-meal-plan.json
+```
+
+El algoritmo y los pesos se explican en
+[docs/meal-plan-generation.md](docs/meal-plan-generation.md).
+
 ## Comandos
 
 ```bash
@@ -247,7 +271,9 @@ npm run build
 
 - Todos los precios y datos nutricionales son de demostración.
 - Solo Mercadona está habilitado; los demás proveedores son informativos.
-- No existe todavía generación de planes ni lista de compra.
+- El coste del plan es coste proporcional consumido, no coste de paquetes
+  completos; la lista de compra sigue fuera de alcance.
+- No existe sustitución de comidas ni edición manual de un plan guardado.
 - El filtrado de plantillas se calcula en memoria tras cargar el pequeño conjunto
   de demostración; se migrará a consulta SQL cuando el volumen lo justifique.
 - No hay autenticación, IA, scraping, Open Food Facts, Redis, Airflow funcional
@@ -263,7 +289,7 @@ npm run build
 ## Roadmap
 
 El desarrollo continúa en fases pequeñas. La siguiente tarea recomendada es la
-**FASE 3 — Generador determinista basado en scoring**, reutilizando estas
-plantillas sin iniciar todavía lista de compra, IA ni sincronización externa.
+**FASE 4 — Lista de compra y desperdicio**, usando el plan guardado para calcular
+paquetes completos sin iniciar todavía IA ni sincronización externa.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.

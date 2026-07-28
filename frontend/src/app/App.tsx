@@ -7,6 +7,9 @@ import { ProductDetailPage } from '../pages/ProductDetailPage'
 import { MealTemplatesPage } from '../pages/MealTemplatesPage'
 import { MealTemplateDetailPage } from '../pages/MealTemplateDetailPage'
 import { MealTemplateFormPage } from '../pages/MealTemplateFormPage'
+import { MealPlansPage } from '../pages/MealPlansPage'
+import { MealPlanFormPage } from '../pages/MealPlanFormPage'
+import { MealPlanDetailPage } from '../pages/MealPlanDetailPage'
 
 const queryClient = createQueryClient()
 
@@ -22,6 +25,9 @@ export function App() {
           <Route path="/meal-templates/new" element={<MealTemplateFormPage />} />
           <Route path="/meal-templates/:id" element={<MealTemplateDetailPage />} />
           <Route path="/meal-templates/:id/edit" element={<MealTemplateFormPage />} />
+          <Route path="/meal-plans" element={<MealPlansPage />} />
+          <Route path="/meal-plans/new" element={<MealPlanFormPage />} />
+          <Route path="/meal-plans/:id" element={<MealPlanDetailPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </BrowserRouter>

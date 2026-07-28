@@ -120,3 +120,33 @@ alérgenos. `OrToolsMealPlanGenerationStrategy` será una opción posterior.
 
 Un puerto futuro de lenguaje natural podrá interpretar preferencias, pero nunca
 calculará precios ni nutrientes ni acoplará el dominio a un proveedor de IA.
+## Flujo de generación semanal
+
+```mermaid
+flowchart LR
+    UI[React: criterios] --> API[MealPlanController]
+    API --> APP[MealPlanService]
+    APP --> PORT[MealPlanGenerationStrategy]
+    PORT --> SCORE[ScoringMealPlanGenerationStrategy]
+    SCORE --> FILTER[Filtrado y cálculo obligatorio]
+    FILTER --> BEAM[Beam search acotado]
+    BEAM --> EXPLAIN[Score, advertencias y metadata]
+    EXPLAIN -->|persist=false| UI
+    EXPLAIN -->|persist=true + token válido| DB[(Snapshot PostgreSQL)]
+```
+
+El controlador solo valida el contrato y delega. El servicio selecciona la
+estrategia por `GenerationStrategy`; el dominio no conoce beam search. Una
+implementación futura basada en OR-Tools se conectará al mismo puerto.
+
+La estrategia ordena las entradas, construye posiciones deterministas, filtra
+antes de puntuar y limita la búsqueda a 24 estados y 8 candidatas por posición.
+La seed solo desempata. Duración y `generatedAt` se añaden al final y no alteran
+la selección.
+
+Preview y persistencia son stateless: el frontend devuelve seed y fingerprint.
+El servicio vuelve a generar, valida el token y guarda el árbol completo dentro
+de una transacción. Véanse
+[generación semanal](meal-plan-generation.md),
+[ADR 0006](adr/0006-deterministic-scoring-generation.md) y
+[ADR 0008](adr/0008-preview-persistence-token.md).

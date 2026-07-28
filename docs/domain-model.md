@@ -171,3 +171,44 @@ contra el coste real estimado de los paquetes comprados.
 
 Registrará `id`, supermercado, inicio, fin, estado, productos leídos, creados,
 actualizados, no disponibles, cambios de precio y mensaje de error.
+## Plan semanal
+
+`MealPlan` pertenece a un supermercado y conserva nombre, fecha, duración,
+comidas diarias, raciones, objetivos, presupuesto, estado, estrategia, seed,
+token, totales, scores, métricas, completitud y timestamps.
+
+`MealPlanDay` identifica de forma única `(mealPlanId, dayIndex)` y
+`(mealPlanId, date)`. Guarda totales nutricionales, coste consumido,
+desviaciones y score diario.
+
+`PlannedMeal` identifica de forma única la posición dentro del día. Referencia
+la plantilla original y conserva su nombre, tipo, raciones, ingredientes
+obligatorios, nutrición, coste, score, completitud y advertencias del momento.
+
+`MealPlanWarning` pertenece al plan y opcionalmente a un día. Contiene código,
+mensaje, severidad y fecha.
+
+Enums:
+
+- `MealPlanStatus`: `DRAFT`, `GENERATED`, `ARCHIVED`.
+- `GenerationStrategy`: `SCORING`.
+- `WarningSeverity`: `INFO`, `WARNING`, `ERROR`.
+- `VarietyPreference`: `LOW`, `MEDIUM`, `HIGH`.
+
+### Invariantes
+
+- 1–14 días, 1–6 comidas diarias y raciones mayores que cero.
+- Objetivo calórico positivo, proteína no negativa y presupuesto positivo si
+  existe.
+- Todas las plantillas pertenecen al supermercado del plan.
+- La posición es única dentro de cada día.
+- Un plan persistido no puede volver a `DRAFT`.
+- El archivado es lógico.
+
+### Snapshot
+
+Se usa persistencia híbrida: columnas relacionales para integridad y filtros,
+tablas hijas para días/comidas/advertencias, y JSON de criterios y resultado
+completo. El detalle se lee del snapshot, no se recalcula desde el catálogo.
+La decisión se formaliza en
+[ADR 0007](adr/0007-meal-plan-snapshots.md).

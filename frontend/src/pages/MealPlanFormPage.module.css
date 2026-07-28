@@ -1,0 +1,253 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 85% 5%, #deefdf, transparent 28rem), var(--color-background);
+}
+.main {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 5rem;
+}
+.intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+.intro > div {
+  max-width: 48rem;
+}
+.intro span,
+.preview > header span {
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.intro h1 {
+  margin: 0.35rem 0 0.6rem;
+  color: var(--color-heading);
+  font-size: clamp(2.3rem, 5vw, 4.2rem);
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+.intro p {
+  margin: 0;
+  color: var(--color-text-soft);
+  line-height: 1.6;
+}
+.intro a {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: white;
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.form {
+  display: grid;
+  gap: 0.8rem;
+}
+.section {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.45fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.1rem;
+  padding: 1rem;
+  background: rgb(255 255 255 / 88%);
+}
+.section h2 {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: 1rem;
+}
+.section header p {
+  margin: 0.35rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+.section > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.field {
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.field > span,
+.checks legend {
+  color: var(--color-text-soft);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+.field input,
+.field select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.65rem;
+  padding: 0.65rem;
+  background: white;
+  color: var(--color-text);
+  font-size: 0.78rem;
+}
+.field small,
+.checks small {
+  color: var(--color-danger);
+  font-size: 0.62rem;
+}
+.checks {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.checks > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.checks label {
+  position: relative;
+  cursor: pointer;
+}
+.checks input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.checks label {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.4rem 0.6rem;
+  background: white;
+  color: var(--color-text-soft);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.checks label:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+.switch {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.submitBar {
+  position: sticky;
+  bottom: 0.5rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  background: rgb(255 255 255 / 95%);
+  box-shadow: var(--shadow-sm);
+}
+.submitBar span {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+.submitBar button,
+.actions button {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  background: white;
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+.submitBar button,
+.actions .save {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+.submitBar button:disabled,
+.actions button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.error {
+  border-radius: 0.75rem;
+  padding: 0.8rem;
+  background: #fff0f0;
+  color: var(--color-danger);
+  font-size: 0.75rem;
+}
+.preview {
+  border: 1px solid var(--color-border);
+  border-radius: 1.2rem;
+  padding: 1rem;
+  background: rgb(255 255 255 / 84%);
+}
+.preview > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.preview h2 {
+  margin: 0.2rem 0 0;
+  color: var(--color-heading);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.4rem;
+}
+@media (max-width: 760px) {
+  .section {
+    grid-template-columns: 1fr;
+  }
+  .section > div {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .intro,
+  .preview > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .actions {
+    justify-content: start;
+  }
+}
+@media (max-width: 500px) {
+  .main {
+    width: calc(100% - 1rem);
+    padding-top: 0.5rem;
+  }
+  .section > div {
+    grid-template-columns: 1fr;
+  }
+  .submitBar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
