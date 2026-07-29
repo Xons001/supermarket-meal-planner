@@ -44,6 +44,8 @@ export const mealPlanFormSchema = z.object({
   excludedTemplateIds: z.array(z.string().uuid()),
   excludedProductIds: z.array(z.string().uuid()),
   allowIncompleteCalculations: z.boolean(),
+  strategy: z.enum(['SCORING', 'PURCHASE_AWARE_SCORING']),
+  optimizationPreset: z.enum(['BALANCED', 'LOWER_PURCHASE_COST', 'LOWER_WASTE', 'MORE_REUSE']),
   deterministicSeed: z
     .string()
     .refine(

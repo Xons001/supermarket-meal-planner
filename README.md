@@ -232,6 +232,15 @@ curl -X POST http://localhost:8081/api/v1/meal-plans/generate \
 El algoritmo y los pesos se explican en
 [docs/meal-plan-generation.md](docs/meal-plan-generation.md).
 
+La estrategia predeterminada desde la FASE 5 es `PURCHASE_AWARE_SCORING`.
+Optimiza el coste real de envases, el desperdicio y la reutilización
+económicamente útil sin dejar de puntuar nutrición y variedad. El modo
+`SCORING` continúa disponible para reproducir el comportamiento clásico.
+Cuando no se configura presupuesto, la normalización económica usa una
+referencia configurable de 2,50 € por comida; no se trata de un precio real.
+Consulta
+[docs/purchase-aware-meal-plan-optimization.md](docs/purchase-aware-meal-plan-optimization.md).
+
 ## Listas de compra
 
 - Listado: <http://localhost:5173/shopping-lists>
@@ -309,8 +318,8 @@ npm run build
 
 - Todos los precios y datos nutricionales son de demostración.
 - Solo Mercadona está habilitado; los demás proveedores son informativos.
-- El scoring del plan continúa usando coste proporcional consumido. La lista de
-  compra calcula por separado el coste estimado de paquetes completos.
+- El modo clásico `SCORING` usa coste proporcional consumido. La estrategia
+  predeterminada calcula durante el beam coste real, paquetes y desperdicio.
 - Un plan guardado antes de la FASE 4 carece de snapshots de formato y precio;
   su lista se genera como parcial y explica qué artículos no puede calcular.
 - No existe sustitución de comidas ni edición manual de un plan guardado.
@@ -328,9 +337,8 @@ npm run build
 
 ## Roadmap
 
-El desarrollo continúa en fases pequeñas. La siguiente tarea recomendada es la
-**FASE 5 — Sustituciones**, para reemplazar comidas o productos respetando
-restricciones y recalculando el plan, sin iniciar todavía IA ni sincronización
-externa.
+La FASE 5 incorpora optimización por compra real y mantiene el algoritmo
+clásico como baseline. La siguiente fase permanece sin implementar y debe
+definirse antes de iniciar sustituciones o sincronización externa.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.

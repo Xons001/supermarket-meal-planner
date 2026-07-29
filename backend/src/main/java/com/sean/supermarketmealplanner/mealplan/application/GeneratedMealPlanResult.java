@@ -2,6 +2,7 @@ package com.sean.supermarketmealplanner.mealplan.application;
 
 import com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy;
 import com.sean.supermarketmealplanner.mealplan.domain.MealPlanStatus;
+import com.sean.supermarketmealplanner.mealplan.domain.OptimizationPreset;
 import com.sean.supermarketmealplanner.mealplan.domain.VarietyPreference;
 import com.sean.supermarketmealplanner.mealplan.domain.WarningSeverity;
 import com.sean.supermarketmealplanner.mealtemplate.application.NutritionBreakdown;
@@ -31,6 +32,7 @@ public record GeneratedMealPlanResult(
         List<DayResult> days,
         NutritionBreakdown weeklyNutrition,
         BigDecimal totalConsumedCost,
+        PurchaseMetrics purchaseMetrics,
         BigDecimal weeklyBudget,
         BigDecimal budgetDifference,
         boolean budgetExceeded,
@@ -123,6 +125,14 @@ public record GeneratedMealPlanResult(
             BigDecimal repetitionScore,
             BigDecimal completenessScore,
             BigDecimal preparationScore,
+            BigDecimal purchaseCostScore,
+            BigDecimal consumedCostScore,
+            BigDecimal purchaseBudgetScore,
+            BigDecimal wasteCostScore,
+            BigDecimal wastePercentageScore,
+            BigDecimal usefulReuseScore,
+            BigDecimal uniqueProductsScore,
+            BigDecimal packageCountScore,
             BigDecimal totalScore
     ) {
     }
@@ -143,6 +153,24 @@ public record GeneratedMealPlanResult(
     ) {
     }
 
+    public record PurchaseMetrics(
+            BigDecimal estimatedConsumedCost,
+            BigDecimal estimatedPurchaseCost,
+            BigDecimal estimatedWasteCost,
+            BigDecimal estimatedWastePercentage,
+            int estimatedPackageCount,
+            int estimatedUniqueProductCount,
+            int reusedProductCount,
+            int economicallyUsefulReuseCount,
+            BigDecimal purchaseBudgetDifference,
+            boolean purchaseBudgetExceeded,
+            BigDecimal purchaseBudgetDeviationPercentage,
+            boolean calculationComplete,
+            List<String> warnings,
+            List<String> selectionReasons
+    ) {
+    }
+
     public record GenerationMetadata(
             GenerationStrategy strategy,
             long seed,
@@ -152,7 +180,9 @@ public record GeneratedMealPlanResult(
             OffsetDateTime generatedAt,
             String algorithmVersion,
             int beamWidth,
-            int candidatesPerPosition
+            int candidatesPerPosition,
+            OptimizationPreset optimizationPreset,
+            Map<String, BigDecimal> scoreWeights
     ) {
     }
 }

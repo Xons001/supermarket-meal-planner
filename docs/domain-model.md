@@ -252,3 +252,15 @@ dato era desconocido.
 La lista se deriva exclusivamente del snapshot persistido del plan. No consulta
 el producto o la plantilla actuales. Esto preserva la reproducibilidad y hace
 explícita la compatibilidad con planes anteriores a la FASE 4.
+
+## Métricas de optimización de compra
+
+Los planes FASE 5 pueden contener `PurchaseMetrics`: coste consumido agregado,
+coste real, coste y porcentaje de sobrante, envases, productos únicos,
+productos reutilizados, reutilizaciones económicamente útiles y comparación
+con presupuesto. También guardan razones deterministas y completitud.
+
+`GenerationStrategy` admite `SCORING` y `PURCHASE_AWARE_SCORING`.
+`OptimizationPreset` admite `BALANCED`, `LOWER_PURCHASE_COST`, `LOWER_WASTE` y
+`MORE_REUSE`. Estrategia, preset, pesos y versión forman parte del snapshot y
+del token. En planes históricos estas propiedades son opcionales.

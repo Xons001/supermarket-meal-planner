@@ -36,6 +36,77 @@
   font-size: 0.78rem;
   line-height: 1.5;
 }
+.purchase {
+  display: grid;
+  gap: 0.9rem;
+  border: 1px solid #a9d8c0;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #f4fbf7;
+}
+.purchase header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.purchase header span {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+.purchase h2,
+.purchase h3 {
+  margin: 0;
+  color: var(--color-heading);
+}
+.purchase header strong {
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  background: #dff3e7;
+  color: #17603a;
+  font-size: 0.7rem;
+}
+.purchase header strong[data-budget='exceeded'] {
+  background: #fde6e2;
+  color: #9b2f22;
+}
+.purchase dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+}
+.purchase dl div {
+  display: grid;
+  gap: 0.2rem;
+  border-radius: 0.65rem;
+  padding: 0.65rem;
+  background: white;
+}
+.purchase dt {
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+}
+.purchase dd {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.purchase p,
+.reasons {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.reasons h3 {
+  font-size: 0.78rem;
+}
+.reasons ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+}
 .warnings {
   border: 1px solid #ead9a8;
   border-radius: 1rem;
@@ -222,5 +293,12 @@
   .days > details > summary {
     align-items: start;
     flex-direction: column;
+  }
+  .purchase header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .purchase dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

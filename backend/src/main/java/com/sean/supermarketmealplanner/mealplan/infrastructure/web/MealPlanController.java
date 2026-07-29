@@ -43,7 +43,11 @@ public class MealPlanController {
     }
 
     @PostMapping("/generate")
-    @Operation(summary = "Generate a deterministic meal plan, optionally persisting it")
+    @Operation(
+            summary = "Generate a deterministic meal plan, optionally persisting it",
+            description = "PURCHASE_AWARE_SCORING is the default. SCORING preserves the classic "
+                    + "consumed-cost algorithm and ignores optimizationPreset."
+    )
     public GeneratedMealPlanResult generate(
             @Valid @RequestBody GenerateMealPlanCommand command
     ) {

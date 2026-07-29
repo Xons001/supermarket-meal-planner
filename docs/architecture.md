@@ -186,3 +186,20 @@ producto producen `422` con contexto seguro. Véanse
 [listas de compra](shopping-lists.md),
 [ADR 0009](adr/0009-shopping-list-snapshots.md) y
 [ADR 0010](adr/0010-whole-package-rounding.md).
+
+## Flujo de optimización sensible a compra
+
+`MealPlanService` selecciona estrategias mediante `GenerationStrategy`.
+`SCORING` conserva el beam clásico y `PURCHASE_AWARE_SCORING` añade a cada
+estado un agregado inmutable de compra. Ambas rutas comparten filtrado,
+candidatos, slots, seed y snapshots.
+
+El calculador puro de `shared.application.purchase` no conoce JPA. El generador
+lo usa en modo tolerante para representar candidatos parciales y
+`ShoppingListCalculationService` en modo estricto para preservar sus contratos
+de error. Así, las mismas entradas completas producen las mismas métricas.
+
+La nueva ruta actualiza solo los productos de la comida añadida, conserva
+deltas marginales y recalcula exactamente los finalistas. Véanse
+[optimización de compra](purchase-aware-meal-plan-optimization.md) y
+[ADR 0015](adr/0015-incremental-beam-without-or-tools.md).

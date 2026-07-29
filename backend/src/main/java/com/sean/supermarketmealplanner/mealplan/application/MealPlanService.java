@@ -49,9 +49,12 @@ public class MealPlanService {
 
     @Transactional
     public GeneratedMealPlanResult generate(GenerateMealPlanCommand command) {
-        var strategy = strategies.get(
-                com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy.SCORING
-        );
+        var strategy = strategies.get(command.strategy());
+        if (strategy == null) {
+            throw new MealPlanValidationException(
+                    "Unsupported generation strategy: " + command.strategy()
+            );
+        }
         var preview = strategy.generate(command);
         if (!command.persist()) {
             return preview;
@@ -213,6 +216,7 @@ public class MealPlanService {
                 value.days(),
                 value.weeklyNutrition(),
                 value.totalConsumedCost(),
+                value.purchaseMetrics(),
                 value.weeklyBudget(),
                 value.budgetDifference(),
                 value.budgetExceeded(),

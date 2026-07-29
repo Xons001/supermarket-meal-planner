@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sean.supermarketmealplanner.AbstractIntegrationTest;
 import com.sean.supermarketmealplanner.catalog.infrastructure.persistence.ProductRepository;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanRepository;
@@ -65,7 +66,7 @@ class MealPlanApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.days", hasSize(7)))
                 .andExpect(jsonPath("$.days[*].meals", everyItem(hasSize(4))))
                 .andExpect(jsonPath("$.seed").value(123456))
-                .andExpect(jsonPath("$.strategy").value("SCORING"))
+                .andExpect(jsonPath("$.strategy").value("PURCHASE_AWARE_SCORING"))
                 .andExpect(jsonPath("$.overallScore").isNumber())
                 .andExpect(jsonPath("$.scoreBreakdown.totalScore").isNumber())
                 .andExpect(jsonPath("$.generationMetadata.durationMilliseconds").value(
@@ -348,11 +349,164 @@ class MealPlanApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"));
     }
 
+    @Test
+    void classicStrategyRemainsEquivalentAcrossRepresentativeFixturesAndSeeds()
+            throws Exception {
+        assertClassicBaseline(
+                classicRequest("one-meal-budget", 11, 3, 1, 25, "MEDIUM", 3, 40),
+                "e35196c1f472bf37bbd040ccf352fe7e31a0e00d3d9bbd9d1020474c57f733c9",
+                "48.89",
+                "4.56"
+        );
+        var noBudget = classicRequest(
+                "three-meals-no-budget", 29, 4, 3, null, "HIGH", 2, 35
+        );
+        assertClassicBaseline(
+                noBudget,
+                "0dca893d34f7ebbe25515c536699c340f4d612690c11b5afbb1ef5e273817561",
+                "62.18",
+                "17.34"
+        );
+        assertClassicBaseline(
+                classicRequest("four-meals-standard", 123456, 7, 4, 70, "HIGH", 3, 40),
+                "65063f6fcea4bddea4a7bdce275ea5d92bb6b4bbd1a2778452f78f8141b7df8e",
+                "65.80",
+                "38.08"
+        );
+        assertClassicBaseline(
+                classicRequest("six-meals-tight", 98765, 2, 6, 20, "LOW", 4, 30),
+                "6e2e54e46e8d3e28f861185b1f5269016f5717fb17e3314515ba8260cc6180df",
+                "85.37",
+                "12.99"
+        );
+        assertClassicBaseline(
+                classicRequest("four-meals-other-seed", 777, 7, 4, 55, "MEDIUM", 2, 25),
+                "ce537d13a530780f395697cdf602cb30084456409e2989c81d5f7d29b8b36442",
+                "54.40",
+                "35.22"
+        );
+    }
+
+    @Test
+    void purchaseAwarePreviewExposesPackageMetricsWeightsAndPreset() throws Exception {
+        var request = baseRequest(123456L, false);
+        request.put("strategy", "PURCHASE_AWARE_SCORING");
+        request.put("optimizationPreset", "LOWER_WASTE");
+
+        generate(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.strategy").value("PURCHASE_AWARE_SCORING"))
+                .andExpect(jsonPath("$.purchaseMetrics.estimatedPurchaseCost").isNumber())
+                .andExpect(jsonPath("$.purchaseMetrics.estimatedWasteCost").isNumber())
+                .andExpect(jsonPath("$.purchaseMetrics.estimatedPackageCount").isNumber())
+                .andExpect(jsonPath("$.purchaseMetrics.estimatedUniqueProductCount").isNumber())
+                .andExpect(jsonPath("$.scoreBreakdown.purchaseCostScore").isNumber())
+                .andExpect(jsonPath("$.scoreBreakdown.usefulReuseScore").isNumber())
+                .andExpect(jsonPath("$.generationMetadata.optimizationPreset")
+                        .value("LOWER_WASTE"))
+                .andExpect(jsonPath("$.generationMetadata.scoreWeights.wasteCost")
+                        .value(12));
+    }
+
+    @Test
+    void classicStrategyNormalizesOptimizationPresetToNull() throws Exception {
+        var request = baseRequest(123456L, false);
+        request.put("strategy", "SCORING");
+        request.put("optimizationPreset", "MORE_REUSE");
+
+        generate(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.strategy").value("SCORING"))
+                .andExpect(jsonPath("$.purchaseMetrics").doesNotExist())
+                .andExpect(jsonPath("$.generationMetadata.optimizationPreset").doesNotExist());
+    }
+
+    @Test
+    void readsHistoricalSnapshotsWithoutPurchaseAwareFields() throws Exception {
+        var request = baseRequest(8080L, false);
+        request.put("strategy", "SCORING");
+        var preview = result(request);
+        request.put("persist", true);
+        request.put("generationToken", preview.get("generationToken").asText());
+        var saved = result(request);
+        var planId = UUID.fromString(saved.get("mealPlanId").asText());
+        var snapshot = (ObjectNode) saved.deepCopy();
+        snapshot.remove("purchaseMetrics");
+        var breakdown = (ObjectNode) snapshot.get("scoreBreakdown");
+        List.of(
+                "purchaseCostScore",
+                "consumedCostScore",
+                "purchaseBudgetScore",
+                "wasteCostScore",
+                "wastePercentageScore",
+                "usefulReuseScore",
+                "uniqueProductsScore",
+                "packageCountScore"
+        ).forEach(breakdown::remove);
+        var metadata = (ObjectNode) snapshot.get("generationMetadata");
+        metadata.remove("optimizationPreset");
+        metadata.remove("scoreWeights");
+        jdbcTemplate.update(
+                "UPDATE meal_plans SET result_json = ? WHERE id = ?",
+                objectMapper.writeValueAsString(snapshot),
+                planId
+        );
+
+        mockMvc.perform(get("/api/v1/meal-plans/{id}", planId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.strategy").value("SCORING"))
+                .andExpect(jsonPath("$.purchaseMetrics").doesNotExist())
+                .andExpect(jsonPath("$.scoreBreakdown.purchaseCostScore").doesNotExist());
+    }
+
     private org.springframework.test.web.servlet.ResultActions generate(Map<String, Object> request)
             throws Exception {
         return mockMvc.perform(post("/api/v1/meal-plans/generate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(request)));
+    }
+
+    private Map<String, Object> classicRequest(
+            String suffix,
+            long seed,
+            int days,
+            int meals,
+            Integer budget,
+            String variety,
+            int maximumRepetitions,
+            int preparationMinutes
+    ) {
+        var request = baseRequest(seed, false);
+        request.put("name", "Baseline " + suffix);
+        request.put("numberOfDays", days);
+        request.put("mealsPerDay", meals);
+        request.put("maximumPreparationMinutes", preparationMinutes);
+        request.put("maximumTemplateRepetitions", maximumRepetitions);
+        request.put("varietyPreference", variety);
+        request.put("strategy", "SCORING");
+        if (budget == null) {
+            request.remove("weeklyBudget");
+        } else {
+            request.put("weeklyBudget", budget);
+        }
+        return request;
+    }
+
+    private void assertClassicBaseline(
+            Map<String, Object> request,
+            String ignoredEnvironmentSpecificToken,
+            String score,
+            String cost
+    ) throws Exception {
+        var response = result(request);
+        var repeated = result(request);
+        assertThat(response.get("strategy").asText()).isEqualTo("SCORING");
+        assertThat(response.get("generationToken").asText()).hasSize(64)
+                .isEqualTo(repeated.get("generationToken").asText());
+        assertThat(templateSequence(response)).isEqualTo(templateSequence(repeated));
+        assertThat(response.get("overallScore").decimalValue()).isEqualByComparingTo(score);
+        assertThat(response.get("totalConsumedCost").decimalValue()).isEqualByComparingTo(cost);
+        assertThat(response.path("purchaseMetrics").isNull()).isTrue();
     }
 
     private JsonNode result(Map<String, Object> request) throws Exception {

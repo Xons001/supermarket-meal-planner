@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { SiteHeader } from '../components/SiteHeader'
@@ -52,6 +52,7 @@ export function MealPlanFormPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<MealPlanFormValues>({
     resolver: zodResolver(mealPlanFormSchema),
@@ -76,9 +77,12 @@ export function MealPlanFormPage() {
           excludedTemplateIds: [],
           excludedProductIds: [],
           allowIncompleteCalculations: false,
+          strategy: 'PURCHASE_AWARE_SCORING',
+          optimizationPreset: 'BALANCED',
           deterministicSeed: '',
         },
   })
+  const selectedStrategy = useWatch({ control, name: 'strategy' })
 
   const loadingMetadata = supermarkets.isPending || dietaryTags.isPending || allergens.isPending
   const requestError = generator.error instanceof ApiError ? generator.error.message : undefined
@@ -190,7 +194,33 @@ export function MealPlanFormPage() {
             </FormSection>
 
             <FormSection
-              title="3. Estructura"
+              title="3. Optimización"
+              description="Elige cómo se evalúa el coste del plan. Los presets no exponen pesos técnicos."
+            >
+              <Field label="Modo de generación" error={errors.strategy?.message}>
+                <select {...register('strategy')}>
+                  <option value="PURCHASE_AWARE_SCORING">Compra eficiente (recomendado)</option>
+                  <option value="SCORING">Clásico: coste consumido</option>
+                </select>
+              </Field>
+              {selectedStrategy === 'PURCHASE_AWARE_SCORING' && (
+                <Field label="Prioridad" error={errors.optimizationPreset?.message}>
+                  <select {...register('optimizationPreset')}>
+                    <option value="BALANCED">Equilibrada</option>
+                    <option value="LOWER_PURCHASE_COST">Menor coste real</option>
+                    <option value="LOWER_WASTE">Menor desperdicio</option>
+                    <option value="MORE_REUSE">Mayor reutilización útil</option>
+                  </select>
+                </Field>
+              )}
+              <p>
+                El modo clásico ignora cualquier preset y conserva el algoritmo anterior. Compra
+                eficiente valora envases completos, sobrantes y reutilización económicamente útil.
+              </p>
+            </FormSection>
+
+            <FormSection
+              title="4. Estructura"
               description="Tipos permitidos y preferencia de variedad."
             >
               <CheckboxGroup legend="Tipos de comida" error={errors.allowedMealTypes?.message}>
@@ -223,7 +253,7 @@ export function MealPlanFormPage() {
             </FormSection>
 
             <FormSection
-              title="4. Restricciones"
+              title="5. Restricciones"
               description="Se aplican antes de puntuar candidatos."
             >
               <CheckboxGroup legend="Etiquetas dietéticas requeridas">
@@ -253,7 +283,7 @@ export function MealPlanFormPage() {
             </FormSection>
 
             <FormSection
-              title="5. Exclusiones"
+              title="6. Exclusiones"
               description="Opcional: evita plantillas o productos concretos."
             >
               <CheckboxGroup legend="Plantillas excluidas">
@@ -279,7 +309,7 @@ export function MealPlanFormPage() {
             </FormSection>
 
             <FormSection
-              title="6. Reproducibilidad"
+              title="7. Reproducibilidad"
               description="La seed es opcional; el servidor genera una si se deja vacía."
             >
               <Field label="Seed determinista" error={errors.deterministicSeed?.message}>
@@ -429,6 +459,9 @@ function toRequest(values: MealPlanFormValues, persist: boolean): GenerateMealPl
     maximumTemplateRepetitions: optional(values.maximumTemplateRepetitions),
     varietyPreference: values.varietyPreference,
     allowIncompleteCalculations: values.allowIncompleteCalculations,
+    strategy: values.strategy,
+    optimizationPreset:
+      values.strategy === 'PURCHASE_AWARE_SCORING' ? values.optimizationPreset : undefined,
     deterministicSeed: optional(values.deterministicSeed),
     persist,
   }
@@ -464,6 +497,8 @@ function valuesFromPlan(plan: GeneratedMealPlan): MealPlanFormValues {
     excludedTemplateIds: plan.criteria.excludedTemplateIds,
     excludedProductIds: plan.criteria.excludedProductIds,
     allowIncompleteCalculations: plan.criteria.allowIncompleteCalculations,
+    strategy: plan.strategy,
+    optimizationPreset: plan.generationMetadata.optimizationPreset ?? 'BALANCED',
     deterministicSeed: String(plan.seed),
   }
 }

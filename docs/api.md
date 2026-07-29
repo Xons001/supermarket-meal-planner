@@ -485,6 +485,44 @@ persistido de la lista.
 
 Todos usan `application/problem+json` sin trazas ni información interna.
 
+## Optimización de compra en planes
+
+`POST /api/v1/meal-plans/generate` acepta opcionalmente:
+
+```json
+{
+  "strategy": "PURCHASE_AWARE_SCORING",
+  "optimizationPreset": "BALANCED"
+}
+```
+
+La estrategia purchase-aware es el valor predeterminado. `SCORING` mantiene el
+algoritmo clásico; si recibe `optimizationPreset`, el backend lo normaliza a
+`null`.
+
+Preview, persistencia y detalle incorporan `purchaseMetrics`, los nuevos
+componentes opcionales de `scoreBreakdown` y en `generationMetadata` el preset
+y los pesos efectivos. `purchaseMetrics.estimatedConsumedCost` es comparable
+con la lista agregada. Los campos nuevos son nulos en snapshots históricos.
+
+Ejemplo parcial:
+
+```json
+{
+  "strategy": "PURCHASE_AWARE_SCORING",
+  "purchaseMetrics": {
+    "estimatedConsumedCost": 37.53,
+    "estimatedPurchaseCost": 53.35,
+    "estimatedWasteCost": 15.82,
+    "estimatedWastePercentage": 29.7,
+    "estimatedPackageCount": 25,
+    "estimatedUniqueProductCount": 13,
+    "purchaseBudgetDifference": 16.65,
+    "calculationComplete": true
+  }
+}
+```
+
 ## Contratos futuros no implementados
 
 Las sustituciones, autenticación, sincronización Airflow, OR-Tools e IA

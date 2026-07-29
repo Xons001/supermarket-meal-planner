@@ -28,9 +28,11 @@ Agregación global del plan, paquetes enteros, coste real estimado de compra,
 cantidad utilizada y sobrante, presupuesto, avisos, snapshots, filtros,
 exportación CSV e impresión.
 
-## FASE 5 — Sustituciones
+## FASE 5 — Optimización por compra real ✅
 
-Reemplazos de comidas y productos conservando restricciones.
+Beam Search sensible a envases completos, coste marginal, desperdicio y
+reutilización económicamente útil. Incluye estrategia clásica compatible,
+presets controlados, snapshots y consistencia con listas de compra.
 
 ## FASE 6 — Airflow y sincronización
 

@@ -86,6 +86,8 @@ describe('MealPlanFormPage', () => {
     const fetchMock = mockApi()
     renderPage()
 
+    expect(screen.getByLabelText('Modo de generación')).toHaveValue('PURCHASE_AWARE_SCORING')
+    expect(screen.getByLabelText('Prioridad')).toHaveValue('BALANCED')
     expect(screen.getByRole('heading', { name: /construye tu plan/i })).toBeInTheDocument()
     expect(await screen.findByRole('checkbox', { name: 'Alto en proteína' })).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'Leche' })).toBeInTheDocument()
@@ -107,7 +109,26 @@ describe('MealPlanFormPage', () => {
       persist: true,
       deterministicSeed: 123456,
       generationToken: 'a'.repeat(64),
+      strategy: 'PURCHASE_AWARE_SCORING',
+      optimizationPreset: 'BALANCED',
     })
+  })
+
+  it('hides purchase presets and sends no preset in classic mode', async () => {
+    const user = userEvent.setup()
+    const fetchMock = mockApi()
+    renderPage()
+
+    await user.selectOptions(screen.getByLabelText('Modo de generación'), 'SCORING')
+    expect(screen.queryByLabelText('Prioridad')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /generar previsual/i }))
+
+    const generateCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes('/api/v1/meal-plans/generate'),
+    )
+    const body = JSON.parse(String(generateCall?.[1]?.body)) as Record<string, unknown>
+    expect(body.strategy).toBe('SCORING')
+    expect(body.optimizationPreset).toBeUndefined()
   })
 
   it('validates ranges before sending a request', async () => {

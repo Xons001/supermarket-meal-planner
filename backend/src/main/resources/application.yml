@@ -28,6 +28,74 @@ app:
     demo-resource: classpath:data/mock/meal-templates.json
     seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
   meal-plans:
+    purchase-aware:
+      reference-cost-per-meal: 2.50
+      purchase-cost-score-slope: 35
+      consumed-cost-score-slope: 20
+      waste-cost-score-slope: 100
+      unique-product-penalty: 4
+      package-count-penalty: 2
+      budget-exceeded-penalty-factor: 4
+      balanced:
+        calories: 21
+        protein: 21
+        purchaseCost: 10
+        consumedCost: 2
+        budget: 14
+        wasteCost: 10
+        wastePercentage: 10
+        usefulReuse: 4
+        uniqueProducts: 1
+        packageCount: 2
+        variety: 2
+        repetition: 1
+        completeness: 1
+        preparation: 1
+      lower-purchase-cost:
+        calories: 21
+        protein: 21
+        purchaseCost: 16
+        consumedCost: 2
+        budget: 18
+        wasteCost: 5
+        wastePercentage: 4
+        usefulReuse: 3
+        uniqueProducts: 2
+        packageCount: 3
+        variety: 2
+        repetition: 1
+        completeness: 1
+        preparation: 1
+      lower-waste:
+        calories: 20
+        protein: 20
+        purchaseCost: 8
+        consumedCost: 2
+        budget: 14
+        wasteCost: 12
+        wastePercentage: 12
+        usefulReuse: 4
+        uniqueProducts: 1
+        packageCount: 2
+        variety: 2
+        repetition: 1
+        completeness: 1
+        preparation: 1
+      more-reuse:
+        calories: 21
+        protein: 21
+        purchaseCost: 6
+        consumedCost: 2
+        budget: 14
+        wasteCost: 6
+        wastePercentage: 6
+        usefulReuse: 10
+        uniqueProducts: 5
+        packageCount: 3
+        variety: 2
+        repetition: 2
+        completeness: 1
+        preparation: 1
     scoring:
       beam-width: 24
       candidates-per-position: 8

@@ -11,6 +11,7 @@ const mealTypeLabels = {
 }
 
 export function MealPlanResult({ plan }: { plan: GeneratedMealPlan }) {
+  const purchase = plan.purchaseMetrics
   return (
     <div className={styles.result}>
       <section className={styles.summary} aria-label="Resumen del plan">
@@ -29,9 +30,69 @@ export function MealPlanResult({ plan }: { plan: GeneratedMealPlan }) {
       </section>
 
       <div className={styles.notice}>
-        <strong>Coste orientativo:</strong> se calcula solo la cantidad consumida de cada
-        ingrediente obligatorio, no el precio de comprar envases completos.
+        {purchase ? (
+          <>
+            <strong>Dos costes distintos:</strong> el coste consumido representa solo los
+            ingredientes utilizados; el coste real estima los envases completos que hay que comprar.
+          </>
+        ) : (
+          <>
+            <strong>Plan clásico o histórico:</strong> solo conserva el coste proporcional
+            consumido, no una estimación de envases completos.
+          </>
+        )}
       </div>
+
+      {purchase && (
+        <section className={styles.purchase} aria-label="Optimización de compra">
+          <header>
+            <div>
+              <span>Compra estimada</span>
+              <h2>{formatMoney(purchase.estimatedPurchaseCost)}</h2>
+            </div>
+            <strong data-budget={purchase.purchaseBudgetExceeded ? 'exceeded' : 'within'}>
+              {budgetLabel(purchase.purchaseBudgetDifference)}
+            </strong>
+          </header>
+          <dl>
+            <PurchaseMetric
+              label="Ingredientes utilizados"
+              value={formatMoney(purchase.estimatedConsumedCost)}
+            />
+            <PurchaseMetric
+              label="Sobrantes estimados"
+              value={formatMoney(purchase.estimatedWasteCost)}
+            />
+            <PurchaseMetric
+              label="Desperdicio"
+              value={`${formatDecimal(purchase.estimatedWastePercentage)} %`}
+            />
+            <PurchaseMetric label="Envases" value={String(purchase.estimatedPackageCount)} />
+            <PurchaseMetric
+              label="Productos únicos"
+              value={String(purchase.estimatedUniqueProductCount)}
+            />
+            <PurchaseMetric
+              label="Reutilización útil"
+              value={`${purchase.economicallyUsefulReuseCount} mejoras`}
+            />
+          </dl>
+          {!purchase.calculationComplete && (
+            <p role="status">
+              Estimación parcial: algunos productos no tienen snapshots completos de precio, envase,
+              unidad o disponibilidad.
+            </p>
+          )}
+          <div className={styles.reasons}>
+            <h3>Por qué se eligió</h3>
+            <ul>
+              {purchase.selectionReasons.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {plan.warnings.length > 0 && (
         <section className={styles.warnings} aria-label="Advertencias">
@@ -115,12 +176,14 @@ export function MealPlanResult({ plan }: { plan: GeneratedMealPlan }) {
         <div>
           <h2>Desglose de puntuación</h2>
           <dl>
-            {Object.entries(plan.scoreBreakdown).map(([key, value]) => (
-              <div key={key}>
-                <dt>{scoreLabel(key)}</dt>
-                <dd>{formatDecimal(value)}</dd>
-              </div>
-            ))}
+            {Object.entries(plan.scoreBreakdown)
+              .filter((entry): entry is [string, number] => typeof entry[1] === 'number')
+              .map(([key, value]) => (
+                <div key={key}>
+                  <dt>{scoreLabel(key)}</dt>
+                  <dd>{formatDecimal(value)}</dd>
+                </div>
+              ))}
           </dl>
         </div>
         <div>
@@ -150,6 +213,22 @@ export function MealPlanResult({ plan }: { plan: GeneratedMealPlan }) {
       </footer>
     </div>
   )
+}
+
+function PurchaseMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  )
+}
+
+function budgetLabel(difference: number | null): string {
+  if (difference === null) return 'Sin presupuesto configurado'
+  return difference >= 0
+    ? `${formatMoney(difference)} de margen`
+    : `${formatMoney(Math.abs(difference))} sobre presupuesto`
 }
 
 function Metric({
@@ -188,6 +267,14 @@ function scoreLabel(key: string): string {
       repetitionScore: 'Repetición',
       completenessScore: 'Completitud',
       preparationScore: 'Preparación',
+      purchaseCostScore: 'Coste real de compra',
+      consumedCostScore: 'Coste consumido',
+      purchaseBudgetScore: 'Presupuesto de compra',
+      wasteCostScore: 'Coste de sobrantes',
+      wastePercentageScore: 'Desperdicio porcentual',
+      usefulReuseScore: 'Reutilización útil',
+      uniqueProductsScore: 'Productos únicos',
+      packageCountScore: 'Número de envases',
       totalScore: 'Total',
     }[key] ?? key
   )

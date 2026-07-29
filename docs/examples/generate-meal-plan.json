@@ -17,6 +17,8 @@
   "maximumTemplateRepetitions": 2,
   "varietyPreference": "HIGH",
   "allowIncompleteCalculations": false,
+  "strategy": "PURCHASE_AWARE_SCORING",
+  "optimizationPreset": "BALANCED",
   "deterministicSeed": 123456,
   "persist": false
 }

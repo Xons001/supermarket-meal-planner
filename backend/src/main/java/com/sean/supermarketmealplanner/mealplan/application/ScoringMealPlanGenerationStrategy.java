@@ -15,6 +15,7 @@ import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateServ
 import com.sean.supermarketmealplanner.mealtemplate.application.NutritionBreakdown;
 import com.sean.supermarketmealplanner.mealtemplate.domain.MealType;
 import com.sean.supermarketmealplanner.mealtemplate.infrastructure.persistence.MealTemplateRepository;
+import com.sean.supermarketmealplanner.shared.application.purchase.PurchaseMetricsCalculator;
 import com.sean.supermarketmealplanner.supermarket.domain.SupermarketCode;
 import com.sean.supermarketmealplanner.supermarket.infrastructure.persistence.SupermarketRepository;
 import java.math.BigDecimal;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStrategy {
 
     static final String ALGORITHM_VERSION = "scoring-beam-v1";
+    static final String PURCHASE_AWARE_ALGORITHM_VERSION = "purchase-aware-beam-v1";
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
     private static final SecureRandom SEED_SOURCE = new SecureRandom();
     private static final long MAX_JAVASCRIPT_SAFE_INTEGER = 9_007_199_254_740_991L;
@@ -78,6 +80,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
     private final AllergenRepository allergenRepository;
     private final MealPlanScoringService scoringService;
     private final MealPlanScoringProperties properties;
+    private final PurchaseMetricsCalculator purchaseCalculator;
+    private final PurchaseAwareMealPlanScoringService purchaseScoringService;
 
     public ScoringMealPlanGenerationStrategy(
             MealTemplateService mealTemplateService,
@@ -87,7 +91,9 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
             DietaryTagRepository dietaryTagRepository,
             AllergenRepository allergenRepository,
             MealPlanScoringService scoringService,
-            MealPlanScoringProperties properties
+            MealPlanScoringProperties properties,
+            PurchaseMetricsCalculator purchaseCalculator,
+            PurchaseAwareMealPlanScoringService purchaseScoringService
     ) {
         this.mealTemplateService = mealTemplateService;
         this.mealTemplateRepository = mealTemplateRepository;
@@ -97,6 +103,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
         this.allergenRepository = allergenRepository;
         this.scoringService = scoringService;
         this.properties = properties;
+        this.purchaseCalculator = purchaseCalculator;
+        this.purchaseScoringService = purchaseScoringService;
     }
 
     @Override
@@ -107,6 +115,20 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
     @Override
     @Transactional(readOnly = true)
     public GeneratedMealPlanResult generate(GenerateMealPlanCommand originalCommand) {
+        return generateInternal(originalCommand, false);
+    }
+
+    @Transactional(readOnly = true)
+    public GeneratedMealPlanResult generatePurchaseAware(
+            GenerateMealPlanCommand originalCommand
+    ) {
+        return generateInternal(originalCommand, true);
+    }
+
+    private GeneratedMealPlanResult generateInternal(
+            GenerateMealPlanCommand originalCommand,
+            boolean purchaseAware
+    ) {
         var started = System.nanoTime();
         validateCommand(originalCommand);
         var seed = originalCommand.deterministicSeed() == null
@@ -200,7 +222,16 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
         }
 
         var evaluated = new AtomicInteger();
-        var beam = List.of(new BeamState(List.of(), BigDecimal.ZERO, seed));
+        var initialPurchaseState = purchaseAware
+                ? purchaseCalculator.empty(command.weeklyBudget())
+                : null;
+        var beam = List.of(new BeamState(
+                List.of(),
+                BigDecimal.ZERO,
+                seed,
+                initialPurchaseState,
+                0
+        ));
         for (int slotIndex = 0; slotIndex < slots.size(); slotIndex++) {
             var slot = slots.get(slotIndex);
             var slotCandidates = byType.getOrDefault(slot.mealType(), List.of());
@@ -222,10 +253,37 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                     evaluated.incrementAndGet();
                     var selections = new ArrayList<>(state.selections());
                     selections.add(new Selection(slot, candidate));
+                    PurchaseMetricsCalculator.PurchaseDelta purchaseDelta = null;
+                    if (purchaseAware) {
+                        purchaseDelta = purchaseCalculator.add(
+                                state.purchaseState(),
+                                candidate.ingredients().stream().map(this::purchaseInput).toList(),
+                                PurchaseMetricsCalculator.ConflictMode.LENIENT
+                        );
+                    }
+                    var usefulReuse = state.economicallyUsefulReuseCount()
+                            + (purchaseDelta == null
+                                    ? 0
+                                    : purchaseDelta.economicallyUsefulReuse());
+                    var penalty = partialPenalty(command, selections);
+                    if (purchaseDelta != null) {
+                        penalty = penalty.add(purchaseScoringService.partialPenalty(
+                                        command,
+                                        purchaseDelta.state().calculation(),
+                                        usefulReuse,
+                                        selections.size()
+                                ))
+                                .subtract(purchaseScoringService.marginalBonus(
+                                        command,
+                                        purchaseDelta
+                                ));
+                    }
                     expanded.add(new BeamState(
                             List.copyOf(selections),
-                            partialPenalty(command, selections),
-                            sequenceKey(seed, selections)
+                            penalty,
+                            sequenceKey(seed, selections),
+                            purchaseDelta == null ? null : purchaseDelta.state(),
+                            usefulReuse
                     ));
                 }
             }
@@ -236,11 +294,22 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                     .toList();
         }
 
-        var finalStates = beam.stream().map(state -> new FinalState(
-                state,
-                scoringService.score(command, toScoredMeals(state.selections()))
-        )).sorted(Comparator.comparing(
-                        (FinalState value) -> value.score().totalScore()
+        var finalStates = beam.stream().map(state -> {
+            var legacyScore = scoringService.score(
+                    command,
+                    toScoredMeals(state.selections())
+            );
+            var purchaseScore = purchaseAware
+                    ? purchaseScoringService.score(
+                            command,
+                            legacyScore,
+                            state.purchaseState().calculation(),
+                            state.economicallyUsefulReuseCount()
+                    )
+                    : null;
+            return new FinalState(state, legacyScore, purchaseScore);
+        }).sorted(Comparator.comparing(
+                        FinalState::totalScore
                 ).reversed().thenComparing(value -> value.state().tieKey(), Long::compareUnsigned))
                 .toList();
         if (finalStates.isEmpty()) {
@@ -268,7 +337,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 evaluated.get(),
                 finalStates.size(),
                 duration,
-                generatedAt
+                generatedAt,
+                purchaseAware
         );
     }
 
@@ -584,7 +654,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
             int candidatesEvaluated,
             int completePlansEvaluated,
             long duration,
-            OffsetDateTime generatedAt
+            OffsetDateTime generatedAt,
+            boolean purchaseAware
     ) {
         var selectionsByDay = best.state().selections().stream()
                 .collect(Collectors.groupingBy(
@@ -600,8 +671,10 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 null
         )));
         warnings.add(new GeneratedMealPlanResult.PlanWarning(
-                "CONSUMED_COST_ONLY",
-                "Budget uses proportional consumed cost, not the cost of complete packages",
+                purchaseAware ? "PURCHASE_AWARE_OPTIMIZATION" : "CONSUMED_COST_ONLY",
+                purchaseAware
+                        ? "Budget and optimization use the estimated cost of complete packages"
+                        : "Budget uses proportional consumed cost, not the cost of complete packages",
                 WarningSeverity.INFO,
                 null
         ));
@@ -716,15 +789,27 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 ? null
                 : percentage(weeklyCost.subtract(command.weeklyBudget()).abs(), command.weeklyBudget())
                 .setScale(2, RoundingMode.HALF_UP);
-        if (budgetExceeded) {
+        var purchaseCalculation = purchaseAware
+                ? best.state().purchaseState().calculation()
+                : null;
+        var effectiveBudgetExceeded = purchaseAware
+                ? purchaseCalculation.purchaseBudgetExceeded()
+                : budgetExceeded;
+        var effectiveBudgetDifference = purchaseAware
+                ? purchaseCalculation.purchaseBudgetDifference()
+                : budgetDifference;
+        if (effectiveBudgetExceeded) {
             warnings.add(new GeneratedMealPlanResult.PlanWarning(
                     "BUDGET_EXCEEDED",
-                    "Consumed cost exceeds the weekly budget by "
-                            + budgetDifference.abs().setScale(2, RoundingMode.HALF_UP),
+                    (purchaseAware ? "Purchase cost" : "Consumed cost")
+                            + " exceeds the weekly budget by "
+                            + effectiveBudgetDifference.abs().setScale(2, RoundingMode.HALF_UP),
                     WarningSeverity.WARNING,
                     null
             ));
-            constraintsNotMet.add("Weekly consumed-cost budget exceeded");
+            constraintsNotMet.add(purchaseAware
+                    ? "Weekly purchase-cost budget exceeded"
+                    : "Weekly consumed-cost budget exceeded");
         }
         if (best.score().maximumObservedRepetition()
                 > command.effectiveMaximumTemplateRepetitions()) {
@@ -744,7 +829,15 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 best.score().repetitionScore(),
                 best.score().completenessScore(),
                 best.score().preparationScore(),
-                best.score().totalScore()
+                purchaseAware ? best.purchaseScore().purchaseCostScore() : null,
+                purchaseAware ? best.purchaseScore().consumedCostScore() : null,
+                purchaseAware ? best.purchaseScore().purchaseBudgetScore() : null,
+                purchaseAware ? best.purchaseScore().wasteCostScore() : null,
+                purchaseAware ? best.purchaseScore().wastePercentageScore() : null,
+                purchaseAware ? best.purchaseScore().usefulReuseScore() : null,
+                purchaseAware ? best.purchaseScore().uniqueProductsScore() : null,
+                purchaseAware ? best.purchaseScore().packageCountScore() : null,
+                best.totalScore()
         );
         var variety = new GeneratedMealPlanResult.VarietyMetrics(
                 best.score().uniqueTemplates(),
@@ -764,35 +857,49 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 command.mealsPerDay(),
                 command.servings(),
                 command.deterministicSeed(),
-                GenerationStrategy.SCORING,
+                purchaseAware
+                        ? GenerationStrategy.PURCHASE_AWARE_SCORING
+                        : GenerationStrategy.SCORING,
                 MealPlanStatus.DRAFT,
                 criteria(command),
                 List.copyOf(days),
                 scaleNutrition(weeklyNutrition),
                 money(weeklyCost),
+                purchaseAware
+                        ? purchaseMetrics(
+                                purchaseCalculation,
+                                best.state().economicallyUsefulReuseCount(),
+                                best
+                        )
+                        : null,
                 command.weeklyBudget(),
                 budgetDifference == null ? null : money(budgetDifference),
                 budgetExceeded,
                 budgetDeviation,
-                best.score().totalScore(),
+                best.totalScore(),
                 breakdown,
                 variety,
                 best.state().selections().stream()
-                        .allMatch(selection -> selection.candidate().complete()),
+                        .allMatch(selection -> selection.candidate().complete())
+                        && (!purchaseAware || purchaseCalculation.calculationComplete()),
                 List.copyOf(warnings),
                 constraintsApplied(command),
                 List.copyOf(constraintsNotMet),
                 Map.copyOf(rejected),
                 new GeneratedMealPlanResult.GenerationMetadata(
-                        GenerationStrategy.SCORING,
+                        purchaseAware
+                                ? GenerationStrategy.PURCHASE_AWARE_SCORING
+                                : GenerationStrategy.SCORING,
                         command.deterministicSeed(),
                         duration,
                         candidatesEvaluated,
                         completePlansEvaluated,
                         generatedAt,
-                        ALGORITHM_VERSION,
+                        purchaseAware ? PURCHASE_AWARE_ALGORITHM_VERSION : ALGORITHM_VERSION,
                         properties.getBeamWidth(),
-                        properties.getCandidatesPerPosition()
+                        properties.getCandidatesPerPosition(),
+                        purchaseAware ? command.optimizationPreset() : null,
+                        purchaseAware ? best.purchaseScore().weights() : Map.of()
                 ),
                 null,
                 null
@@ -814,6 +921,49 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 command.effectiveMaximumTemplateRepetitions(),
                 command.varietyPreference(),
                 command.allowIncompleteCalculations()
+        );
+    }
+
+    private GeneratedMealPlanResult.PurchaseMetrics purchaseMetrics(
+            PurchaseMetricsCalculator.PurchaseCalculation purchase,
+            int economicallyUsefulReuse,
+            FinalState best
+    ) {
+        var reasons = new ArrayList<String>();
+        if (economicallyUsefulReuse > 0) {
+            reasons.add("Reutiliza ingredientes cuando evita envases o aprovecha sobrantes");
+        }
+        if (purchase.wastePercentage().compareTo(new BigDecimal("30")) <= 0) {
+            reasons.add("Mantiene el desperdicio estimado por debajo del 30 %");
+        }
+        if (purchase.weeklyBudget() != null && !purchase.purchaseBudgetExceeded()) {
+            reasons.add("El coste estimado de compra entra en el presupuesto");
+        }
+        if (best.score().calorieScore().compareTo(new BigDecimal("80")) >= 0
+                && best.score().proteinScore().compareTo(new BigDecimal("80")) >= 0) {
+            reasons.add("Mantiene un buen ajuste de calorías y proteína");
+        }
+        if (reasons.isEmpty()) {
+            reasons.add("Es la mejor solución viable con las restricciones solicitadas");
+        }
+        return new GeneratedMealPlanResult.PurchaseMetrics(
+                purchase.totalConsumedCost(),
+                purchase.totalPurchaseCost(),
+                purchase.totalWasteCost(),
+                purchase.wastePercentage(),
+                purchase.totalPackages(),
+                purchase.uniqueProductCount(),
+                purchase.reusedProductCount(),
+                economicallyUsefulReuse,
+                purchase.purchaseBudgetDifference(),
+                purchase.purchaseBudgetExceeded(),
+                purchase.purchaseBudgetDeviationPercentage(),
+                purchase.calculationComplete(),
+                purchase.warnings().stream()
+                        .map(PurchaseMetricsCalculator.PurchaseWarning::message)
+                        .distinct()
+                        .toList(),
+                List.copyOf(reasons)
         );
     }
 
@@ -895,6 +1045,12 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 .append('|').append(command.varietyPreference())
                 .append('|').append(command.allowIncompleteCalculations())
                 .append('|').append(command.deterministicSeed());
+        if (command.strategy() == GenerationStrategy.PURCHASE_AWARE_SCORING) {
+            canonical.append('|').append(command.strategy())
+                    .append('|').append(command.optimizationPreset())
+                    .append('|').append(PURCHASE_AWARE_ALGORITHM_VERSION)
+                    .append('|').append(purchaseScoringService.weights(command));
+        }
         candidates.stream().sorted(Comparator.comparing(Candidate::templateId)).forEach(candidate ->
                 canonical.append('|').append(candidate.templateId())
                         .append(':').append(candidate.nutrition())
@@ -950,6 +1106,27 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 selection.candidate().preparationMinutes(),
                 selection.candidate().complete()
         )).toList();
+    }
+
+    private PurchaseMetricsCalculator.IngredientInput purchaseInput(
+            GeneratedMealPlanResult.IngredientSummary ingredient
+    ) {
+        return new PurchaseMetricsCalculator.IngredientInput(
+                ingredient.productId(),
+                ingredient.productName(),
+                ingredient.brand(),
+                ingredient.categoryId(),
+                ingredient.categoryName(),
+                ingredient.quantity(),
+                ingredient.quantityUnit(),
+                ingredient.measurementType(),
+                ingredient.packageQuantity(),
+                ingredient.packageUnit(),
+                ingredient.packagePrice(),
+                ingredient.unitPrice(),
+                ingredient.available(),
+                ingredient.warnings()
+        );
     }
 
     private BigDecimal percentage(BigDecimal amount, BigDecimal base) {
@@ -1034,12 +1211,22 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
     private record Selection(Slot slot, Candidate candidate) {
     }
 
-    private record BeamState(List<Selection> selections, BigDecimal penalty, long tieKey) {
+    private record BeamState(
+            List<Selection> selections,
+            BigDecimal penalty,
+            long tieKey,
+            PurchaseMetricsCalculator.PurchaseState purchaseState,
+            int economicallyUsefulReuseCount
+    ) {
     }
 
     private record FinalState(
             BeamState state,
-            MealPlanScoringService.ScoreOutput score
+            MealPlanScoringService.ScoreOutput score,
+            PurchaseAwareMealPlanScoringService.ScoreOutput purchaseScore
     ) {
+        BigDecimal totalScore() {
+            return purchaseScore == null ? score.totalScore() : purchaseScore.totalScore();
+        }
     }
 }

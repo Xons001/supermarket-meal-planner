@@ -2,6 +2,8 @@ import type { MealType, NutritionBreakdown, PageResponse } from './api'
 
 export type MealPlanStatus = 'DRAFT' | 'GENERATED' | 'ARCHIVED'
 export type VarietyPreference = 'LOW' | 'MEDIUM' | 'HIGH'
+export type MealPlanGenerationStrategy = 'SCORING' | 'PURCHASE_AWARE_SCORING'
+export type OptimizationPreset = 'BALANCED' | 'LOWER_PURCHASE_COST' | 'LOWER_WASTE' | 'MORE_REUSE'
 
 export interface GenerateMealPlanRequest {
   supermarketCode: string
@@ -22,6 +24,8 @@ export interface GenerateMealPlanRequest {
   maximumTemplateRepetitions?: number
   varietyPreference: VarietyPreference
   allowIncompleteCalculations: boolean
+  strategy?: MealPlanGenerationStrategy
+  optimizationPreset?: OptimizationPreset
   deterministicSeed?: number
   generationToken?: string
   persist: boolean
@@ -54,7 +58,7 @@ export interface PlannedMeal {
     packageUnit?: string | null
     packagePrice?: number | null
     unitPrice?: number | null
-    available?: boolean
+    available?: boolean | null
     consumedCost?: number | null
     calculationComplete?: boolean
     warnings?: string[]
@@ -94,7 +98,7 @@ export interface GeneratedMealPlan {
   mealsPerDay: number
   servings: number
   seed: number
-  strategy: 'SCORING'
+  strategy: MealPlanGenerationStrategy
   status: MealPlanStatus
   criteria: {
     dailyCaloriesTarget: number
@@ -112,6 +116,22 @@ export interface GeneratedMealPlan {
   days: MealPlanDay[]
   weeklyNutrition: NutritionBreakdown
   totalConsumedCost: number
+  purchaseMetrics?: {
+    estimatedConsumedCost: number
+    estimatedPurchaseCost: number
+    estimatedWasteCost: number
+    estimatedWastePercentage: number
+    estimatedPackageCount: number
+    estimatedUniqueProductCount: number
+    reusedProductCount: number
+    economicallyUsefulReuseCount: number
+    purchaseBudgetDifference: number | null
+    purchaseBudgetExceeded: boolean
+    purchaseBudgetDeviationPercentage: number | null
+    calculationComplete: boolean
+    warnings: string[]
+    selectionReasons: string[]
+  } | null
   weeklyBudget: number | null
   budgetDifference: number | null
   budgetExceeded: boolean
@@ -125,6 +145,14 @@ export interface GeneratedMealPlan {
     repetitionScore: number
     completenessScore: number
     preparationScore: number
+    purchaseCostScore?: number | null
+    consumedCostScore?: number | null
+    purchaseBudgetScore?: number | null
+    wasteCostScore?: number | null
+    wastePercentageScore?: number | null
+    usefulReuseScore?: number | null
+    uniqueProductsScore?: number | null
+    packageCountScore?: number | null
     totalScore: number
   }
   varietyMetrics: {
@@ -139,7 +167,7 @@ export interface GeneratedMealPlan {
   constraintsNotMet: string[]
   rejectedCandidateStatistics: Record<string, number>
   generationMetadata: {
-    strategy: 'SCORING'
+    strategy: MealPlanGenerationStrategy
     seed: number
     durationMilliseconds: number
     candidatesEvaluated: number
@@ -148,6 +176,8 @@ export interface GeneratedMealPlan {
     algorithmVersion: string
     beamWidth: number
     candidatesPerPosition: number
+    optimizationPreset?: OptimizationPreset | null
+    scoreWeights?: Record<string, number> | null
   }
   createdAt: string | null
   updatedAt: string | null

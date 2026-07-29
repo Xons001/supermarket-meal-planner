@@ -315,6 +315,40 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
                 .isEqualByComparingTo(expected);
     }
 
+    @Test
+    void completePurchaseAwareSnapshotMatchesPersistedShoppingListExactly() throws Exception {
+        var request = baseRequest(5010L);
+        request.put("strategy", "PURCHASE_AWARE_SCORING");
+        request.put("optimizationPreset", "BALANCED");
+        var preview = generate(request);
+
+        request.put("persist", true);
+        request.put("generationToken", preview.get("generationToken").asText());
+        var planId = UUID.fromString(generate(request).get("mealPlanId").asText());
+        var shoppingList = create(planId);
+
+        assertThat(preview.at("/purchaseMetrics/calculationComplete").asBoolean()).isTrue();
+        assertThat(shoppingList.get("calculationComplete").asBoolean()).isTrue();
+        assertThat(shoppingList.get("totalConsumedCost").decimalValue())
+                .isEqualByComparingTo(
+                        preview.at("/purchaseMetrics/estimatedConsumedCost").decimalValue()
+                );
+        assertThat(shoppingList.get("totalPurchaseCost").decimalValue())
+                .isEqualByComparingTo(
+                        preview.at("/purchaseMetrics/estimatedPurchaseCost").decimalValue()
+                );
+        assertThat(shoppingList.get("totalWasteCost").decimalValue())
+                .isEqualByComparingTo(
+                        preview.at("/purchaseMetrics/estimatedWasteCost").decimalValue()
+                );
+        assertThat(shoppingList.get("overallWastePercentage").decimalValue())
+                .isEqualByComparingTo(
+                        preview.at("/purchaseMetrics/estimatedWastePercentage").decimalValue()
+                );
+        assertThat(shoppingList.get("totalPackages").asInt())
+                .isEqualTo(preview.at("/purchaseMetrics/estimatedPackageCount").asInt());
+    }
+
     private UUID savedPlan(long seed) throws Exception {
         var request = baseRequest(seed);
         var preview = generate(request);

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.sean.supermarketmealplanner.mealplan.application.GeneratedMealPlanResult;
 import com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy;
 import com.sean.supermarketmealplanner.mealplan.domain.MealPlanStatus;
+import com.sean.supermarketmealplanner.shared.application.purchase.PurchaseMetricsCalculator;
 import com.sean.supermarketmealplanner.mealtemplate.application.NutritionBreakdown;
 import com.sean.supermarketmealplanner.shoppinglist.application.ShoppingListCalculationService;
 import com.sean.supermarketmealplanner.shoppinglist.application.ShoppingListException;
@@ -19,7 +20,8 @@ import org.junit.jupiter.api.Test;
 
 class ShoppingListCalculationServiceTest {
 
-    private final ShoppingListCalculationService service = new ShoppingListCalculationService();
+    private final ShoppingListCalculationService service =
+            new ShoppingListCalculationService(new PurchaseMetricsCalculator());
 
     @Test
     void aggregatesProductsAcrossMealsAndDaysAndRoundsPackagesUp() {
@@ -184,6 +186,7 @@ class ShoppingListCalculationServiceTest {
                 List.of(days),
                 zeroNutrition(),
                 BigDecimal.ZERO,
+                null,
                 budget,
                 null,
                 false,

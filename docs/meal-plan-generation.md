@@ -129,5 +129,19 @@ formato, precio y disponibilidad para que la lista no dependa del catálogo
 actual. Los planes anteriores siguen siendo legibles y producen listas
 parciales cuando esos campos faltan.
 
-Límites actuales: no hay sustituciones, edición manual del plan, IA, OR-Tools ni
-recomendaciones médicas. La lista de compra no modifica el scoring original.
+## Estrategia purchase-aware
+
+La FASE 5 conserva esta estrategia clásica y añade otra que incorpora al beam
+coste real, envases, desperdicio y reutilización económicamente útil. La
+repetición descriptiva de un producto no se premia por sí sola.
+
+Los factores y presets están centralizados en configuración. Si no existe
+presupuesto, la referencia de 2,50 € por comida solo normaliza scores. Un
+`wasteCostDelta` negativo significa que una comida reduce el sobrante ya
+comprado y puede mejorar el candidato.
+
+Detalles completos en
+[optimización del plan por compra real](purchase-aware-meal-plan-optimization.md).
+
+Límites actuales: no hay sustituciones, edición manual del plan, IA, OR-Tools
+ni recomendaciones médicas.

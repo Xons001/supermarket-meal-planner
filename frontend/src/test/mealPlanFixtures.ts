@@ -125,6 +125,55 @@ export const generatedMealPlanFixture: GeneratedMealPlan = {
   updatedAt: null,
 }
 
+export const purchaseAwareMealPlanFixture: GeneratedMealPlan = {
+  ...generatedMealPlanFixture,
+  strategy: 'PURCHASE_AWARE_SCORING',
+  purchaseMetrics: {
+    estimatedConsumedCost: 37.53,
+    estimatedPurchaseCost: 53.35,
+    estimatedWasteCost: 15.82,
+    estimatedWastePercentage: 29.7,
+    estimatedPackageCount: 25,
+    estimatedUniqueProductCount: 13,
+    reusedProductCount: 10,
+    economicallyUsefulReuseCount: 8,
+    purchaseBudgetDifference: 16.65,
+    purchaseBudgetExceeded: false,
+    purchaseBudgetDeviationPercentage: 23.8,
+    calculationComplete: true,
+    warnings: [],
+    selectionReasons: [
+      'Reutiliza ingredientes cuando evita envases o aprovecha sobrantes',
+      'El coste estimado de compra entra en el presupuesto',
+    ],
+  },
+  scoreBreakdown: {
+    ...generatedMealPlanFixture.scoreBreakdown,
+    purchaseCostScore: 73.3,
+    consumedCostScore: 89.3,
+    purchaseBudgetScore: 100,
+    wasteCostScore: 77.4,
+    wastePercentageScore: 70.3,
+    usefulReuseScore: 80,
+    uniqueProductsScore: 48,
+    packageCountScore: 50,
+    totalScore: 78.4,
+  },
+  overallScore: 78.4,
+  generationMetadata: {
+    ...generatedMealPlanFixture.generationMetadata,
+    strategy: 'PURCHASE_AWARE_SCORING',
+    algorithmVersion: 'purchase-aware-beam-v1',
+    optimizationPreset: 'BALANCED',
+    scoreWeights: {
+      calories: 22,
+      protein: 22,
+      purchaseCost: 10,
+      budget: 15,
+    },
+  },
+}
+
 export const mealPlanSummaryFixture: MealPlanSummary = {
   id: '50000000-0000-4000-8000-000000000001',
   name: generatedMealPlanFixture.name,
