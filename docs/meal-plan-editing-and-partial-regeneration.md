@@ -72,5 +72,11 @@ Todos se presentan como `application/problem+json` con `errorCode`.
 
 ## Límites
 
-No incluye usuarios, autenticación, inventario, colaboración, OR-Tools, IA,
-integraciones externas ni Airflow funcional.
+No incluye inventario, colaboración, OR-Tools, IA, integraciones externas ni
+Airflow funcional.
+
+## Propiedad de previews y cambios
+
+Toda operación resuelve el plan por `id + ownerId`. El propietario se firma en
+el preview HMAC y se comprueba de nuevo al confirmar. Historial, bloqueo,
+regeneración y undo no permiten inferir la existencia de planes ajenos.

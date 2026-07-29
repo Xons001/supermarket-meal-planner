@@ -38,6 +38,18 @@ services:
       CATALOG_SEED_ENABLED: "true"
       MEAL_PLAN_PREVIEW_HMAC_SECRET: ${MEAL_PLAN_PREVIEW_HMAC_SECRET:?MEAL_PLAN_PREVIEW_HMAC_SECRET is required}
       MEAL_PLAN_PREVIEW_TTL: ${MEAL_PLAN_PREVIEW_TTL:-PT15M}
+      APP_AUTH_ACCESS_TOKEN_SECRET: ${APP_AUTH_ACCESS_TOKEN_SECRET:?APP_AUTH_ACCESS_TOKEN_SECRET is required}
+      APP_AUTH_REFRESH_TOKEN_SECRET: ${APP_AUTH_REFRESH_TOKEN_SECRET:?APP_AUTH_REFRESH_TOKEN_SECRET is required}
+      APP_AUTH_COOKIE_SECURE: ${APP_AUTH_COOKIE_SECURE:-false}
+      APP_AUTH_COOKIE_SAME_SITE: ${APP_AUTH_COOKIE_SAME_SITE:-Lax}
+      APP_AUTH_ALLOWED_ORIGINS: ${APP_AUTH_ALLOWED_ORIGINS:-http://localhost:5173}
+      APP_AUTH_SWAGGER_ENABLED: ${APP_AUTH_SWAGGER_ENABLED:-true}
+      APP_DEMO_ENABLED: ${APP_DEMO_ENABLED:-false}
+      APP_DEMO_EMAIL: ${APP_DEMO_EMAIL:-}
+      APP_DEMO_PASSWORD: ${APP_DEMO_PASSWORD:-}
+      APP_ADMIN_ENABLED: ${APP_ADMIN_ENABLED:-false}
+      APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL:-}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-}
     ports:
       - "${BACKEND_HOST_PORT:-8081}:8080"
     networks:
@@ -95,6 +107,9 @@ services:
     command: ["sh", "./mvnw", "verify"]
     environment:
       TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      APP_AUTH_ACCESS_TOKEN_SECRET: test-access-secret-at-least-thirty-two-bytes
+      APP_AUTH_REFRESH_TOKEN_SECRET: test-refresh-secret-at-least-thirty-two-bytes
+      MEAL_PLAN_PREVIEW_HMAC_SECRET: test-preview-secret-at-least-thirty-two-bytes
     volumes:
       - .:/workspace
       - maven_cache:/root/.m2

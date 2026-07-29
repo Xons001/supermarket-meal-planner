@@ -20,6 +20,7 @@ import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealP
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanEntity;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanRepository;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.PlannedMealEntity;
+import com.sean.supermarketmealplanner.identity.application.CurrentUserProvider;
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateIngredientRequest;
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateRequest;
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateResponse;
@@ -66,6 +67,7 @@ public class MealPlanEditingService {
     );
 
     private final MealPlanRepository planRepository;
+    private final CurrentUserProvider currentUser;
     private final MealPlanChangeRepository changeRepository;
     private final MealTemplateRepository templateRepository;
     private final MealTemplateService templateService;
@@ -84,7 +86,8 @@ public class MealPlanEditingService {
             MealPlanSnapshotService snapshotService,
             MealPlanRecalculationService recalculationService,
             EditPreviewTokenService tokenService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CurrentUserProvider currentUser
     ) {
         this.planRepository = planRepository;
         this.changeRepository = changeRepository;
@@ -95,6 +98,7 @@ public class MealPlanEditingService {
         this.recalculationService = recalculationService;
         this.tokenService = tokenService;
         this.objectMapper = objectMapper;
+        this.currentUser = currentUser;
     }
 
     @Transactional(readOnly = true)
@@ -240,6 +244,7 @@ public class MealPlanEditingService {
         try {
             var payload = tokenService.verify(previewToken);
             if (!payload.planId().equals(planId)
+                    || !Objects.equals(payload.ownerId(), currentUser.userId())
                     || !payload.targetId().equals(targetId)
                     || !payload.operation().equals(expectedOperation)) {
                 throw stale("The preview token belongs to another operation");
@@ -447,7 +452,8 @@ public class MealPlanEditingService {
         var targetId = "DAY_REGENERATED".equals(operation)
                 ? context.day().getId() : context.meal().getId();
         var signed = tokenService.issue(new EditPreviewTokenService.TokenPayload(
-                operation, context.plan().getId(), targetId, context.plan().getEditVersion(),
+                operation, context.plan().getId(), currentUser.userId(), targetId,
+                context.plan().getEditVersion(),
                 replacements.stream().map(GeneratedMealPlanResult.PlannedMealResult::templateId).toList(),
                 seed, hash(replacements), source.strategy().name(),
                 source.generationMetadata().optimizationPreset() == null
@@ -657,7 +663,8 @@ public class MealPlanEditingService {
     }
 
     private MealPlanEntity findPlan(UUID id) {
-        return planRepository.findById(id).orElseThrow(() -> new MealPlanEditingException(
+        return planRepository.findByIdAndOwnerId(id, currentUser.userId())
+                .orElseThrow(() -> new MealPlanEditingException(
                 "Meal plan not found: " + id, "MEAL_PLAN_NOT_FOUND", 404
         ));
     }

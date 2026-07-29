@@ -1,12 +1,34 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createQueryClient } from '../app/queryClient'
 import { mealTemplateFixture, partialMealTemplateFixture } from '../test/mealTemplateFixtures'
 import type { MealTemplate } from '../types/api'
 import { MealTemplateDetailPage } from './MealTemplateDetailPage'
+import { AuthProvider } from '../auth/AuthProvider'
+import type { AuthUser } from '../types/auth'
+
+const admin: AuthUser = {
+  id: '00000000-0000-4000-8000-000000000001',
+  email: 'admin@example.test',
+  displayName: 'Admin',
+  status: 'ACTIVE',
+  role: 'ADMIN',
+  createdAt: '2026-01-01T00:00:00Z',
+  preferences: {
+    dailyCaloriesTarget: 2000,
+    dailyProteinTarget: 100,
+    weeklyBudget: 70,
+    numberOfDays: 7,
+    mealsPerDay: 4,
+    strategy: 'PURCHASE_AWARE_SCORING',
+    optimizationPreset: 'BALANCED',
+    dietaryRestrictions: [],
+    allergens: [],
+  },
+}
 
 function mockApi(template: MealTemplate = mealTemplateFixture) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -30,13 +52,15 @@ function mockApi(template: MealTemplate = mealTemplateFixture) {
 function renderPage(template: MealTemplate = mealTemplateFixture) {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[`/meal-templates/${template.id}`]}>
-        <Routes>
-          <Route path="/meal-templates/:id" element={<MealTemplateDetailPage />} />
-          <Route path="/meal-templates" element={<h1>Listado abierto</h1>} />
-          <Route path="/meal-templates/:id/edit" element={<h1>Editor abierto</h1>} />
-        </Routes>
-      </MemoryRouter>
+      <AuthProvider initialUser={admin}>
+        <MemoryRouter initialEntries={[`/meal-templates/${template.id}`]}>
+          <Routes>
+            <Route path="/meal-templates/:id" element={<MealTemplateDetailPage />} />
+            <Route path="/meal-templates" element={<h1>Listado abierto</h1>} />
+            <Route path="/meal-templates/:id/edit" element={<h1>Editor abierto</h1>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>,
   )
 }

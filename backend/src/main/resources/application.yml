@@ -1,6 +1,8 @@
 spring:
   application:
     name: supermarket-meal-planner-backend
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/meal_planner}
     username: ${DB_USER:meal_planner}
@@ -21,6 +23,36 @@ spring:
       enabled: true
 
 app:
+  demo:
+    enabled: ${APP_DEMO_ENABLED:false}
+    email: ${APP_DEMO_EMAIL:}
+    password: ${APP_DEMO_PASSWORD:}
+  admin:
+    enabled: ${APP_ADMIN_ENABLED:false}
+    email: ${APP_ADMIN_EMAIL:}
+    password: ${APP_ADMIN_PASSWORD:}
+  auth:
+    access-token-secret: ${APP_AUTH_ACCESS_TOKEN_SECRET}
+    refresh-token-secret: ${APP_AUTH_REFRESH_TOKEN_SECRET}
+    issuer: ${APP_AUTH_ISSUER:supermarket-meal-planner}
+    access-ttl: ${APP_AUTH_ACCESS_TTL:PT15M}
+    refresh-ttl: ${APP_AUTH_REFRESH_TTL:P30D}
+    cookie:
+      secure: ${APP_AUTH_COOKIE_SECURE:false}
+      same-site: ${APP_AUTH_COOKIE_SAME_SITE:Lax}
+    allowed-origins: ${APP_AUTH_ALLOWED_ORIGINS:http://localhost:5173}
+    swagger-enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
+    argon2:
+      salt-length: ${APP_AUTH_ARGON2_SALT_LENGTH:16}
+      hash-length: ${APP_AUTH_ARGON2_HASH_LENGTH:32}
+      parallelism: ${APP_AUTH_ARGON2_PARALLELISM:1}
+      memory-kb: ${APP_AUTH_ARGON2_MEMORY_KB:19456}
+      iterations: ${APP_AUTH_ARGON2_ITERATIONS:2}
+    rate-limits:
+      login-per-minute: ${APP_AUTH_RATE_LOGIN_PER_MINUTE:5}
+      register-per-hour: ${APP_AUTH_RATE_REGISTER_PER_HOUR:3}
+      refresh-per-minute: ${APP_AUTH_RATE_REFRESH_PER_MINUTE:30}
+      password-change-per-hour: ${APP_AUTH_RATE_PASSWORD_PER_HOUR:5}
   catalog:
     demo-resource: classpath:data/mock/mercadona-catalog.json
     seed-enabled: ${CATALOG_SEED_ENABLED:true}
@@ -141,10 +173,13 @@ management:
     health:
       probes:
         enabled: true
-      show-details: always
+      show-details: never
 
 springdoc:
+  api-docs:
+    enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
   swagger-ui:
+    enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
     path: /swagger-ui/index.html
     operations-sorter: method
 

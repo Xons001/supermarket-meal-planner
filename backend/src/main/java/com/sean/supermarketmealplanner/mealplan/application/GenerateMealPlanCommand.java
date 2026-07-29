@@ -47,7 +47,8 @@ public record GenerateMealPlanCommand(
         ) OptimizationPreset optimizationPreset,
         Long deterministicSeed,
         @Size(max = 64) String generationToken,
-        boolean persist
+        boolean persist,
+        UUID ownerId
 ) {
     public GenerateMealPlanCommand {
         allowedMealTypes = allowedMealTypes == null || allowedMealTypes.isEmpty()
@@ -62,6 +63,24 @@ public record GenerateMealPlanCommand(
         optimizationPreset = strategy == GenerationStrategy.SCORING
                 ? null
                 : optimizationPreset == null ? OptimizationPreset.BALANCED : optimizationPreset;
+    }
+
+    public GenerateMealPlanCommand(
+            String supermarketCode, String name, LocalDate startDate, int numberOfDays,
+            int mealsPerDay, int servings, BigDecimal dailyCaloriesTarget,
+            BigDecimal dailyProteinTarget, BigDecimal weeklyBudget, Set<MealType> allowedMealTypes,
+            Set<String> requiredDietaryTags, Set<String> excludedAllergens,
+            Set<UUID> excludedTemplateIds, Set<UUID> excludedProductIds,
+            Integer maximumPreparationMinutes, Integer maximumTemplateRepetitions,
+            VarietyPreference varietyPreference, boolean allowIncompleteCalculations,
+            GenerationStrategy strategy, OptimizationPreset optimizationPreset,
+            Long deterministicSeed, String generationToken, boolean persist
+    ) {
+        this(supermarketCode,name,startDate,numberOfDays,mealsPerDay,servings,dailyCaloriesTarget,
+                dailyProteinTarget,weeklyBudget,allowedMealTypes,requiredDietaryTags,excludedAllergens,
+                excludedTemplateIds,excludedProductIds,maximumPreparationMinutes,
+                maximumTemplateRepetitions,varietyPreference,allowIncompleteCalculations,strategy,
+                optimizationPreset,deterministicSeed,generationToken,persist,null);
     }
 
     public GenerateMealPlanCommand(
@@ -110,7 +129,8 @@ public record GenerateMealPlanCommand(
                 null,
                 deterministicSeed,
                 generationToken,
-                persist
+                persist,
+                null
         );
     }
 
@@ -148,7 +168,8 @@ public record GenerateMealPlanCommand(
                 optimizationPreset,
                 seed,
                 token,
-                shouldPersist
+                shouldPersist,
+                ownerId
         );
     }
 

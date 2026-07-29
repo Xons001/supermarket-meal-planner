@@ -10,4 +10,5 @@ public interface MealPlanRepository extends
         JpaSpecificationExecutor<MealPlanEntity> {
 
     Optional<MealPlanEntity> findByIdAndArchivedFalse(UUID id);
+    Optional<MealPlanEntity> findByIdAndOwnerId(UUID id, UUID ownerId);
 }

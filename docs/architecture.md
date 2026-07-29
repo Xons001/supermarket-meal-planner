@@ -211,3 +211,22 @@ La nueva ruta actualiza solo los productos de la comida añadida, conserva
 deltas marginales y recalcula exactamente los finalistas. Véanse
 [optimización de compra](purchase-aware-meal-plan-optimization.md) y
 [ADR 0015](adr/0015-incremental-beam-without-or-tools.md).
+
+## Identidad y límite de confianza
+
+Spring Security valida CSRF/CORS y ejecuta un filtro JWT antes de los
+controladores privados. El filtro resuelve `sid`, cuenta activa y revocación en
+PostgreSQL; no confía únicamente en la firma. `CurrentUserProvider` es la única
+entrada de identidad para servicios.
+
+```mermaid
+flowchart LR
+  SPA[React + XSRF] --> SEC[SecurityFilterChain]
+  SEC --> JWT[JWT HS256]
+  JWT --> SESSION[(refresh_token_sessions)]
+  SESSION --> USER[(user_accounts)]
+  USER --> OWNER[CurrentUserProvider]
+  OWNER --> PLAN[Planes por ownerId]
+  OWNER --> LIST[Listas por ownerId]
+  OWNER --> EDIT[Edición por ownerId]
+```

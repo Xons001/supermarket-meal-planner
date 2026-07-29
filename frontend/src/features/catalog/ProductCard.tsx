@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import type { Product } from '../../types/api'
 import { formatMoney, formatPackage } from '../../utils/format'
 import styles from './ProductCard.module.css'

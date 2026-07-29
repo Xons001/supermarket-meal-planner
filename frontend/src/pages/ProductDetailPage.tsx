@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import { usePriceHistory, useProduct } from '../hooks/useCatalogQueries'
 import { formatDate, formatMoney, formatPackage } from '../utils/format'

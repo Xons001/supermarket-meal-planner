@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import {
   useArchiveMealTemplate,
@@ -14,8 +14,10 @@ import {
   quantityUnitLabels,
 } from '../utils/format'
 import styles from './MealTemplateDetailPage.module.css'
+import { useAuth } from '../auth/AuthProvider'
 
 export function MealTemplateDetailPage() {
+  const { user } = useAuth()
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const template = useMealTemplate(id)
@@ -65,14 +67,16 @@ export function MealTemplateDetailPage() {
                 </small>
               </div>
               <div className={styles.actions}>
-                <Link to={`/meal-templates/${id}/edit`}>Editar</Link>
-                <button
-                  type="button"
-                  disabled={statusMutation.isPending}
-                  onClick={() => statusMutation.mutate(!template.data.active)}
-                >
-                  {template.data.active ? 'Desactivar' : 'Activar'}
-                </button>
+                {user?.role === 'ADMIN' && <Link to={`/meal-templates/${id}/edit`}>Editar</Link>}
+                {user?.role === 'ADMIN' && (
+                  <button
+                    type="button"
+                    disabled={statusMutation.isPending}
+                    onClick={() => statusMutation.mutate(!template.data.active)}
+                  >
+                    {template.data.active ? 'Desactivar' : 'Activar'}
+                  </button>
+                )}
                 <button
                   className={styles.danger}
                   type="button"

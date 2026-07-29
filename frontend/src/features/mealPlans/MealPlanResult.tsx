@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import type { GeneratedMealPlan, MealPlanWarning } from '../../types/mealPlan'
 import { formatDecimal, formatMoney } from '../../utils/format'
 import styles from './MealPlanResult.module.css'

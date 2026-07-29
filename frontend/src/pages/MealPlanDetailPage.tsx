@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import { MealPlanResult } from '../features/mealPlans/MealPlanResult'
 import { MealPlanEditingPanel } from '../features/mealPlans/MealPlanEditingPanel'

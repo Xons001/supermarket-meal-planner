@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { BackendStatus } from '../components/BackendStatus'
+import { Link } from 'react-router'
+import { SiteHeader } from '../components/SiteHeader'
 import { ProductPreview } from '../features/catalog/ProductPreview'
 import { SupermarketSelector } from '../features/supermarkets/SupermarketSelector'
 import { useSupermarkets } from '../hooks/useCatalogQueries'
@@ -15,12 +15,12 @@ const workflowSteps = [
   {
     number: '02',
     title: 'Genera un plan comprobable',
-    description: 'Un motor determinista combinará alimentos, nutrición y paquetes completos.',
+    description: 'El motor determinista combina alimentos, nutrición y paquetes completos.',
   },
   {
     number: '03',
     title: 'Compra con menos desperdicio',
-    description: 'La lista calculará paquetes, coste estimado, cantidad utilizada y sobrantes.',
+    description: 'La lista calcula paquetes, coste estimado, cantidad utilizada y sobrantes.',
   },
 ]
 
@@ -32,23 +32,7 @@ export function HomePage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <a className={styles.brand} href="#inicio" aria-label="Supermarket Meal Planner, inicio">
-          <span className={styles.brandMark} aria-hidden="true">
-            S
-          </span>
-          <span>
-            Supermarket
-            <small>Meal Planner</small>
-          </span>
-        </a>
-        <nav className={styles.nav} aria-label="Navegación principal">
-          <a href="#supermercados">Supermercados</a>
-          <a href="#como-funcionara">Cómo funcionará</a>
-          <Link to="/products">Catálogo completo</Link>
-        </nav>
-        <BackendStatus />
-      </header>
+      <SiteHeader />
 
       <main>
         <section className={styles.hero} id="inicio">
@@ -84,7 +68,7 @@ export function HomePage() {
                 <small>Semana equilibrada</small>
                 <strong>7 días · 4 comidas</strong>
               </div>
-              <span>Próxima fase</span>
+              <span>Disponible con cuenta</span>
             </div>
             <div className={styles.macroGrid}>
               <div>
@@ -104,8 +88,8 @@ export function HomePage() {
               <span />
             </div>
             <p>
-              Este panel ilustra el producto futuro. La FASE 1 permite explorar y filtrar el
-              catálogo controlado.
+              Explora el catálogo sin registrarte. Inicia sesión para personalizar y guardar tus
+              planes.
             </p>
           </aside>
         </section>
@@ -148,11 +132,11 @@ export function HomePage() {
           aria-labelledby="workflow-heading"
         >
           <div className={styles.sectionHeading}>
-            <span>Producto previsto</span>
+            <span>Cómo funciona</span>
             <h2 id="workflow-heading">De tus objetivos a una compra útil</h2>
             <p>
-              El núcleo será determinista: cada cifra podrá rastrearse hasta un producto, una
-              cantidad y un paquete.
+              El núcleo es determinista: cada cifra puede rastrearse hasta un producto, una cantidad
+              y un paquete.
             </p>
           </div>
           <div className={styles.workflowGrid}>
@@ -176,7 +160,7 @@ export function HomePage() {
           </span>
           <div>
             <strong>Supermarket Meal Planner</strong>
-            <small>Proyecto independiente · FASE 1</small>
+            <small>Proyecto independiente · Planificación privada y catálogo público</small>
           </div>
         </div>
         <div className={styles.legal}>

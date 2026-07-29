@@ -525,7 +525,7 @@ Ejemplo parcial:
 
 ## Contratos futuros no implementados
 
-La autenticación, sincronización Airflow, OR-Tools e IA opcional permanecen
+La sincronización Airflow, nutrición externa, OR-Tools e IA opcional permanecen
 fuera del runtime actual.
 
 ## Edición parcial de planes persistidos
@@ -561,3 +561,31 @@ Problem Details usa códigos estables:
   `MEAL_PLAN_NOT_EDITABLE`, `EDIT_RULE_VIOLATION`.
 - 404: `MEAL_PLAN_NOT_FOUND`, `MEAL_PLAN_DAY_NOT_FOUND`,
   `PLANNED_MEAL_NOT_FOUND`.
+
+## Identidad y sesión
+
+```text
+GET    /api/v1/auth/csrf
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/refresh
+POST   /api/v1/auth/logout
+POST   /api/v1/auth/logout-all
+GET    /api/v1/auth/me
+PATCH  /api/v1/users/me
+POST   /api/v1/users/me/change-password
+DELETE /api/v1/users/me
+GET    /api/v1/users/me/preferences
+PUT    /api/v1/users/me/preferences
+```
+
+Los tokens nunca se devuelven en JSON. Todos los métodos mutables requieren
+`X-XSRF-TOKEN` y las respuestas sensibles usan `Cache-Control: no-store`.
+Catálogo, supermercados y lectura de plantillas son públicos; mutar plantillas
+requiere `ADMIN`. Generación, planes, listas y edición requieren sesión.
+
+Un recurso de otro propietario responde `404 RESOURCE_NOT_FOUND`. Otros códigos
+estables son `AUTHENTICATION_REQUIRED`, `INVALID_CREDENTIALS`,
+`ACCOUNT_DISABLED`, `EMAIL_ALREADY_REGISTERED`, `PASSWORD_POLICY_VIOLATION`,
+`REFRESH_TOKEN_INVALID`, `REFRESH_TOKEN_REUSED`, `SESSION_EXPIRED`,
+`CSRF_TOKEN_INVALID`, `ACCESS_DENIED` y `RATE_LIMIT_EXCEEDED`.

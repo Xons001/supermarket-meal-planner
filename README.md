@@ -4,7 +4,7 @@ Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.
 
-> **Estado:** FASE 4 — Lista de compra, paquetes y desperdicio.
+> **Estado:** FASE 7 — Usuarios, autenticación y propiedad de datos.
 
 La versión actual permite explorar 24 productos controlados, mantener plantillas
 de comidas y generar planes de 1 a 14 días con 1 a 6 comidas diarias. El motor
@@ -13,6 +13,9 @@ resultado reproducible, puntuarlo y explicar sus advertencias. Los planes se
 pueden previsualizar, guardar como snapshot, consultar y archivar. Desde un plan
 guardado se genera una lista de compra agregada que calcula envases enteros,
 coste real de compra, sobrante y diferencia frente al presupuesto semanal.
+Cada cuenta dispone de preferencias propias y solo puede consultar o modificar
+sus planes, listas e historial. La edición parcial de FASE 6 continúa disponible
+tras autenticarse.
 
 ## Avisos importantes
 
@@ -28,8 +31,9 @@ momento de la consulta.
 
 ## Tecnologías
 
-- Backend: Java 21, Spring Boot 3.5.16, Maven Wrapper, JPA, Validation,
-  PostgreSQL, Flyway, Actuator y springdoc-openapi.
+- Backend: Java 21, Spring Boot 3.5.16, Maven Wrapper, Spring Security,
+  Nimbus JWT, Argon2id, JPA, Validation, PostgreSQL, Flyway, Actuator y
+  springdoc-openapi.
 - Frontend: React 19, TypeScript, Vite 8, React Router, TanStack Query, React
   Hook Form, Zod y CSS Modules.
 - Testing: JUnit 5, Mockito, Testcontainers, Vitest y React Testing Library.
@@ -54,6 +58,7 @@ Más detalle:
 - [Plantillas de comidas y reglas de cálculo](docs/meal-templates.md)
 - [Generación semanal, scoring y determinismo](docs/meal-plan-generation.md)
 - [Listas de compra, paquetes y desperdicio](docs/shopping-lists.md)
+- [Autenticación y propiedad de datos](docs/authentication-and-data-ownership.md)
 - [Roadmap](docs/roadmap.md)
 - [Decisiones arquitectónicas](docs/adr/)
 
@@ -70,7 +75,7 @@ Este método no requiere tener Java, Maven, Node ni PostgreSQL instalados.
 ### Desarrollo sin Docker
 
 - Java 21.
-- Node.js 20.19 o superior.
+- Node.js 22.22 o superior (requisito de React Router 8.3).
 - PostgreSQL 17.
 - Maven no es necesario: se incluye Maven Wrapper.
 
@@ -98,6 +103,18 @@ docker compose up --build
 
 Docker Compose espera a que PostgreSQL esté saludable, arranca el backend,
 aplica Flyway, importa el catálogo JSON y finalmente publica el frontend.
+
+Antes de arrancar deben generarse tres secretos externos distintos. No se
+incluyen valores predeterminados en el repositorio:
+
+```bash
+openssl rand -base64 48 # APP_AUTH_ACCESS_TOKEN_SECRET
+openssl rand -base64 48 # APP_AUTH_REFRESH_TOKEN_SECRET
+openssl rand -base64 48 # MEAL_PLAN_PREVIEW_HMAC_SECRET
+```
+
+Registro y login requieren obtener primero el token CSRF mediante
+`GET /api/v1/auth/csrf`. Demo y ADMIN están deshabilitados por defecto.
 
 Para detenerlo:
 

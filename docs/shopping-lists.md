@@ -139,3 +139,9 @@ snapshots completos coinciden exactamente en coste consumido agregado, compra,
 desperdicio, porcentaje y envases. Con planes históricos o incompletos se
 comparan completitud, valores nulos y advertencias compatibles; no se exige una
 cifra que no puede calcularse.
+
+## Propiedad
+
+Crear, consultar, regenerar, exportar o archivar exige ser propietario del plan.
+Una FK compuesta valida también en SQL que lista y plan tienen el mismo
+`owner_id`. Los IDs ajenos se responden como no encontrados.

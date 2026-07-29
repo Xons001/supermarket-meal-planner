@@ -148,3 +148,9 @@ candidatos. La estrategia y sus pesos originales se conservan en cada plan y
 el reevaluador recalcula el resultado completo después de una edición.
 
 Límites actuales: no hay IA, OR-Tools ni recomendaciones médicas.
+
+## Propiedad y preferencias
+
+La generación es privada. El adaptador HTTP combina valores explícitos con las
+preferencias y construye un comando completo. `ownerId` forma parte del
+generation token, por lo que un preview no puede confirmarse desde otra cuenta.

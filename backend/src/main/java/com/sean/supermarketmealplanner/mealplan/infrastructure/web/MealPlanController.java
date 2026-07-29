@@ -7,6 +7,8 @@ import com.sean.supermarketmealplanner.mealplan.application.MealPlanService;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanStatusRequest;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanSummaryResponse;
 import com.sean.supermarketmealplanner.shared.application.PageResponse;
+import com.sean.supermarketmealplanner.identity.application.CurrentUserProvider;
+import com.sean.supermarketmealplanner.identity.infrastructure.persistence.UserPreferencesRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,13 +35,19 @@ public class MealPlanController {
 
     private final MealPlanService service;
     private final MealPlanSearchRequestParser searchParser;
+    private final CurrentUserProvider currentUser;
+    private final UserPreferencesRepository preferences;
 
     public MealPlanController(
             MealPlanService service,
-            MealPlanSearchRequestParser searchParser
+            MealPlanSearchRequestParser searchParser,
+            CurrentUserProvider currentUser,
+            UserPreferencesRepository preferences
     ) {
         this.service = service;
         this.searchParser = searchParser;
+        this.currentUser = currentUser;
+        this.preferences = preferences;
     }
 
     @PostMapping("/generate")
@@ -49,9 +57,34 @@ public class MealPlanController {
                     + "consumed-cost algorithm and ignores optimizationPreset."
     )
     public GeneratedMealPlanResult generate(
-            @Valid @RequestBody GenerateMealPlanCommand command
+            @Valid @RequestBody GenerateMealPlanRequest request
     ) {
-        return service.generate(command);
+        var userId = currentUser.userId();
+        var pref = preferences.findById(userId).orElseThrow();
+        return service.generate(new GenerateMealPlanCommand(
+                request.supermarketCode(), request.name(), request.startDate(),
+                request.numberOfDays() == null ? pref.getNumberOfDays() : request.numberOfDays(),
+                request.mealsPerDay() == null ? pref.getMealsPerDay() : request.mealsPerDay(),
+                request.servings() == null ? 1 : request.servings(),
+                request.dailyCaloriesTarget() == null ? pref.getDailyCaloriesTarget() : request.dailyCaloriesTarget(),
+                request.dailyProteinTarget() == null ? pref.getDailyProteinTarget() : request.dailyProteinTarget(),
+                request.weeklyBudget() == null ? pref.getWeeklyBudget() : request.weeklyBudget(),
+                request.allowedMealTypes(), union(pref.getDietaryRestrictions(), request.requiredDietaryTags()),
+                union(pref.getAllergens(), request.excludedAllergens()), request.excludedTemplateIds(),
+                request.excludedProductIds(), request.maximumPreparationMinutes(),
+                request.maximumTemplateRepetitions(), request.varietyPreference(),
+                Boolean.TRUE.equals(request.allowIncompleteCalculations()),
+                request.strategy() == null ? pref.getStrategy() : request.strategy(),
+                request.strategy() == com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy.SCORING
+                        ? null : request.optimizationPreset() == null ? pref.getPreset() : request.optimizationPreset(),
+                request.deterministicSeed(), request.generationToken(), Boolean.TRUE.equals(request.persist()),
+                userId
+        ));
+    }
+
+    private static java.util.Set<String> union(java.util.List<String> defaults, java.util.Set<String> explicit) {
+        if (explicit != null) return explicit;
+        return java.util.Set.copyOf(defaults);
     }
 
     @GetMapping

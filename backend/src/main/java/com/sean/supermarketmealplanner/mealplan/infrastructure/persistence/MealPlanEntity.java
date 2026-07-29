@@ -1,6 +1,7 @@
 package com.sean.supermarketmealplanner.mealplan.infrastructure.persistence;
 
 import com.sean.supermarketmealplanner.mealplan.application.GeneratedMealPlanResult;
+import com.sean.supermarketmealplanner.identity.infrastructure.persistence.UserAccountEntity;
 import com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy;
 import com.sean.supermarketmealplanner.mealplan.domain.MealPlanStatus;
 import com.sean.supermarketmealplanner.supermarket.infrastructure.persistence.SupermarketEntity;
@@ -35,6 +36,9 @@ public class MealPlanEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supermarket_id", nullable = false)
     private SupermarketEntity supermarket;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private UserAccountEntity owner;
 
     @Column(nullable = false, length = 180)
     private String name;
@@ -143,12 +147,14 @@ public class MealPlanEntity {
     public MealPlanEntity(
             GeneratedMealPlanResult result,
             SupermarketEntity supermarket,
+            UserAccountEntity owner,
             String criteriaJson,
             String resultJson,
             Map<UUID, com.sean.supermarketmealplanner.mealtemplate.infrastructure.persistence.MealTemplateEntity> templates
     ) {
         this.id = result.mealPlanId();
         this.supermarket = supermarket;
+        this.owner = owner;
         this.name = result.name();
         this.startDate = result.startDate();
         this.numberOfDays = result.numberOfDays();
@@ -260,6 +266,7 @@ public class MealPlanEntity {
 
     public UUID getId() { return id; }
     public SupermarketEntity getSupermarket() { return supermarket; }
+    public UserAccountEntity getOwner() { return owner; }
     public String getName() { return name; }
     public LocalDate getStartDate() { return startDate; }
     public int getNumberOfDays() { return numberOfDays; }

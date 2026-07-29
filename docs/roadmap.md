@@ -40,17 +40,18 @@ Sustitución y regeneración deterministas de comidas o días, bloqueos,
 previews firmados, versionado optimista, historial, undo e invalidación lógica
 de listas de compra.
 
-## FASE 7 — Airflow y sincronización
+## FASE 7 — Usuarios, autenticación y propiedad ✅
+
+Cuentas y preferencias, Argon2id, JWT corto en cookie HttpOnly, refresh opaco
+rotatorio, CSRF, CORS, límites de intentos y aislamiento completo por propietario.
+
+## FASE 8 — Airflow y sincronización
 
 DAGs idempotentes de catálogo, precios, bajas lógicas e informes.
 
-## FASE 8 — Nutrición externa
+## FASE 9 — Nutrición externa
 
 Evaluación de Open Food Facts, matching y confianza verificable.
-
-## FASE 9 — Usuarios y preferencias
-
-Autenticación, perfiles, favoritos, historial y planes guardados.
 
 ## FASE 10 — OR-Tools
 

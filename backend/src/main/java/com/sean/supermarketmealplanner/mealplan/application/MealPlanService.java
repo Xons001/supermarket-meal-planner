@@ -3,6 +3,8 @@ package com.sean.supermarketmealplanner.mealplan.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.supermarketmealplanner.mealplan.domain.MealPlanStatus;
+import com.sean.supermarketmealplanner.identity.application.CurrentUserProvider;
+import com.sean.supermarketmealplanner.identity.infrastructure.persistence.UserAccountRepository;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanEntity;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanRepository;
 import com.sean.supermarketmealplanner.mealtemplate.infrastructure.persistence.MealTemplateEntity;
@@ -30,6 +32,8 @@ public class MealPlanService {
     private final SupermarketRepository supermarketRepository;
     private final ObjectMapper objectMapper;
     private final MealPlanSnapshotService snapshotService;
+    private final CurrentUserProvider currentUser;
+    private final UserAccountRepository userRepository;
 
     public MealPlanService(
             java.util.List<MealPlanGenerationStrategy> strategies,
@@ -37,7 +41,9 @@ public class MealPlanService {
             MealTemplateRepository templateRepository,
             SupermarketRepository supermarketRepository,
             ObjectMapper objectMapper,
-            MealPlanSnapshotService snapshotService
+            MealPlanSnapshotService snapshotService,
+            CurrentUserProvider currentUser,
+            UserAccountRepository userRepository
     ) {
         this.strategies = strategies.stream().collect(Collectors.toUnmodifiableMap(
                 MealPlanGenerationStrategy::supportedStrategy,
@@ -48,6 +54,8 @@ public class MealPlanService {
         this.supermarketRepository = supermarketRepository;
         this.objectMapper = objectMapper;
         this.snapshotService = snapshotService;
+        this.currentUser = currentUser;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -89,6 +97,7 @@ public class MealPlanService {
         var entity = new MealPlanEntity(
                 persisted,
                 supermarket,
+                userRepository.getReferenceById(currentUser.userId()),
                 json(command.withSeedAndPersistence(
                         persisted.seed(),
                         persisted.generationToken(),
@@ -108,6 +117,7 @@ public class MealPlanService {
     public PageResponse<MealPlanSummaryResponse> findAll(MealPlanSearchCriteria criteria) {
         var page = repository.findAll((root, query, builder) -> {
             var predicates = new ArrayList<Predicate>();
+            predicates.add(builder.equal(root.get("owner").get("id"), currentUser.userId()));
             if (criteria.supermarketCode() != null) {
                 predicates.add(builder.equal(
                         root.get("supermarket").get("code"),
@@ -170,7 +180,8 @@ public class MealPlanService {
     }
 
     private MealPlanEntity findEntity(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new MealPlanNotFoundException(id));
+        return repository.findByIdAndOwnerId(id, currentUser.userId())
+                .orElseThrow(() -> new MealPlanNotFoundException(id));
     }
 
     private MealPlanSummaryResponse toSummary(MealPlanEntity entity) {

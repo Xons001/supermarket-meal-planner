@@ -3,6 +3,7 @@ package com.sean.supermarketmealplanner.shoppinglist.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.supermarketmealplanner.mealplan.application.GeneratedMealPlanResult;
+import com.sean.supermarketmealplanner.identity.application.CurrentUserProvider;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanEntity;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanRepository;
 import com.sean.supermarketmealplanner.shared.application.PageResponse;
@@ -23,19 +24,22 @@ public class ShoppingListService {
     private final ShoppingListCalculationService calculationService;
     private final ShoppingListMapper mapper;
     private final ObjectMapper objectMapper;
+    private final CurrentUserProvider currentUser;
 
     public ShoppingListService(
             ShoppingListRepository repository,
             MealPlanRepository mealPlanRepository,
             ShoppingListCalculationService calculationService,
             ShoppingListMapper mapper,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CurrentUserProvider currentUser
     ) {
         this.repository = repository;
         this.mealPlanRepository = mealPlanRepository;
         this.calculationService = calculationService;
         this.mapper = mapper;
         this.objectMapper = objectMapper;
+        this.currentUser = currentUser;
     }
 
     @Transactional
@@ -54,7 +58,8 @@ public class ShoppingListService {
     @Transactional(readOnly = true)
     public ShoppingListResponse findByMealPlanId(UUID mealPlanId) {
         findPlan(mealPlanId);
-        return mapper.toResponse(repository.findByMealPlanIdAndArchivedFalse(mealPlanId)
+        return mapper.toResponse(repository.findByMealPlanIdAndOwnerIdAndArchivedFalse(
+                        mealPlanId, currentUser.userId())
                 .orElseThrow(() -> error(
                         "Shopping list not found for meal plan " + mealPlanId,
                         "SHOPPING_LIST_NOT_FOUND",
@@ -65,7 +70,8 @@ public class ShoppingListService {
     @Transactional
     public ShoppingListResponse regenerate(UUID mealPlanId) {
         var plan = findPlan(mealPlanId);
-        var current = repository.findByMealPlanIdAndArchivedFalse(mealPlanId)
+        var current = repository.findByMealPlanIdAndOwnerIdAndArchivedFalse(
+                        mealPlanId, currentUser.userId())
                 .orElseThrow(() -> error(
                         "Shopping list not found for meal plan " + mealPlanId,
                         "SHOPPING_LIST_NOT_FOUND",
@@ -90,7 +96,7 @@ public class ShoppingListService {
     public PageResponse<ShoppingListSummaryResponse> findAll(
             ShoppingListSearchCriteria criteria
     ) {
-        var values = repository.findAll().stream()
+        var values = repository.findAllByOwnerId(currentUser.userId()).stream()
                 .filter(value -> matches(value, criteria))
                 .sorted(comparator(criteria))
                 .toList();
@@ -115,7 +121,7 @@ public class ShoppingListService {
             UUID mealPlanId,
             ShoppingListStatus requestedStatus
     ) {
-        var entity = repository.findAll().stream()
+        var entity = repository.findAllByOwnerId(currentUser.userId()).stream()
                 .filter(value -> value.getMealPlan().getId().equals(mealPlanId))
                 .max(Comparator.comparing(ShoppingListEntity::getGeneratedAt))
                 .orElseThrow(() -> error(
@@ -139,7 +145,8 @@ public class ShoppingListService {
 
     @Transactional
     public void archive(UUID mealPlanId) {
-        var entity = repository.findByMealPlanIdAndArchivedFalse(mealPlanId)
+        var entity = repository.findByMealPlanIdAndOwnerIdAndArchivedFalse(
+                        mealPlanId, currentUser.userId())
                 .orElseThrow(() -> error(
                         "Active shopping list not found for meal plan " + mealPlanId,
                         "SHOPPING_LIST_NOT_FOUND",
@@ -223,7 +230,7 @@ public class ShoppingListService {
     }
 
     private MealPlanEntity findPlan(UUID id) {
-        return mealPlanRepository.findById(id).orElseThrow(() -> error(
+        return mealPlanRepository.findByIdAndOwnerId(id, currentUser.userId()).orElseThrow(() -> error(
                 "Meal plan not found: " + id,
                 "MEAL_PLAN_NOT_FOUND",
                 404
@@ -231,7 +238,7 @@ public class ShoppingListService {
     }
 
     private ShoppingListEntity findEntity(UUID id) {
-        return repository.findById(id).orElseThrow(() -> error(
+        return repository.findByIdAndOwnerId(id, currentUser.userId()).orElseThrow(() -> error(
                 "Shopping list not found: " + id,
                 "SHOPPING_LIST_NOT_FOUND",
                 404

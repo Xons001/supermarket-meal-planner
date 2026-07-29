@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { SiteHeader } from '../components/SiteHeader'
 import { MealPlanResult } from '../features/mealPlans/MealPlanResult'
@@ -16,6 +16,7 @@ import { useMealTemplates } from '../hooks/useMealTemplateQueries'
 import { mealPlanFormSchema, type MealPlanFormValues } from '../schemas/mealPlanForm'
 import type { GenerateMealPlanRequest, GeneratedMealPlan } from '../types/mealPlan'
 import styles from './MealPlanFormPage.module.css'
+import { useAuth } from '../auth/AuthProvider'
 
 const mealTypes = [
   ['BREAKFAST', 'Desayuno'],
@@ -25,6 +26,7 @@ const mealTypes = [
 ] as const
 
 export function MealPlanFormPage() {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const sourcePlan = (location.state as { sourcePlan?: GeneratedMealPlan } | null)?.sourcePlan
@@ -62,23 +64,23 @@ export function MealPlanFormPage() {
           supermarketCode: 'MERCADONA',
           name: 'Mi plan semanal',
           startDate: nextMonday(),
-          numberOfDays: '7',
-          mealsPerDay: '4',
+          numberOfDays: String(user?.preferences.numberOfDays ?? 7),
+          mealsPerDay: String(user?.preferences.mealsPerDay ?? 4),
           servings: '1',
-          dailyCaloriesTarget: '2000',
-          dailyProteinTarget: '100',
-          weeklyBudget: '70',
+          dailyCaloriesTarget: String(user?.preferences.dailyCaloriesTarget ?? 2000),
+          dailyProteinTarget: String(user?.preferences.dailyProteinTarget ?? 100),
+          weeklyBudget: String(user?.preferences.weeklyBudget ?? 70),
           maximumPreparationMinutes: '40',
           maximumTemplateRepetitions: '3',
           varietyPreference: 'HIGH',
           allowedMealTypes: ['BREAKFAST', 'LUNCH', 'SNACK', 'DINNER'],
-          requiredDietaryTags: [],
-          excludedAllergens: [],
+          requiredDietaryTags: user?.preferences.dietaryRestrictions ?? [],
+          excludedAllergens: user?.preferences.allergens ?? [],
           excludedTemplateIds: [],
           excludedProductIds: [],
           allowIncompleteCalculations: false,
-          strategy: 'PURCHASE_AWARE_SCORING',
-          optimizationPreset: 'BALANCED',
+          strategy: user?.preferences.strategy ?? 'PURCHASE_AWARE_SCORING',
+          optimizationPreset: user?.preferences.optimizationPreset ?? 'BALANCED',
           deterministicSeed: '',
         },
   })

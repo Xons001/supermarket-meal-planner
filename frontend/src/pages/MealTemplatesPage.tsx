@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import { MealTemplateCard } from '../features/mealTemplates/MealTemplateCard'
 import { useAllergens, useDietaryTags, useSupermarkets } from '../hooks/useCatalogQueries'
@@ -7,11 +7,13 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useMealTemplates } from '../hooks/useMealTemplateQueries'
 import type { CatalogOption, MealTemplateFilters, MealType } from '../types/api'
 import styles from './MealTemplatesPage.module.css'
+import { useAuth } from '../auth/AuthProvider'
 
 const DEFAULT_SUPERMARKET = 'MERCADONA'
 const PAGE_SIZE = 9
 
 export function MealTemplatesPage() {
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const queryFromUrl = searchParams.get('query') ?? ''
   const [searchText, setSearchText] = useState(queryFromUrl)
@@ -95,9 +97,11 @@ export function MealTemplatesPage() {
               advertencias verificables.
             </p>
           </div>
-          <Link className={styles.createButton} to="/meal-templates/new">
-            Crear plantilla
-          </Link>
+          {user?.role === 'ADMIN' && (
+            <Link className={styles.createButton} to="/meal-templates/new">
+              Crear plantilla
+            </Link>
+          )}
         </section>
 
         <div className={styles.layout}>

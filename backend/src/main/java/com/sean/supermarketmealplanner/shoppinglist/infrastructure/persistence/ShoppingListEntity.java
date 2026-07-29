@@ -3,6 +3,7 @@ package com.sean.supermarketmealplanner.shoppinglist.infrastructure.persistence;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanEntity;
+import com.sean.supermarketmealplanner.identity.infrastructure.persistence.UserAccountEntity;
 import com.sean.supermarketmealplanner.shoppinglist.application.ShoppingListCalculation;
 import com.sean.supermarketmealplanner.shoppinglist.domain.ShoppingListStatus;
 import com.sean.supermarketmealplanner.supermarket.infrastructure.persistence.SupermarketEntity;
@@ -38,6 +39,9 @@ public class ShoppingListEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "meal_plan_id", nullable = false)
     private MealPlanEntity mealPlan;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private UserAccountEntity owner;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supermarket_id", nullable = false)
     private SupermarketEntity supermarket;
@@ -99,6 +103,7 @@ public class ShoppingListEntity {
     ) {
         this.id = UUID.randomUUID();
         this.mealPlan = mealPlan;
+        this.owner = mealPlan.getOwner();
         this.supermarket = mealPlan.getSupermarket();
         this.status = ShoppingListStatus.GENERATED;
         this.totalPackages = calculation.totalPackages();
@@ -148,6 +153,7 @@ public class ShoppingListEntity {
 
     public UUID getId() { return id; }
     public MealPlanEntity getMealPlan() { return mealPlan; }
+    public UserAccountEntity getOwner() { return owner; }
     public SupermarketEntity getSupermarket() { return supermarket; }
     public ShoppingListStatus getStatus() { return status; }
     public int getTotalPackages() { return totalPackages; }

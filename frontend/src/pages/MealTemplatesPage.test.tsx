@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createQueryClient } from '../app/queryClient'
 import {
@@ -10,6 +10,28 @@ import {
   supermarketsFixture,
 } from '../test/mealTemplateFixtures'
 import { MealTemplatesPage } from './MealTemplatesPage'
+import { AuthProvider } from '../auth/AuthProvider'
+import type { AuthUser } from '../types/auth'
+
+const admin: AuthUser = {
+  id: '00000000-0000-4000-8000-000000000001',
+  email: 'admin@example.test',
+  displayName: 'Admin',
+  status: 'ACTIVE',
+  role: 'ADMIN',
+  createdAt: '2026-01-01T00:00:00Z',
+  preferences: {
+    dailyCaloriesTarget: 2000,
+    dailyProteinTarget: 100,
+    weeklyBudget: 70,
+    numberOfDays: 7,
+    mealsPerDay: 4,
+    strategy: 'PURCHASE_AWARE_SCORING',
+    optimizationPreset: 'BALANCED',
+    dietaryRestrictions: [],
+    allergens: [],
+  },
+}
 
 const tags = [
   { id: 'tag-1', code: 'HIGH_PROTEIN', name: 'Alto en proteína' },
@@ -53,21 +75,23 @@ function LocationDisplay() {
 function renderPage(initialEntry = '/meal-templates') {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route
-            path="/meal-templates"
-            element={
-              <>
-                <MealTemplatesPage />
-                <LocationDisplay />
-              </>
-            }
-          />
-          <Route path="/meal-templates/:id" element={<h1>Detalle abierto</h1>} />
-          <Route path="/meal-templates/new" element={<h1>Formulario abierto</h1>} />
-        </Routes>
-      </MemoryRouter>
+      <AuthProvider initialUser={admin}>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <Routes>
+            <Route
+              path="/meal-templates"
+              element={
+                <>
+                  <MealTemplatesPage />
+                  <LocationDisplay />
+                </>
+              }
+            />
+            <Route path="/meal-templates/:id" element={<h1>Detalle abierto</h1>} />
+            <Route path="/meal-templates/new" element={<h1>Formulario abierto</h1>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>,
   )
 }

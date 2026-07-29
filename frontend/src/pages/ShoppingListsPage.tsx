@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import { useSupermarkets } from '../hooks/useCatalogQueries'
 import { useShoppingLists } from '../hooks/useShoppingListQueries'

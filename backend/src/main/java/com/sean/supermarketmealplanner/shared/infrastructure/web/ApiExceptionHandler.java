@@ -15,14 +15,24 @@ import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.sean.supermarketmealplanner.identity.application.IdentityException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(IdentityException.class)
+    ResponseEntity<ProblemDetail> identity(IdentityException exception) {
+        var problem = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
+        problem.setTitle(exception.getMessage());
+        problem.setProperty("code", exception.getCode());
+        return ResponseEntity.status(exception.getStatus())
+                .cacheControl(org.springframework.http.CacheControl.noStore()).body(problem);
+    }
 
     @ExceptionHandler({
             ProductNotFoundException.class,

@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef, useState } from 'react'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useProducts, useSupermarkets } from '../hooks/useCatalogQueries'

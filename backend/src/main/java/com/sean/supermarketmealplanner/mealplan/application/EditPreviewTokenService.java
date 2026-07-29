@@ -59,6 +59,7 @@ public class EditPreviewTokenService {
         var payload = new TokenPayload(
                 value.operation(),
                 value.planId(),
+                value.ownerId(),
                 value.targetId(),
                 value.editVersion(),
                 value.templateIds(),
@@ -91,7 +92,8 @@ public class EditPreviewTokenService {
         try {
             var expected = sign(parts[0]);
             var supplied = DECODER.decode(parts[1]);
-            if (!MessageDigest.isEqual(expected, supplied)) {
+            if (!ENCODER.encodeToString(supplied).equals(parts[1])
+                    || !MessageDigest.isEqual(expected, supplied)) {
                 throw new MealPlanEditingException(
                         "The edit preview token signature is invalid",
                         "EDIT_PREVIEW_TOKEN_INVALID_SIGNATURE",
@@ -131,6 +133,7 @@ public class EditPreviewTokenService {
     public record TokenPayload(
             String operation,
             UUID planId,
+            UUID ownerId,
             UUID targetId,
             long editVersion,
             List<UUID> templateIds,
@@ -143,6 +146,13 @@ public class EditPreviewTokenService {
             String algorithm,
             long expiresAtEpochSeconds
     ) {
+        public TokenPayload(String operation, UUID planId, UUID targetId, long editVersion,
+                            List<UUID> templateIds, long seed, String resultHash, String strategy,
+                            String preset, String snapshotHash, MealPlanEditingDtos.MetricsSnapshot metrics,
+                            String algorithm, long expiresAtEpochSeconds) {
+            this(operation, planId, null, targetId, editVersion, templateIds, seed, resultHash,
+                    strategy, preset, snapshotHash, metrics, algorithm, expiresAtEpochSeconds);
+        }
     }
 
     public record SignedToken(String value, Instant expiresAt) {

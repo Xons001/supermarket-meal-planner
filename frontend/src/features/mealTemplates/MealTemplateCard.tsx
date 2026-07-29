@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import type { MealTemplate } from '../../types/api'
 import { formatDecimal, formatMoney, mealTypeLabels } from '../../utils/format'
 import styles from './MealTemplateCard.module.css'

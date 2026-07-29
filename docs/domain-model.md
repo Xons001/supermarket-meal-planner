@@ -276,3 +276,13 @@ plantilla original y seed parcial.
 estructuradas, seed, estrategia, preset, motivo y relación de undo.
 `ShoppingList.sourcePlanContentVersion` permite derivar `CURRENT` u `OUTDATED`
 sin modificar la lista cuando se edita el plan.
+
+## Identidad y propiedad
+
+`UserAccount` contiene email normalizado, hash Argon2id, nombre, estado, rol y
+versión optimista. `UserPreferences` guarda objetivos, presupuesto, dimensiones
+del plan, estrategia, preset, restricciones y alérgenos.
+
+`RefreshTokenSession` guarda únicamente el HMAC del token opaco, familia,
+usuario, expiración, rotación, revocación y reemplazo. `MealPlan.owner` y
+`ShoppingList.owner` son obligatorios; una FK compuesta garantiza que coinciden.

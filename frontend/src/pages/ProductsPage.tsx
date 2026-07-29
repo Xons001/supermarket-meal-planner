@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { SiteHeader } from '../components/SiteHeader'
 import { ProductCard } from '../features/catalog/ProductCard'
 import {

@@ -1058,7 +1058,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                 .append('|').append(command.effectiveMaximumTemplateRepetitions())
                 .append('|').append(command.varietyPreference())
                 .append('|').append(command.allowIncompleteCalculations())
-                .append('|').append(command.deterministicSeed());
+                .append('|').append(command.deterministicSeed())
+                .append('|').append(command.ownerId());
         if (command.strategy() == GenerationStrategy.PURCHASE_AWARE_SCORING) {
             canonical.append('|').append(command.strategy())
                     .append('|').append(command.optimizationPreset())
