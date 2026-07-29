@@ -1,0 +1,86 @@
+.page {
+  width: min(900px, calc(100% - 2rem));
+  margin: 2rem auto 5rem;
+}
+
+.page header {
+  margin-bottom: 1.5rem;
+}
+
+.page header p,
+.page header h1 {
+  margin: 0;
+}
+
+.page header p {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.page header h1 {
+  margin-block: 0.25rem;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+}
+
+.page label {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.page select {
+  min-height: 2.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.7rem;
+  padding: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.feed,
+.loading {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1.5rem;
+}
+
+.feed {
+  padding: 0;
+  list-style: none;
+}
+
+.feed li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: var(--color-surface);
+}
+
+.feed li > div {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.feed a {
+  color: var(--color-heading);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.feed time {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 560px) {
+  .feed li,
+  .feed li > div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

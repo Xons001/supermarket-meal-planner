@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getMe } from '../api/auth'
 import { ApiError } from '../api/client'
 import type { AuthUser } from '../types/auth'
+import { applyTheme, visitorTheme } from '../app/theme'
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -42,6 +43,19 @@ export function AuthProvider({
     window.addEventListener('smp:session-expired', expired)
     return () => window.removeEventListener('smp:session-expired', expired)
   }, [setIdentity])
+  useEffect(() => {
+    applyTheme(query.data?.preferences.theme ?? visitorTheme())
+    const media =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-color-scheme: dark)')
+        : null
+    const refreshSystem = () => {
+      const selected = query.data?.preferences.theme ?? visitorTheme()
+      if (selected === 'SYSTEM') applyTheme(selected)
+    }
+    media?.addEventListener('change', refreshSystem)
+    return () => media?.removeEventListener('change', refreshSystem)
+  }, [query.data?.id, query.data?.preferences.theme])
   return (
     <AuthContext.Provider
       value={{ user: query.data ?? null, loading: query.isLoading, setIdentity }}

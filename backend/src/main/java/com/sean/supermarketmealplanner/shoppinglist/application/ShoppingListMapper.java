@@ -90,7 +90,10 @@ public class ShoppingListMapper {
                 entity.getGenerationDurationMilliseconds(),
                 entity.getSourcePlanContentVersion(),
                 entity.getMealPlan().getContentVersion(),
-                entity.isCurrentForPlan() ? "CURRENT" : "OUTDATED"
+                entity.isCurrentForPlan() ? "CURRENT" : "OUTDATED",
+                entity.isActive(),
+                entity.isArchived(),
+                entity.getArchivedAt()
         );
     }
 
@@ -117,7 +120,10 @@ public class ShoppingListMapper {
                 entity.isDemoData(),
                 entity.getSourcePlanContentVersion(),
                 entity.getMealPlan().getContentVersion(),
-                entity.isCurrentForPlan() ? "CURRENT" : "OUTDATED"
+                entity.isCurrentForPlan() ? "CURRENT" : "OUTDATED",
+                entity.isActive(),
+                entity.isArchived(),
+                entity.getArchivedAt()
         );
     }
 

@@ -156,7 +156,7 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void regeneratesTransactionallyAndArchivesPreviousList() throws Exception {
+    void regeneratesTransactionallyAndKeepsPreviousListAsInactiveHistory() throws Exception {
         var planId = savedPlan(5003L);
         var first = create(planId);
         jdbcTemplate.update(
@@ -181,15 +181,19 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
                 .andReturn().getResponse().getContentAsString());
 
         assertThat(replacement.get("id").asText()).isNotEqualTo(first.get("id").asText());
-        assertThat(repository.findById(UUID.fromString(first.get("id").asText()))
-                .orElseThrow().getStatus().name()).isEqualTo("ARCHIVED");
-        assertThat(repository.findByMealPlanIdAndArchivedFalse(planId)
+        var previous = repository.findById(UUID.fromString(first.get("id").asText())).orElseThrow();
+        assertThat(previous.getStatus().name()).isEqualTo("GENERATED");
+        assertThat(previous.isActive()).isFalse();
+        assertThat(previous.isArchived()).isFalse();
+        assertThat(repository.findByMealPlanIdAndActiveTrue(planId)
                 .orElseThrow().getId().toString()).isEqualTo(replacement.get("id").asText());
         assertThat(replacement.get("freshness").asText()).isEqualTo("CURRENT");
         mockMvc.perform(get("/api/v1/shopping-lists/{id}", first.get("id").asText()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(first.get("id").asText()))
-                .andExpect(jsonPath("$.freshness").value("OUTDATED"));
+                .andExpect(jsonPath("$.freshness").value("OUTDATED"))
+                .andExpect(jsonPath("$.active").value(false))
+                .andExpect(jsonPath("$.archived").value(false));
     }
 
     @Test
@@ -203,7 +207,7 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.errorCode").value("MEAL_PLAN_SNAPSHOT_INSUFFICIENT"));
 
-        assertThat(repository.findByMealPlanIdAndArchivedFalse(planId)
+        assertThat(repository.findByMealPlanIdAndActiveTrue(planId)
                 .orElseThrow().getId().toString()).isEqualTo(original.get("id").asText());
     }
 
@@ -292,7 +296,7 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.productId").value(productId))
                 .andExpect(jsonPath("$.unitsDetected").isArray())
                 .andExpect(jsonPath("$.expectedMeasurementType").exists());
-        assertThat(repository.findByMealPlanIdAndArchivedFalse(planId)).isEmpty();
+        assertThat(repository.findByMealPlanIdAndActiveTrue(planId)).isEmpty();
     }
 
     @Test

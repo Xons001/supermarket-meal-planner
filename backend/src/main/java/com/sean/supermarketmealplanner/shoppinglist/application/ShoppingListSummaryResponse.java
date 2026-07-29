@@ -27,6 +27,9 @@ public record ShoppingListSummaryResponse(
         boolean demoData,
         long sourcePlanContentVersion,
         long currentPlanContentVersion,
-        String freshness
+        String freshness,
+        boolean active,
+        boolean archived,
+        OffsetDateTime archivedAt
 ) {
 }

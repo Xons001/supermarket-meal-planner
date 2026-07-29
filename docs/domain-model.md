@@ -118,10 +118,11 @@ Si falta nutrición, precio, formato o una base compatible, se conserva el
 ingrediente, se devuelve un aviso y el indicador de completitud correspondiente
 queda a `false`.
 
-## Entidades previstas posteriores
+## Identidad y preferencias
 
-- `UserPreference`: gustos, exclusiones, alérgenos y restricciones; posterior a
-  usuarios.
+`UserAccount` es el propietario de planes y listas. `UserPreference` conserva
+objetivos, presupuesto, días, comidas, estrategia, preset, restricciones,
+alérgenos y tema `LIGHT|DARK|SYSTEM`.
 
 Relaciones principales:
 
@@ -167,9 +168,11 @@ Registrará `id`, supermercado, inicio, fin, estado, productos leídos, creados,
 actualizados, no disponibles, cambios de precio y mensaje de error.
 ## Plan semanal
 
-`MealPlan` pertenece a un supermercado y conserva nombre, fecha, duración,
-comidas diarias, raciones, objetivos, presupuesto, estado, estrategia, seed,
-token, totales, scores, métricas, completitud y timestamps.
+`MealPlan` pertenece a un usuario y a un supermercado. Conserva nombre, fecha,
+duración, comidas diarias, raciones, objetivos, presupuesto, estado,
+estrategia, seed, token, totales, scores, métricas, completitud y timestamps.
+`favorite` y `archivedAt` organizan el recurso sin cambiar su contenido.
+`duplicatedFromPlanId` mantiene la procedencia de una copia independiente.
 
 `MealPlanDay` identifica de forma única `(mealPlanId, dayIndex)` y
 `(mealPlanId, date)`. Guarda totales nutricionales, coste consumido,
@@ -178,6 +181,7 @@ desviaciones y score diario.
 `PlannedMeal` identifica de forma única la posición dentro del día. Referencia
 la plantilla original y conserva su nombre, tipo, raciones, ingredientes
 obligatorios, nutrición, coste, score, completitud y advertencias del momento.
+Su origen puede ser `GENERATED`, `REPLACED`, `REGENERATED` o `DUPLICATED`.
 
 `MealPlanWarning` pertenece al plan y opcionalmente a un día. Contiene código,
 mensaje, severidad y fecha.
@@ -185,7 +189,7 @@ mensaje, severidad y fecha.
 Enums:
 
 - `MealPlanStatus`: `DRAFT`, `GENERATED`, `ARCHIVED`.
-- `GenerationStrategy`: `SCORING`.
+- `GenerationStrategy`: `SCORING`, `PURCHASE_AWARE_SCORING`.
 - `WarningSeverity`: `INFO`, `WARNING`, `ERROR`.
 - `VarietyPreference`: `LOW`, `MEDIUM`, `HIGH`.
 
@@ -203,7 +207,9 @@ Enums:
 
 Se usa persistencia híbrida: columnas relacionales para integridad y filtros,
 tablas hijas para días/comidas/advertencias, y JSON de criterios y resultado
-completo. El detalle se lee del snapshot, no se recalcula desde el catálogo.
+completo. `result_json` es la fuente canónica de métricas; las columnas resumen
+son proyecciones de consulta sincronizadas por un único componente en la misma
+transacción. El detalle se lee del snapshot, no se recalcula desde el catálogo.
 La decisión se formaliza en
 [ADR 0007](adr/0007-meal-plan-snapshots.md).
 
@@ -211,14 +217,18 @@ La decisión se formaliza en
 
 ### ShoppingList
 
-`id`, `mealPlanId`, snapshots de nombre del plan y supermercado, `status`,
-`generatedAt`, `updatedAt`, conteos, costes consumido/compra/desperdicio,
+`id`, `mealPlanId`, propietario, snapshots de nombre del plan y supermercado,
+`status`, `active`, `archivedAt`, `generatedAt`, `updatedAt`, conteos, costes
+consumido/compra/desperdicio,
 porcentaje global de desperdicio, resúmenes de cantidad por magnitud,
 presupuesto semanal y desviación, indicadores de completitud, duración y
 `demoData`.
 
-Solo puede existir una lista `GENERATED` por plan. Las versiones sustituidas
-quedan `ARCHIVED`; el borrado es lógico.
+Puede haber varias listas históricas por plan, pero solo una activa mediante un
+índice único parcial. Regenerar crea una lista activa nueva y deja la anterior
+inactiva y accesible. Archivar desactiva; restaurar no activa. La activación es
+una acción explícita e independiente de `freshness`, que se deriva comparando
+`sourcePlanContentVersion` con la versión actual del plan.
 
 ### ShoppingListItem
 

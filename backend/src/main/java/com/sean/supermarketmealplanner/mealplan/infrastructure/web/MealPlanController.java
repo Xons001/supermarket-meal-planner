@@ -6,6 +6,8 @@ import com.sean.supermarketmealplanner.mealplan.application.MealPlanSearchReques
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanService;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanStatusRequest;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanSummaryResponse;
+import com.sean.supermarketmealplanner.mealplan.application.DuplicateMealPlanRequest;
+import com.sean.supermarketmealplanner.mealplan.application.FavoriteMealPlanRequest;
 import com.sean.supermarketmealplanner.shared.application.PageResponse;
 import com.sean.supermarketmealplanner.identity.application.CurrentUserProvider;
 import com.sean.supermarketmealplanner.identity.infrastructure.persistence.UserPreferencesRepository;
@@ -97,6 +99,10 @@ public class MealPlanController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateTo,
             @RequestParam(required = false) BigDecimal minimumScore,
+            @RequestParam(required = false, name = "q") String query,
+            @RequestParam(required = false) String strategy,
+            @RequestParam(required = false) Boolean favorite,
+            @RequestParam(required = false) Boolean archived,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort
@@ -107,6 +113,10 @@ public class MealPlanController {
                 startDateFrom,
                 startDateTo,
                 minimumScore,
+                query,
+                strategy,
+                favorite,
+                archived,
                 page,
                 size,
                 sort
@@ -133,5 +143,31 @@ public class MealPlanController {
     @Operation(summary = "Logically archive a saved meal plan")
     public void archive(@PathVariable UUID id) {
         service.archive(id);
+    }
+
+    @PatchMapping("/{id}/archive")
+    @Operation(summary = "Archive a plan without changing its content version")
+    public GeneratedMealPlanResult archiveExplicitly(@PathVariable UUID id) {
+        return service.changeStatus(id, com.sean.supermarketmealplanner.mealplan.domain.MealPlanStatus.ARCHIVED);
+    }
+
+    @PatchMapping("/{id}/restore")
+    @Operation(summary = "Restore an archived plan")
+    public GeneratedMealPlanResult restore(@PathVariable UUID id) {
+        return service.restore(id);
+    }
+
+    @PatchMapping("/{id}/favorite")
+    @Operation(summary = "Set or clear a plan favorite")
+    public MealPlanSummaryResponse favorite(@PathVariable UUID id,
+            @RequestBody FavoriteMealPlanRequest request) {
+        return service.favorite(id, request.favorite());
+    }
+
+    @PostMapping("/{id}/duplicate")
+    @Operation(summary = "Duplicate an exact historical plan snapshot")
+    public GeneratedMealPlanResult duplicate(@PathVariable UUID id,
+            @Valid @RequestBody DuplicateMealPlanRequest request) {
+        return service.duplicate(id, request);
     }
 }

@@ -1,5 +1,12 @@
 # Listas de compra, paquetes y desperdicio
 
+## Selección y archivo
+
+Desde FASE 8, `active` y `archived` son conceptos distintos. Archivar siempre
+desactiva. Restaurar nunca activa ni sustituye silenciosamente otra lista. La
+activación es explícita y conserva la anterior como historial accesible.
+Regenerar crea una lista nueva activa y deja la anterior inactiva, no archivada.
+
 ## Alcance
 
 La FASE 4 transforma un plan semanal persistido en una lista de compra

@@ -26,6 +26,7 @@ const user: AuthUser = {
     optimizationPreset: 'BALANCED',
     dietaryRestrictions: [],
     allergens: [],
+    theme: 'SYSTEM',
   },
 }
 
@@ -58,8 +59,7 @@ describe('SiteHeader', () => {
     renderHeader(null)
 
     expect(screen.getByRole('link', { name: 'Catálogo' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Plantillas' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Planificar' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /funciona/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Mis planes' })).not.toBeInTheDocument()
@@ -70,7 +70,8 @@ describe('SiteHeader', () => {
 
     expect(screen.getByRole('link', { name: 'Mis planes' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Mis listas' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Abrir mi perfil' })).toHaveTextContent('Sean')
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(screen.getByLabelText(/Abrir.*cuenta/)).toHaveTextContent('Sean')
     expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument()
   })
@@ -89,7 +90,7 @@ describe('SiteHeader', () => {
 
     await browserUser.click(screen.getByRole('button', { name: 'Simular acceso' }))
 
-    expect(await screen.findByRole('link', { name: 'Abrir mi perfil' })).toHaveTextContent('Sean')
+    expect(await screen.findByLabelText(/Abrir.*cuenta/)).toHaveTextContent('Sean')
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument()
   })
 })

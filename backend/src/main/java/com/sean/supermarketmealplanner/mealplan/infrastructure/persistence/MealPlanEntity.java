@@ -68,7 +68,7 @@ public class MealPlanEntity {
     private String criteriaJson;
     @Column(name = "result_json", nullable = false, columnDefinition = "TEXT")
     private String resultJson;
-    @Column(name = "generation_token", nullable = false, length = 64)
+    @Column(name = "generation_token", length = 64)
     private String generationToken;
     @Column(name = "total_calories", nullable = false, precision = 14, scale = 3)
     private BigDecimal totalCalories;
@@ -122,6 +122,23 @@ public class MealPlanEntity {
     private OffsetDateTime generatedAt;
     @Column(nullable = false)
     private boolean archived;
+    @Column(nullable = false)
+    private boolean favorite;
+    @Column(name = "archived_at")
+    private OffsetDateTime archivedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "duplicated_from_plan_id")
+    private MealPlanEntity duplicatedFromPlan;
+    @Column(name = "estimated_purchase_cost", precision = 14, scale = 2)
+    private BigDecimal estimatedPurchaseCost;
+    @Column(name = "estimated_waste_cost", precision = 14, scale = 2)
+    private BigDecimal estimatedWasteCost;
+    @Column(name = "estimated_waste_percentage", precision = 6, scale = 1)
+    private BigDecimal estimatedWastePercentage;
+    @Column(name = "estimated_package_count")
+    private Integer estimatedPackageCount;
+    @Column(name = "estimated_unique_product_count")
+    private Integer estimatedUniqueProductCount;
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
@@ -167,38 +184,19 @@ public class MealPlanEntity {
         this.generationStrategy = result.strategy();
         this.deterministicSeed = result.seed();
         this.criteriaJson = criteriaJson;
-        this.resultJson = resultJson;
         this.generationToken = result.generationToken();
-        this.totalCalories = result.weeklyNutrition().calories();
-        this.totalProtein = result.weeklyNutrition().protein();
-        this.totalCarbohydrates = result.weeklyNutrition().carbohydrates();
-        this.totalFat = result.weeklyNutrition().fat();
-        this.totalFiber = result.weeklyNutrition().fiber();
-        this.totalSugar = result.weeklyNutrition().sugar();
-        this.totalSalt = result.weeklyNutrition().salt();
-        this.totalConsumedCost = result.totalConsumedCost();
-        this.overallScore = result.overallScore();
-        this.calorieScore = result.scoreBreakdown().calorieScore();
-        this.proteinScore = result.scoreBreakdown().proteinScore();
-        this.budgetScore = result.scoreBreakdown().budgetScore();
-        this.varietyScore = result.scoreBreakdown().varietyScore();
-        this.repetitionScore = result.scoreBreakdown().repetitionScore();
-        this.completenessScore = result.scoreBreakdown().completenessScore();
-        this.preparationScore = result.scoreBreakdown().preparationScore();
-        this.uniqueTemplates = result.varietyMetrics().uniqueTemplates();
-        this.repeatedTemplates = result.varietyMetrics().repeatedTemplates();
-        this.maximumObservedRepetition = result.varietyMetrics().maximumObservedRepetition();
-        this.calculationComplete = result.calculationComplete();
         this.candidatesEvaluated = result.generationMetadata().candidatesEvaluated();
         this.completePlansEvaluated = result.generationMetadata().completePlansEvaluated();
         this.durationMilliseconds = result.generationMetadata().durationMilliseconds();
         this.algorithmVersion = result.generationMetadata().algorithmVersion();
         this.generatedAt = result.generationMetadata().generatedAt();
         this.archived = false;
+        this.favorite = false;
         this.createdAt = result.createdAt();
         this.updatedAt = result.updatedAt();
         this.editVersion = result.editVersion();
         this.contentVersion = result.contentVersion();
+        synchronizeSnapshot(result, resultJson);
         result.days().forEach(day -> this.days.add(new MealPlanDayEntity(this, day, templates)));
         var daysByIndex = this.days.stream()
                 .collect(java.util.stream.Collectors.toMap(
@@ -222,6 +220,7 @@ public class MealPlanEntity {
         }
         this.status = requestedStatus;
         this.archived = requestedStatus == MealPlanStatus.ARCHIVED;
+        this.archivedAt = this.archived ? changedAt : null;
         this.updatedAt = changedAt;
         this.resultJson = updatedResultJson;
     }
@@ -240,6 +239,11 @@ public class MealPlanEntity {
             String updatedResultJson,
             OffsetDateTime changedAt
     ) {
+        synchronizeSnapshot(result, updatedResultJson);
+        this.updatedAt = changedAt;
+    }
+
+    private void synchronizeSnapshot(GeneratedMealPlanResult result, String updatedResultJson) {
         this.resultJson = updatedResultJson;
         this.totalCalories = result.weeklyNutrition().calories();
         this.totalProtein = result.weeklyNutrition().protein();
@@ -261,7 +265,21 @@ public class MealPlanEntity {
         this.repeatedTemplates = result.varietyMetrics().repeatedTemplates();
         this.maximumObservedRepetition = result.varietyMetrics().maximumObservedRepetition();
         this.calculationComplete = result.calculationComplete();
+        var purchase = result.purchaseMetrics();
+        this.estimatedPurchaseCost = purchase == null ? null : purchase.estimatedPurchaseCost();
+        this.estimatedWasteCost = purchase == null ? null : purchase.estimatedWasteCost();
+        this.estimatedWastePercentage = purchase == null ? null : purchase.estimatedWastePercentage();
+        this.estimatedPackageCount = purchase == null ? null : purchase.estimatedPackageCount();
+        this.estimatedUniqueProductCount = purchase == null ? null : purchase.estimatedUniqueProductCount();
+    }
+
+    public void setFavorite(boolean favorite, OffsetDateTime changedAt) {
+        this.favorite = favorite;
         this.updatedAt = changedAt;
+    }
+
+    public void markDuplicatedFrom(MealPlanEntity source) {
+        this.duplicatedFromPlan = source;
     }
 
     public UUID getId() { return id; }
@@ -276,15 +294,25 @@ public class MealPlanEntity {
     public BigDecimal getDailyProteinTarget() { return dailyProteinTarget; }
     public BigDecimal getWeeklyBudget() { return weeklyBudget; }
     public MealPlanStatus getStatus() { return status; }
+    public GenerationStrategy getGenerationStrategy() { return generationStrategy; }
     public long getDeterministicSeed() { return deterministicSeed; }
     public String getCriteriaJson() { return criteriaJson; }
     public String getResultJson() { return resultJson; }
     public String getGenerationToken() { return generationToken; }
     public BigDecimal getTotalConsumedCost() { return totalConsumedCost; }
+    public BigDecimal getEstimatedPurchaseCost() { return estimatedPurchaseCost; }
+    public BigDecimal getEstimatedWasteCost() { return estimatedWasteCost; }
+    public BigDecimal getEstimatedWastePercentage() { return estimatedWastePercentage; }
+    public Integer getEstimatedPackageCount() { return estimatedPackageCount; }
+    public Integer getEstimatedUniqueProductCount() { return estimatedUniqueProductCount; }
     public BigDecimal getOverallScore() { return overallScore; }
     public boolean isCalculationComplete() { return calculationComplete; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public boolean isArchived() { return archived; }
+    public boolean isFavorite() { return favorite; }
+    public OffsetDateTime getArchivedAt() { return archivedAt; }
+    public MealPlanEntity getDuplicatedFromPlan() { return duplicatedFromPlan; }
     public List<MealPlanWarningEntity> getWarnings() { return List.copyOf(warnings); }
     public List<MealPlanDayEntity> getDays() { return List.copyOf(days); }
     public long getEditVersion() { return editVersion; }

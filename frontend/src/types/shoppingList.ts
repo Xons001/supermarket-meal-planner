@@ -89,6 +89,9 @@ export interface ShoppingList {
   sourcePlanContentVersion?: number
   currentPlanContentVersion?: number
   freshness?: ShoppingListFreshness
+  active?: boolean
+  archived?: boolean
+  archivedAt?: string | null
 }
 
 export interface ShoppingListSummary {
@@ -114,6 +117,9 @@ export interface ShoppingListSummary {
   sourcePlanContentVersion?: number
   currentPlanContentVersion?: number
   freshness?: ShoppingListFreshness
+  active?: boolean
+  archived?: boolean
+  archivedAt?: string | null
 }
 
 export type ShoppingListPage = PageResponse<ShoppingListSummary>

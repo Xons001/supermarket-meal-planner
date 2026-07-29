@@ -8,6 +8,16 @@
       content="Planifica menús semanales con productos de supermercados y datos nutricionales verificables."
     />
     <meta name="theme-color" content="#12372a" />
+    <script>
+      ;(() => {
+        const saved = localStorage.getItem('smp-visitor-theme') || 'SYSTEM'
+        const dark =
+          saved === 'DARK' ||
+          (saved === 'SYSTEM' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+      })()
+    </script>
     <title>Supermarket Meal Planner</title>
   </head>
   <body>

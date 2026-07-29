@@ -50,6 +50,13 @@ export function getShoppingList(id: string): Promise<ShoppingList> {
   return apiFetch(`/api/v1/shopping-lists/${id}`)
 }
 
+export const archiveShoppingListById = (id: string) =>
+  apiFetch<ShoppingList>(`/api/v1/shopping-lists/${id}/archive`, { method: 'PATCH' })
+export const restoreShoppingList = (id: string) =>
+  apiFetch<ShoppingList>(`/api/v1/shopping-lists/${id}/restore`, { method: 'PATCH' })
+export const activateShoppingList = (id: string) =>
+  apiFetch<ShoppingList>(`/api/v1/shopping-lists/${id}/activate`, { method: 'PATCH' })
+
 export function shoppingListCsvUrl(id: string): string {
   return `/api/v1/shopping-lists/${id}/export?format=csv`
 }

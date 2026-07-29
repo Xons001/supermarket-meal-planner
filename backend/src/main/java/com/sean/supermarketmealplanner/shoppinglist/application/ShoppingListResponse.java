@@ -35,7 +35,10 @@ public record ShoppingListResponse(
         long generationDurationMilliseconds,
         long sourcePlanContentVersion,
         long currentPlanContentVersion,
-        String freshness
+        String freshness,
+        boolean active,
+        boolean archived,
+        OffsetDateTime archivedAt
 ) {
     public record SupermarketSnapshot(
             UUID id,

@@ -3,6 +3,7 @@ package com.sean.supermarketmealplanner.shoppinglist.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.supermarketmealplanner.mealplan.application.GeneratedMealPlanResult;
+import com.sean.supermarketmealplanner.activity.application.ActivityService;
 import com.sean.supermarketmealplanner.identity.application.CurrentUserProvider;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanEntity;
 import com.sean.supermarketmealplanner.mealplan.infrastructure.persistence.MealPlanRepository;
@@ -11,8 +12,10 @@ import com.sean.supermarketmealplanner.shoppinglist.domain.ShoppingListStatus;
 import com.sean.supermarketmealplanner.shoppinglist.infrastructure.persistence.ShoppingListEntity;
 import com.sean.supermarketmealplanner.shoppinglist.infrastructure.persistence.ShoppingListRepository;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ public class ShoppingListService {
     private final ShoppingListMapper mapper;
     private final ObjectMapper objectMapper;
     private final CurrentUserProvider currentUser;
+    private final ActivityService activityService;
 
     public ShoppingListService(
             ShoppingListRepository repository,
@@ -32,7 +36,8 @@ public class ShoppingListService {
             ShoppingListCalculationService calculationService,
             ShoppingListMapper mapper,
             ObjectMapper objectMapper,
-            CurrentUserProvider currentUser
+            CurrentUserProvider currentUser,
+            ActivityService activityService
     ) {
         this.repository = repository;
         this.mealPlanRepository = mealPlanRepository;
@@ -40,12 +45,13 @@ public class ShoppingListService {
         this.mapper = mapper;
         this.objectMapper = objectMapper;
         this.currentUser = currentUser;
+        this.activityService = activityService;
     }
 
     @Transactional
     public ShoppingListResponse create(UUID mealPlanId) {
         var plan = findPlan(mealPlanId);
-        if (repository.existsByMealPlanIdAndArchivedFalse(mealPlanId)) {
+        if (repository.existsByMealPlanIdAndActiveTrue(mealPlanId)) {
             throw error(
                     "The meal plan already has an active shopping list",
                     "SHOPPING_LIST_ALREADY_EXISTS",
@@ -58,7 +64,7 @@ public class ShoppingListService {
     @Transactional(readOnly = true)
     public ShoppingListResponse findByMealPlanId(UUID mealPlanId) {
         findPlan(mealPlanId);
-        return mapper.toResponse(repository.findByMealPlanIdAndOwnerIdAndArchivedFalse(
+        return mapper.toResponse(repository.findByMealPlanIdAndOwnerIdAndActiveTrue(
                         mealPlanId, currentUser.userId())
                 .orElseThrow(() -> error(
                         "Shopping list not found for meal plan " + mealPlanId,
@@ -70,7 +76,7 @@ public class ShoppingListService {
     @Transactional
     public ShoppingListResponse regenerate(UUID mealPlanId) {
         var plan = findPlan(mealPlanId);
-        var current = repository.findByMealPlanIdAndOwnerIdAndArchivedFalse(
+        var current = repository.findByMealPlanIdAndOwnerIdAndActiveTrue(
                         mealPlanId, currentUser.userId())
                 .orElseThrow(() -> error(
                         "Shopping list not found for meal plan " + mealPlanId,
@@ -81,10 +87,14 @@ public class ShoppingListService {
         var calculation = calculationService.calculate(parseSnapshot(plan));
         var now = OffsetDateTime.now();
         var duration = (System.nanoTime() - started) / 1_000_000;
-        current.changeStatus(ShoppingListStatus.ARCHIVED, now);
+        current.deactivate(now);
         repository.saveAndFlush(current);
         var replacement = new ShoppingListEntity(plan, calculation, duration, now);
-        return mapper.toResponse(repository.saveAndFlush(replacement));
+        repository.saveAndFlush(replacement);
+        activityService.record(plan.getOwner(), "SHOPPING_LIST_REGENERATED", "Lista de compra regenerada",
+                "SHOPPING_LIST", replacement.getId(), plan.getId(),
+                java.util.Map.of("previousShoppingListId", current.getId()));
+        return mapper.toResponse(replacement);
     }
 
     @Transactional(readOnly = true)
@@ -96,23 +106,20 @@ public class ShoppingListService {
     public PageResponse<ShoppingListSummaryResponse> findAll(
             ShoppingListSearchCriteria criteria
     ) {
-        var values = repository.findAllByOwnerId(currentUser.userId()).stream()
-                .filter(value -> matches(value, criteria))
-                .sorted(comparator(criteria))
-                .toList();
-        var total = values.size();
-        var start = Math.min(criteria.page() * criteria.size(), total);
-        var end = Math.min(start + criteria.size(), total);
-        var content = values.subList(start, end).stream().map(mapper::toSummary).toList();
-        var pages = total == 0 ? 0 : (int) Math.ceil((double) total / criteria.size());
+        var property = switch (criteria.sortField()) {
+            case "totalPurchaseCost" -> "totalPurchaseCost";
+            case "totalWasteCost" -> "totalWasteCost";
+            case "overallWastePercentage" -> "overallWastePercentage";
+            default -> "generatedAt";
+        };
+        var direction = criteria.descending() ? Sort.Direction.DESC : Sort.Direction.ASC;
+        var pageable = PageRequest.of(criteria.page(), criteria.size(),
+                Sort.by(direction, property).and(Sort.by(Sort.Direction.ASC, "id")));
+        var page = repository.findAll(specification(criteria), pageable);
+        var content = page.getContent().stream().map(mapper::toSummary).toList();
         return new PageResponse<>(
-                content,
-                criteria.page(),
-                criteria.size(),
-                total,
-                pages,
-                criteria.page() == 0,
-                criteria.page() + 1 >= pages
+                content, page.getNumber(), page.getSize(), page.getTotalElements(),
+                page.getTotalPages(), page.isFirst(), page.isLast()
         );
     }
 
@@ -123,14 +130,14 @@ public class ShoppingListService {
     ) {
         var entity = repository.findAllByOwnerId(currentUser.userId()).stream()
                 .filter(value -> value.getMealPlan().getId().equals(mealPlanId))
-                .max(Comparator.comparing(ShoppingListEntity::getGeneratedAt))
+                .max(java.util.Comparator.comparing(ShoppingListEntity::getGeneratedAt))
                 .orElseThrow(() -> error(
                         "Shopping list not found for meal plan " + mealPlanId,
                         "SHOPPING_LIST_NOT_FOUND",
                         404
                 ));
         if (requestedStatus == ShoppingListStatus.GENERATED
-                && repository.findByMealPlanIdAndArchivedFalse(mealPlanId)
+                && repository.findByMealPlanIdAndActiveTrue(mealPlanId)
                         .filter(active -> !active.getId().equals(entity.getId()))
                         .isPresent()) {
             throw error(
@@ -145,7 +152,7 @@ public class ShoppingListService {
 
     @Transactional
     public void archive(UUID mealPlanId) {
-        var entity = repository.findByMealPlanIdAndOwnerIdAndArchivedFalse(
+        var entity = repository.findByMealPlanIdAndOwnerIdAndActiveTrue(
                         mealPlanId, currentUser.userId())
                 .orElseThrow(() -> error(
                         "Active shopping list not found for meal plan " + mealPlanId,
@@ -154,6 +161,53 @@ public class ShoppingListService {
                 ));
         entity.changeStatus(ShoppingListStatus.ARCHIVED, OffsetDateTime.now());
         repository.save(entity);
+    }
+
+    @Transactional
+    public ShoppingListResponse archiveById(UUID id) {
+        var entity = findEntity(id);
+        entity.changeStatus(ShoppingListStatus.ARCHIVED, OffsetDateTime.now());
+        repository.saveAndFlush(entity);
+        activityService.record(entity.getOwner(), "SHOPPING_LIST_ARCHIVED", "Lista de compra archivada",
+                "SHOPPING_LIST", entity.getId(), entity.getMealPlan().getId(), java.util.Map.of());
+        return mapper.toResponse(entity);
+    }
+
+    @Transactional
+    public ShoppingListResponse restore(UUID id) {
+        var entity = findEntity(id);
+        if (!entity.isArchived()) {
+            return mapper.toResponse(entity);
+        }
+        entity.changeStatus(ShoppingListStatus.GENERATED, OffsetDateTime.now());
+        entity.deactivate(OffsetDateTime.now());
+        repository.saveAndFlush(entity);
+        activityService.record(entity.getOwner(), "SHOPPING_LIST_RESTORED", "Lista de compra restaurada",
+                "SHOPPING_LIST", entity.getId(), entity.getMealPlan().getId(),
+                java.util.Map.of("active", false));
+        return mapper.toResponse(entity);
+    }
+
+    @Transactional
+    public ShoppingListResponse activate(UUID id) {
+        var entity = findEntity(id);
+        if (entity.isArchived()) {
+            throw error("Archived shopping lists must be restored before activation",
+                    "SHOPPING_LIST_ARCHIVED", 422);
+        }
+        var now = OffsetDateTime.now();
+        repository.findByMealPlanIdAndOwnerIdAndActiveTrue(
+                        entity.getMealPlan().getId(), currentUser.userId())
+                .filter(current -> !current.getId().equals(id))
+                .ifPresent(current -> {
+                    current.deactivate(now);
+                    repository.save(current);
+                });
+        entity.activate(now);
+        repository.saveAndFlush(entity);
+        activityService.record(entity.getOwner(), "SHOPPING_LIST_ACTIVATED", "Lista de compra activada",
+                "SHOPPING_LIST", entity.getId(), entity.getMealPlan().getId(), java.util.Map.of());
+        return mapper.toResponse(entity);
     }
 
     @Transactional(readOnly = true)
@@ -166,9 +220,10 @@ public class ShoppingListService {
         var calculation = calculationService.calculate(parseSnapshot(plan));
         var now = OffsetDateTime.now();
         var duration = (System.nanoTime() - started) / 1_000_000;
-        return mapper.toResponse(repository.saveAndFlush(
-                new ShoppingListEntity(plan, calculation, duration, now)
-        ));
+        var entity = repository.saveAndFlush(new ShoppingListEntity(plan, calculation, duration, now));
+        activityService.record(plan.getOwner(), "SHOPPING_LIST_CREATED", "Lista de compra creada",
+                "SHOPPING_LIST", entity.getId(), plan.getId(), java.util.Map.of());
+        return mapper.toResponse(entity);
     }
 
     private GeneratedMealPlanResult parseSnapshot(MealPlanEntity plan) {
@@ -183,50 +238,28 @@ public class ShoppingListService {
         }
     }
 
-    private boolean matches(
-            ShoppingListEntity value,
-            ShoppingListSearchCriteria criteria
-    ) {
-        if (criteria.supermarketCode() != null
-                && value.getSupermarket().getCode() != criteria.supermarketCode()) {
-            return false;
-        }
-        if (criteria.status() != null && value.getStatus() != criteria.status()) {
-            return false;
-        }
-        if (criteria.generatedFrom() != null
-                && value.getGeneratedAt().isBefore(criteria.generatedFrom())) {
-            return false;
-        }
-        if (criteria.generatedTo() != null
-                && value.getGeneratedAt().isAfter(criteria.generatedTo())) {
-            return false;
-        }
-        if (criteria.calculationComplete() != null
-                && value.isCalculationComplete() != criteria.calculationComplete()) {
-            return false;
-        }
-        return criteria.budgetExceeded() == null
-                || value.isPurchaseBudgetExceeded() == criteria.budgetExceeded();
-    }
-
-    private Comparator<ShoppingListEntity> comparator(ShoppingListSearchCriteria criteria) {
-        Comparator<ShoppingListEntity> result = switch (criteria.sortField()) {
-            case "totalPurchaseCost" -> Comparator.comparing(
-                    ShoppingListEntity::getTotalPurchaseCost
-            );
-            case "totalWasteCost" -> Comparator.comparing(
-                    ShoppingListEntity::getTotalWasteCost
-            );
-            case "overallWastePercentage" -> Comparator.comparing(
-                    ShoppingListEntity::getOverallWastePercentage
-            );
-            default -> Comparator.comparing(ShoppingListEntity::getGeneratedAt);
+    private Specification<ShoppingListEntity> specification(ShoppingListSearchCriteria criteria) {
+        return (root, query, cb) -> {
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+            predicates.add(cb.equal(root.get("owner").get("id"), currentUser.userId()));
+            if (criteria.supermarketCode() != null) {
+                predicates.add(cb.equal(root.get("supermarket").get("code"), criteria.supermarketCode()));
+            }
+            if (criteria.status() != null) predicates.add(cb.equal(root.get("status"), criteria.status()));
+            if (criteria.generatedFrom() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("generatedAt"), criteria.generatedFrom()));
+            }
+            if (criteria.generatedTo() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("generatedAt"), criteria.generatedTo()));
+            }
+            if (criteria.calculationComplete() != null) {
+                predicates.add(cb.equal(root.get("calculationComplete"), criteria.calculationComplete()));
+            }
+            if (criteria.budgetExceeded() != null) {
+                predicates.add(cb.equal(root.get("purchaseBudgetExceeded"), criteria.budgetExceeded()));
+            }
+            return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
         };
-        if (criteria.descending()) {
-            result = result.reversed();
-        }
-        return result.thenComparing(ShoppingListEntity::getId);
     }
 
     private MealPlanEntity findPlan(UUID id) {

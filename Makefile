@@ -1,4 +1,4 @@
-.PHONY: dev backend frontend test build down clean
+.PHONY: dev backend frontend test e2e build down clean
 
 dev:
 	docker compose up --build
@@ -12,6 +12,9 @@ frontend:
 test:
 	docker compose --profile tools run --rm --build backend-test
 	docker compose --profile tools run --rm --build frontend-test
+
+e2e:
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-e2e.ps1
 
 build:
 	docker compose build

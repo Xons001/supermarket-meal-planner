@@ -24,6 +24,26 @@ public record MealPlanSummaryResponse(
         int warningCount,
         long seed,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        String strategy,
+        boolean favorite,
+        boolean archived,
+        OffsetDateTime archivedAt,
+        BigDecimal estimatedPurchaseCost,
+        BigDecimal estimatedWasteCost,
+        BigDecimal estimatedWastePercentage,
+        Integer estimatedPackageCount,
+        Integer estimatedUniqueProductCount,
+        UUID duplicatedFromPlanId
 ) {
+    public MealPlanSummaryResponse(UUID id, String name, String supermarketCode, String supermarketName,
+            LocalDate startDate, int numberOfDays, int mealsPerDay, int servings,
+            BigDecimal dailyCaloriesTarget, BigDecimal dailyProteinTarget, BigDecimal totalConsumedCost,
+            BigDecimal weeklyBudget, BigDecimal overallScore, String status, boolean calculationComplete,
+            int warningCount, long seed, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+        this(id, name, supermarketCode, supermarketName, startDate, numberOfDays, mealsPerDay, servings,
+                dailyCaloriesTarget, dailyProteinTarget, totalConsumedCost, weeklyBudget, overallScore,
+                status, calculationComplete, warningCount, seed, createdAt, updatedAt, null, false, false,
+                null, null, null, null, null, null, null);
+    }
 }

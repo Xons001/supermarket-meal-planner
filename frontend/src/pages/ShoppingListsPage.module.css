@@ -147,6 +147,19 @@
   background: var(--color-primary);
   color: white;
 }
+.links {
+  flex-wrap: wrap;
+}
+.links button {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 0.55rem;
+  padding: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.66rem;
+  cursor: pointer;
+}
 .state {
   display: grid;
   min-height: 17rem;

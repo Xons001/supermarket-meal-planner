@@ -9,6 +9,7 @@ import type {
   EditPreview,
   MealAlternative,
   MealPlanChangePage,
+  MealPlanSummary,
 } from '../types/mealPlan'
 
 export function generateMealPlan(request: GenerateMealPlanRequest): Promise<GeneratedMealPlan> {
@@ -43,6 +44,21 @@ export function changeMealPlanStatus(
 export function archiveMealPlan(id: string): Promise<void> {
   return apiFetch(`/api/v1/meal-plans/${id}`, { method: 'DELETE' })
 }
+
+export const restoreMealPlan = (id: string) =>
+  apiFetch<GeneratedMealPlan>(`/api/v1/meal-plans/${id}/restore`, { method: 'PATCH' })
+
+export const setMealPlanFavorite = (id: string, favorite: boolean) =>
+  apiFetch<MealPlanSummary>(`/api/v1/meal-plans/${id}/favorite`, {
+    method: 'PATCH',
+    body: JSON.stringify({ favorite }),
+  })
+
+export const duplicateMealPlan = (id: string, name: string, startDate: string) =>
+  apiFetch<GeneratedMealPlan>(`/api/v1/meal-plans/${id}/duplicate`, {
+    method: 'POST',
+    body: JSON.stringify({ name, startDate }),
+  })
 
 export function getMealAlternatives(
   planId: string,

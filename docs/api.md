@@ -589,3 +589,16 @@ estables son `AUTHENTICATION_REQUIRED`, `INVALID_CREDENTIALS`,
 `ACCOUNT_DISABLED`, `EMAIL_ALREADY_REGISTERED`, `PASSWORD_POLICY_VIOLATION`,
 `REFRESH_TOKEN_INVALID`, `REFRESH_TOKEN_REUSED`, `SESSION_EXPIRED`,
 `CSRF_TOKEN_INVALID`, `ACCESS_DENIED` y `RATE_LIMIT_EXCEEDED`.
+
+## Dashboard, actividad y organización
+
+- `GET /api/v1/dashboard`: métricas persistidas, último plan activo, lista
+  seleccionada por prioridad `CURRENT/OUTDATED` y actividad reciente.
+- `GET /api/v1/activity?type=&page=0&size=20`: feed combinado y paginado.
+- `PATCH /api/v1/meal-plans/{id}/archive|restore|favorite`.
+- `POST /api/v1/meal-plans/{id}/duplicate`: requiere nombre y fecha inicial.
+- `PATCH /api/v1/shopping-lists/{id}/archive|restore|activate`.
+
+Restaurar una lista nunca la activa. La activación es explícita y desactiva la
+lista anterior sin archivarla. La duplicación no hereda tokens, listas, historial
+ni actividad.

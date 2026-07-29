@@ -1,6 +1,7 @@
 package com.sean.supermarketmealplanner.mealplan.application;
 
 import com.sean.supermarketmealplanner.mealplan.domain.MealPlanStatus;
+import com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy;
 import com.sean.supermarketmealplanner.supermarket.domain.SupermarketCode;
 import com.sean.supermarketmealplanner.supermarket.infrastructure.persistence.SupermarketRepository;
 import java.math.BigDecimal;
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
 public class MealPlanSearchRequestParser {
 
     private static final Set<String> SORT_FIELDS = Set.of(
-            "name", "startDate", "overallScore", "createdAt", "totalConsumedCost"
+            "name", "startDate", "overallScore", "createdAt", "totalConsumedCost",
+            "estimatedPurchaseCost", "estimatedWasteCost"
     );
     private final SupermarketRepository supermarketRepository;
 
@@ -29,6 +31,24 @@ public class MealPlanSearchRequestParser {
             LocalDate startDateFrom,
             LocalDate startDateTo,
             BigDecimal minimumScore,
+            int page,
+            int size,
+            String sort
+    ) {
+        return parse(supermarketCode, status, startDateFrom, startDateTo, minimumScore,
+                null, null, null, null, page, size, sort);
+    }
+
+    public MealPlanSearchCriteria parse(
+            String supermarketCode,
+            String status,
+            LocalDate startDateFrom,
+            LocalDate startDateTo,
+            BigDecimal minimumScore,
+            String query,
+            String strategy,
+            Boolean favorite,
+            Boolean archived,
             int page,
             int size,
             String sort
@@ -63,12 +83,25 @@ public class MealPlanSearchRequestParser {
                 startDateFrom,
                 startDateTo,
                 minimumScore,
+                query == null || query.isBlank() ? null : query.trim(),
+                parseStrategy(strategy),
+                favorite,
+                archived,
                 PageRequest.of(
                         page,
                         size,
                         Sort.by(direction, sortParts[0]).and(Sort.by("id"))
                 )
         );
+    }
+
+    private GenerationStrategy parseStrategy(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        try {
+            return GenerationStrategy.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            throw new MealPlanValidationException("Invalid generation strategy: " + raw);
+        }
     }
 
     private SupermarketCode parseSupermarket(String raw) {

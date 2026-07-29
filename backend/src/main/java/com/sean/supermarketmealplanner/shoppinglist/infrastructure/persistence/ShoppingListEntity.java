@@ -76,6 +76,10 @@ public class ShoppingListEntity {
     private boolean demoData;
     @Column(nullable = false)
     private boolean archived;
+    @Column(nullable = false)
+    private boolean active;
+    @Column(name = "archived_at")
+    private OffsetDateTime archivedAt;
     @Column(name = "generated_at", nullable = false)
     private OffsetDateTime generatedAt;
     @Column(name = "created_at", nullable = false)
@@ -120,6 +124,7 @@ public class ShoppingListEntity {
         this.generationDurationMilliseconds = durationMilliseconds;
         this.demoData = true;
         this.archived = false;
+        this.active = true;
         this.generatedAt = now;
         this.createdAt = now;
         this.updatedAt = now;
@@ -140,6 +145,25 @@ public class ShoppingListEntity {
     public void changeStatus(ShoppingListStatus requested, OffsetDateTime now) {
         this.status = requested;
         this.archived = requested == ShoppingListStatus.ARCHIVED;
+        if (this.archived) {
+            this.active = false;
+            this.archivedAt = now;
+        } else {
+            this.archivedAt = null;
+        }
+        this.updatedAt = now;
+    }
+
+    public void activate(OffsetDateTime now) {
+        if (archived) {
+            throw new IllegalStateException("An archived shopping list cannot be activated");
+        }
+        this.active = true;
+        this.updatedAt = now;
+    }
+
+    public void deactivate(OffsetDateTime now) {
+        this.active = false;
         this.updatedAt = now;
     }
 
@@ -170,6 +194,8 @@ public class ShoppingListEntity {
     public long getGenerationDurationMilliseconds() { return generationDurationMilliseconds; }
     public boolean isDemoData() { return demoData; }
     public boolean isArchived() { return archived; }
+    public boolean isActive() { return active; }
+    public OffsetDateTime getArchivedAt() { return archivedAt; }
     public OffsetDateTime getGeneratedAt() { return generatedAt; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

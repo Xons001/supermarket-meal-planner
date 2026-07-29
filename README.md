@@ -36,7 +36,8 @@ momento de la consulta.
   springdoc-openapi.
 - Frontend: React 19, TypeScript, Vite 8, React Router, TanStack Query, React
   Hook Form, Zod y CSS Modules.
-- Testing: JUnit 5, Mockito, Testcontainers, Vitest y React Testing Library.
+- Testing: JUnit 5, Mockito, Testcontainers, Vitest, React Testing Library y
+  Playwright.
 - Infraestructura: Docker, Docker Compose, Nginx y Makefile.
 - ETL futuro: Python y Apache Airflow; todavía no forman parte del runtime.
 
@@ -345,21 +346,19 @@ npm run build
   cuando cambia el contenido y determina si la lista activa queda desactualizada.
 - El filtrado de plantillas se calcula en memoria tras cargar el pequeño conjunto
   de demostración; se migrará a consulta SQL cuando el volumen lo justifique.
-- No hay autenticación, IA, scraping, Open Food Facts, Redis, Airflow funcional
-  ni Kubernetes.
+- No hay IA, scraping, Open Food Facts, Redis, Airflow funcional ni Kubernetes.
+- El dashboard, la actividad y los listados usan proyecciones persistidas; no
+  recalculan los planes.
+- Los tres usuarios manuales y el plan privado de validación se conservan
+  temporalmente y los E2E usan una base independiente y desechable.
 - Los puertos estándar 8080 y 5432 no se usan por defecto para evitar colisiones
   con otros proyectos locales.
-- `npm audit` informa de dos entradas altas que corresponden al mismo advisory
-  transitivo de React Router en modo RSC/Actions. Esta aplicación es una SPA
-  cliente y no usa RSC, acciones de servidor ni SSR. La corrección automática
-  propuesta fuerza un cambio incompatible y una bajada de versión, por lo que
-  no se ha aplicado sin una validación específica del router.
+- `npm audit` no informa vulnerabilidades con el lockfile actual.
 
 ## Roadmap
 
-La FASE 6 incorpora edición parcial transaccional y mantiene ambas estrategias
-de generación. La siguiente fase es la sincronización Airflow y no forma parte
-del runtime actual.
+La FASE 8 incorpora dashboard, actividad, organización, temas y duplicación
+histórica. La siguiente fase es Airflow y no forma parte del runtime actual.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.
 

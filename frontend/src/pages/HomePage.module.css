@@ -421,6 +421,89 @@ main > :global(section):last-child {
   border-top: 1px solid var(--color-border);
 }
 
+.story,
+.benefits,
+.technical {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 5rem auto;
+}
+
+.story {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  border-block: 1px solid var(--color-border);
+  padding-block: 3rem;
+}
+
+.story span,
+.technical span {
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.story h2,
+.technical h2 {
+  margin: 0.5rem 0;
+  color: var(--color-heading);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.story p,
+.technical p {
+  color: var(--color-text-soft);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.technical {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.technical > div {
+  border-radius: var(--radius-md);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: var(--color-surface);
+}
+
+.technical .cta {
+  display: grid;
+  align-content: center;
+  background: var(--color-heading);
+  color: var(--color-background);
+}
+
+.cta h2 {
+  color: white;
+}
+
+.cta > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.cta a {
+  border: 1px solid white;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: white;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .story,
+  .technical {
+    grid-template-columns: 1fr;
+  }
+}
+
 .footerBrand {
   display: flex;
   align-items: center;

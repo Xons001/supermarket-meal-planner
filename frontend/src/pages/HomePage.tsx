@@ -107,6 +107,17 @@ export function HomePage() {
           </div>
         </section>
 
+        <section className={styles.story} aria-labelledby="problem-heading">
+          <div>
+            <span>El problema</span>
+            <h2 id="problem-heading">Un menú no termina cuando eliges las recetas</h2>
+          </div>
+          <p>
+            Comprar paquetes completos cambia el coste y deja sobrantes. Aquí nutrición, presupuesto
+            y aprovechamiento se evalúan juntos y con datos rastreables.
+          </p>
+        </section>
+
         <section className={styles.selectorSection} id="supermercados">
           {supermarkets.isPending ? (
             <div className={styles.loading} aria-live="polite">
@@ -151,6 +162,45 @@ export function HomePage() {
         </section>
 
         <ProductPreview supermarketCode={activeSupermarketCode} />
+
+        <section className={styles.benefits} aria-labelledby="benefits-heading">
+          <div className={styles.sectionHeading}>
+            <span>Beneficios</span>
+            <h2 id="benefits-heading">Decisiones claras, sin cifras decorativas</h2>
+          </div>
+          <div className={styles.workflowGrid}>
+            <article>
+              <h3>Compra real</h3>
+              <p>Compara coste consumido, paquetes necesarios y coste de sobrantes.</p>
+            </article>
+            <article>
+              <h3>Edición controlada</h3>
+              <p>Previsualiza sustituciones antes de cambiar un plan guardado.</p>
+            </article>
+            <article>
+              <h3>Datos privados</h3>
+              <p>Tus planes y listas pertenecen a tu cuenta; el catálogo sigue siendo público.</p>
+            </article>
+          </div>
+        </section>
+
+        <section className={styles.technical}>
+          <div>
+            <span>Enfoque técnico</span>
+            <h2>Cálculos deterministas y snapshots históricos</h2>
+            <p>
+              Las copias conservan cantidades y precios originales. Cada plan puede explicarse sin
+              consultar de nuevo el catálogo ni depender de una respuesta opaca.
+            </p>
+          </div>
+          <div className={styles.cta}>
+            <h2>Empieza con el catálogo o crea tu espacio privado</h2>
+            <div>
+              <Link to="/register">Crear cuenta</Link>
+              <Link to="/products">Ver catálogo</Link>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className={styles.footer}>

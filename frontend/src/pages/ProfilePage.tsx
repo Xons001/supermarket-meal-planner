@@ -78,6 +78,7 @@ export function ProfilePage() {
                     : (String(data.get('preset')) as OptimizationPreset),
                 dietaryRestrictions: split(String(data.get('dietary'))),
                 allergens: split(String(data.get('allergens'))),
+                theme: String(data.get('theme')) as import('../types/auth').ThemePreference,
               })
               setIdentity({ ...user, preferences: next })
               setMessage('Preferencias guardadas')
@@ -151,6 +152,14 @@ export function ProfilePage() {
                 <option value="LOWER_PURCHASE_COST">Menor compra</option>
                 <option value="LOWER_WASTE">Menos desperdicio</option>
                 <option value="MORE_REUSE">Más aprovechamiento</option>
+              </select>
+            </label>
+            <label>
+              Tema
+              <select name="theme" defaultValue={user.preferences.theme ?? 'SYSTEM'}>
+                <option value="SYSTEM">Usar el sistema</option>
+                <option value="LIGHT">Claro</option>
+                <option value="DARK">Oscuro</option>
               </select>
             </label>
           </div>

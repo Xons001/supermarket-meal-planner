@@ -5,7 +5,7 @@ export type VarietyPreference = 'LOW' | 'MEDIUM' | 'HIGH'
 export type MealPlanGenerationStrategy = 'SCORING' | 'PURCHASE_AWARE_SCORING'
 export type OptimizationPreset = 'BALANCED' | 'LOWER_PURCHASE_COST' | 'LOWER_WASTE' | 'MORE_REUSE'
 export type MealSelectionSource =
-  'GENERATED' | 'MANUALLY_REPLACED' | 'PARTIALLY_REGENERATED' | 'DAY_REGENERATED'
+  'GENERATED' | 'MANUALLY_REPLACED' | 'PARTIALLY_REGENERATED' | 'DAY_REGENERATED' | 'DUPLICATED'
 export type ShoppingListFreshness = 'CURRENT' | 'OUTDATED' | 'NONE'
 export type AlternativePriority =
   'BEST_BALANCE' | 'LOWER_PURCHASE_COST' | 'LOWER_WASTE' | 'MORE_VARIETY'
@@ -312,6 +312,16 @@ export interface MealPlanSummary {
   seed: number
   createdAt: string
   updatedAt: string
+  strategy?: MealPlanGenerationStrategy
+  favorite?: boolean
+  archived?: boolean
+  archivedAt?: string | null
+  estimatedPurchaseCost?: number | null
+  estimatedWasteCost?: number | null
+  estimatedWastePercentage?: number | null
+  estimatedPackageCount?: number | null
+  estimatedUniqueProductCount?: number | null
+  duplicatedFromPlanId?: string | null
 }
 
 export interface MealPlanFilters {
@@ -320,6 +330,10 @@ export interface MealPlanFilters {
   startDateFrom?: string
   startDateTo?: string
   minimumScore?: string
+  q?: string
+  strategy?: MealPlanGenerationStrategy
+  favorite?: string
+  archived?: string
   page: number
   size: number
   sort: string

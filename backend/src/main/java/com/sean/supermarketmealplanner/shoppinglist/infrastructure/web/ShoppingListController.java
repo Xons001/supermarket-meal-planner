@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 @RequestMapping("/api/v1/shopping-lists")
@@ -72,6 +73,24 @@ public class ShoppingListController {
     @Operation(summary = "Get a shopping list snapshot")
     public ShoppingListResponse findById(@PathVariable UUID id) {
         return service.findById(id);
+    }
+
+    @PatchMapping("/{id}/archive")
+    @Operation(summary = "Archive a shopping list and make it inactive")
+    public ShoppingListResponse archive(@PathVariable UUID id) {
+        return service.archiveById(id);
+    }
+
+    @PatchMapping("/{id}/restore")
+    @Operation(summary = "Restore a shopping list without activating it")
+    public ShoppingListResponse restore(@PathVariable UUID id) {
+        return service.restore(id);
+    }
+
+    @PatchMapping("/{id}/activate")
+    @Operation(summary = "Select a restored shopping list explicitly")
+    public ShoppingListResponse activate(@PathVariable UUID id) {
+        return service.activate(id);
     }
 
     @GetMapping(value = "/{id}/export", produces = "text/csv")

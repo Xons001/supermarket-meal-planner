@@ -1,25 +1,78 @@
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
+import {
+  duplicateMealPlan,
+  restoreMealPlan,
+  setMealPlanFavorite,
+  changeMealPlanStatus,
+} from '../api/mealPlans'
+import { queryKeys } from '../app/queryKeys'
 import { SiteHeader } from '../components/SiteHeader'
+import { Button, Modal, useToast } from '../components/ui'
 import { useSupermarkets } from '../hooks/useCatalogQueries'
 import { useMealPlans } from '../hooks/useMealPlanQueries'
-import type { MealPlanFilters, MealPlanStatus } from '../types/mealPlan'
+import type {
+  MealPlanFilters,
+  MealPlanGenerationStrategy,
+  MealPlanStatus,
+  MealPlanSummary,
+} from '../types/mealPlan'
 import { formatDate, formatDecimal, formatMoney } from '../utils/format'
 import styles from './MealPlansPage.module.css'
 
 export function MealPlansPage() {
   const [params, setParams] = useSearchParams()
+  const [duplicating, setDuplicating] = useState<MealPlanSummary | null>(null)
+  const queryClient = useQueryClient()
+  const notify = useToast()
   const filters: MealPlanFilters = {
     supermarketCode: params.get('supermarketCode') || undefined,
     status: (params.get('status') || undefined) as MealPlanStatus | undefined,
     startDateFrom: params.get('startDateFrom') || undefined,
     startDateTo: params.get('startDateTo') || undefined,
     minimumScore: params.get('minimumScore') || undefined,
+    q: params.get('q') || undefined,
+    strategy: (params.get('strategy') || undefined) as MealPlanGenerationStrategy | undefined,
+    favorite: params.get('favorite') || undefined,
+    archived: params.get('archived') || undefined,
     page: validPage(params.get('page')),
     size: 9,
     sort: params.get('sort') ?? 'createdAt,desc',
   }
   const plans = useMealPlans(filters)
   const supermarkets = useSupermarkets()
+  const organize = useMutation({
+    mutationFn: async (action: {
+      plan: MealPlanSummary
+      type: 'favorite' | 'archive' | 'restore'
+    }) => {
+      if (action.type === 'favorite') {
+        return setMealPlanFavorite(action.plan.id, !action.plan.favorite)
+      }
+      return action.type === 'archive'
+        ? changeMealPlanStatus(action.plan.id, 'ARCHIVED')
+        : restoreMealPlan(action.plan.id)
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['meal-plans'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard })
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
+      notify('Plan actualizado')
+    },
+    onError: () => notify('No se pudo actualizar el plan', 'error'),
+  })
+  const duplicate = useMutation({
+    mutationFn: (value: { id: string; name: string; startDate: string }) =>
+      duplicateMealPlan(value.id, value.name, value.startDate),
+    onSuccess: () => {
+      setDuplicating(null)
+      void queryClient.invalidateQueries({ queryKey: ['meal-plans'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard })
+      notify('Plan duplicado con sus snapshots históricos')
+    },
+    onError: () => notify('No se pudo duplicar el plan', 'error'),
+  })
 
   function update(key: string, value: string) {
     setParams((current) => {
@@ -48,6 +101,37 @@ export function MealPlansPage() {
         </header>
 
         <section className={styles.filters} aria-label="Filtros de planes">
+          <label>
+            Buscar
+            <input
+              type="search"
+              placeholder="Nombre o UUID"
+              value={filters.q ?? ''}
+              onChange={(e) => update('q', e.target.value)}
+            />
+          </label>
+          <label>
+            Estrategia
+            <select
+              value={filters.strategy ?? ''}
+              onChange={(e) => update('strategy', e.target.value)}
+            >
+              <option value="">Todas</option>
+              <option value="PURCHASE_AWARE_SCORING">Compra eficiente</option>
+              <option value="SCORING">Clásica</option>
+            </select>
+          </label>
+          <label>
+            Favoritos
+            <select
+              value={filters.favorite ?? ''}
+              onChange={(e) => update('favorite', e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="true">Solo favoritos</option>
+              <option value="false">No favoritos</option>
+            </select>
+          </label>
           <label>
             Supermercado
             <select
@@ -104,6 +188,8 @@ export function MealPlansPage() {
               <option value="startDate,asc">Fecha de inicio</option>
               <option value="overallScore,desc">Mejor score</option>
               <option value="totalConsumedCost,asc">Menor coste</option>
+              <option value="estimatedPurchaseCost,asc">Menor compra real</option>
+              <option value="estimatedWasteCost,asc">Menor desperdicio</option>
               <option value="name,asc">Nombre A–Z</option>
             </select>
           </label>
@@ -137,8 +223,12 @@ export function MealPlansPage() {
                       <dd>{formatMoney(plan.totalConsumedCost)}</dd>
                     </div>
                     <div>
-                      <dt>Objetivo</dt>
-                      <dd>{formatDecimal(plan.dailyCaloriesTarget)} kcal</dd>
+                      <dt>Compra real</dt>
+                      <dd>
+                        {plan.estimatedPurchaseCost == null
+                          ? 'Parcial'
+                          : formatMoney(plan.estimatedPurchaseCost)}
+                      </dd>
                     </div>
                     <div>
                       <dt>Advertencias</dt>
@@ -152,6 +242,25 @@ export function MealPlansPage() {
                   <Link className={styles.open} to={`/meal-plans/${plan.id}`}>
                     Abrir detalle
                   </Link>
+                  <div className={styles.links}>
+                    <button
+                      onClick={() => organize.mutate({ plan, type: 'favorite' })}
+                      aria-label={plan.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+                    >
+                      {plan.favorite ? '★ Favorito' : '☆ Favorito'}
+                    </button>
+                    <button onClick={() => setDuplicating(plan)}>Duplicar</button>
+                    <button
+                      onClick={() =>
+                        organize.mutate({
+                          plan,
+                          type: plan.status === 'ARCHIVED' ? 'restore' : 'archive',
+                        })
+                      }
+                    >
+                      {plan.status === 'ARCHIVED' ? 'Restaurar' : 'Archivar'}
+                    </button>
+                  </div>
                 </article>
               ))}
             </section>
@@ -175,6 +284,38 @@ export function MealPlansPage() {
           </>
         )}
       </main>
+      <Modal open={duplicating !== null} title="Duplicar plan" onClose={() => setDuplicating(null)}>
+        {duplicating && (
+          <form
+            className={styles.duplicateForm}
+            onSubmit={(event) => {
+              event.preventDefault()
+              const data = new FormData(event.currentTarget)
+              duplicate.mutate({
+                id: duplicating.id,
+                name: String(data.get('name')),
+                startDate: String(data.get('startDate')),
+              })
+            }}
+          >
+            <p>Se conservarán exactamente cantidades, precios, disponibilidad y semillas.</p>
+            <label>
+              Nombre
+              <input
+                name="name"
+                required
+                maxLength={180}
+                defaultValue={`${duplicating.name} (copia)`}
+              />
+            </label>
+            <label>
+              Nueva fecha inicial
+              <input name="startDate" type="date" required defaultValue={duplicating.startDate} />
+            </label>
+            <Button disabled={duplicate.isPending}>Confirmar duplicación</Button>
+          </form>
+        )}
+      </Modal>
     </div>
   )
 }

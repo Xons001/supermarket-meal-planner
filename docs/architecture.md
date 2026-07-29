@@ -230,3 +230,12 @@ flowchart LR
   OWNER --> LIST[Listas por ownerId]
   OWNER --> EDIT[Edición por ownerId]
 ```
+
+## Proyecciones de experiencia
+
+El dashboard y los listados consultan columnas resumen sincronizadas con
+`result_json` en la misma transacción. El feed une `user_activity_events` y
+`meal_plan_changes`; esta última conserva la responsabilidad exclusiva sobre
+las ediciones de FASE 6.
+
+Consulta [dashboard-and-organization.md](dashboard-and-organization.md).

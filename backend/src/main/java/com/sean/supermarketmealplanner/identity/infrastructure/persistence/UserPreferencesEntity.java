@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import com.sean.supermarketmealplanner.identity.domain.ThemePreference;
 
 @Entity
 @Table(name = "user_preferences")
@@ -51,6 +52,9 @@ public class UserPreferencesEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     private List<String> allergens;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private ThemePreference theme;
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
@@ -69,6 +73,7 @@ public class UserPreferencesEntity {
         this.preset = OptimizationPreset.BALANCED;
         this.dietaryRestrictions = new ArrayList<>();
         this.allergens = new ArrayList<>();
+        this.theme = ThemePreference.SYSTEM;
         this.createdAt = now;
         this.updatedAt = now;
     }
@@ -76,6 +81,12 @@ public class UserPreferencesEntity {
     public void update(BigDecimal calories, BigDecimal protein, BigDecimal budget, int days, int meals,
                        GenerationStrategy strategy, OptimizationPreset preset, List<String> dietary,
                        List<String> allergens, OffsetDateTime now) {
+        update(calories, protein, budget, days, meals, strategy, preset, dietary, allergens, this.theme, now);
+    }
+
+    public void update(BigDecimal calories, BigDecimal protein, BigDecimal budget, int days, int meals,
+                       GenerationStrategy strategy, OptimizationPreset preset, List<String> dietary,
+                       List<String> allergens, ThemePreference theme, OffsetDateTime now) {
         this.dailyCaloriesTarget = calories;
         this.dailyProteinTarget = protein;
         this.weeklyBudget = budget;
@@ -85,6 +96,7 @@ public class UserPreferencesEntity {
         this.preset = strategy == GenerationStrategy.SCORING ? null : preset;
         this.dietaryRestrictions = List.copyOf(dietary);
         this.allergens = List.copyOf(allergens);
+        this.theme = theme == null ? ThemePreference.SYSTEM : theme;
         this.updatedAt = now;
     }
 
@@ -98,4 +110,5 @@ public class UserPreferencesEntity {
     public OptimizationPreset getPreset() { return preset; }
     public List<String> getDietaryRestrictions() { return List.copyOf(dietaryRestrictions); }
     public List<String> getAllergens() { return List.copyOf(allergens); }
+    public ThemePreference getTheme() { return theme; }
 }

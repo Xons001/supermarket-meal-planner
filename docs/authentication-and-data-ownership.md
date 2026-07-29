@@ -52,6 +52,12 @@ días, comidas, estrategia, preset, restricciones y alérgenos. La precedencia e
 
 Un plan usado como origen en la SPA prevalece sobre las preferencias.
 
+La preferencia de tema autenticada también prevalece sobre el tema local del
+visitante. Al cerrar sesión o cambiar de identidad se retira inmediatamente el
+tema del usuario anterior y se recupera la preferencia local del visitante o
+`SYSTEM`. Un script previo al montaje de React aplica esta base para evitar
+parpadeos.
+
 ## CSRF, CORS y cookies
 
 Todos los métodos mutables, incluidos registro, login, refresh y logout,

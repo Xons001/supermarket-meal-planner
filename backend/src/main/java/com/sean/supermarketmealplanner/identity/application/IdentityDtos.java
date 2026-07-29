@@ -2,6 +2,7 @@ package com.sean.supermarketmealplanner.identity.application;
 
 import com.sean.supermarketmealplanner.mealplan.domain.GenerationStrategy;
 import com.sean.supermarketmealplanner.mealplan.domain.OptimizationPreset;
+import com.sean.supermarketmealplanner.identity.domain.ThemePreference;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -32,16 +33,32 @@ public final class IdentityDtos {
             @NotNull GenerationStrategy strategy,
             OptimizationPreset optimizationPreset,
             List<@NotBlank String> dietaryRestrictions,
-            List<@NotBlank String> allergens
+            List<@NotBlank String> allergens,
+            ThemePreference theme
     ) {
         public PreferencesRequest {
             dietaryRestrictions = dietaryRestrictions == null ? List.of() : List.copyOf(dietaryRestrictions);
             allergens = allergens == null ? List.of() : List.copyOf(allergens);
+            theme = theme == null ? ThemePreference.SYSTEM : theme;
+        }
+        public PreferencesRequest(BigDecimal dailyCaloriesTarget, BigDecimal dailyProteinTarget,
+                BigDecimal weeklyBudget, int numberOfDays, int mealsPerDay, GenerationStrategy strategy,
+                OptimizationPreset optimizationPreset, List<String> dietaryRestrictions, List<String> allergens) {
+            this(dailyCaloriesTarget, dailyProteinTarget, weeklyBudget, numberOfDays, mealsPerDay, strategy,
+                    optimizationPreset, dietaryRestrictions, allergens, ThemePreference.SYSTEM);
         }
     }
     public record PreferencesResponse(BigDecimal dailyCaloriesTarget, BigDecimal dailyProteinTarget,
             BigDecimal weeklyBudget, int numberOfDays, int mealsPerDay, GenerationStrategy strategy,
-            OptimizationPreset optimizationPreset, List<String> dietaryRestrictions, List<String> allergens) {}
+            OptimizationPreset optimizationPreset, List<String> dietaryRestrictions, List<String> allergens,
+            ThemePreference theme) {
+        public PreferencesResponse(BigDecimal dailyCaloriesTarget, BigDecimal dailyProteinTarget,
+                BigDecimal weeklyBudget, int numberOfDays, int mealsPerDay, GenerationStrategy strategy,
+                OptimizationPreset optimizationPreset, List<String> dietaryRestrictions, List<String> allergens) {
+            this(dailyCaloriesTarget, dailyProteinTarget, weeklyBudget, numberOfDays, mealsPerDay, strategy,
+                    optimizationPreset, dietaryRestrictions, allergens, ThemePreference.SYSTEM);
+        }
+    }
     public record UserResponse(UUID id, String email, String displayName, String status, String role,
                                OffsetDateTime createdAt, PreferencesResponse preferences) {}
 }

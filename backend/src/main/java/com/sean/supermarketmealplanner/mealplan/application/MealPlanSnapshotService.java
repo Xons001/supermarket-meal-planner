@@ -89,7 +89,7 @@ public class MealPlanSnapshotService {
                     day.proteinDeviation(), day.dailyScore(), day.warnings(), persistedDay.getId()
             ));
         }
-        var activeList = shoppingListRepository.findByMealPlanIdAndArchivedFalse(entity.getId());
+        var activeList = shoppingListRepository.findByMealPlanIdAndActiveTrue(entity.getId());
         var freshness = activeList
                 .map(value -> value.isCurrentForPlan()
                         ? ShoppingListFreshness.CURRENT : ShoppingListFreshness.OUTDATED)

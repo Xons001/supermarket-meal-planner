@@ -69,7 +69,7 @@ public class IdentityService {
         var user=active(id); var p=preference(id); p.update(request.dailyCaloriesTarget(),
                 request.dailyProteinTarget(),request.weeklyBudget(),request.numberOfDays(),request.mealsPerDay(),
                 request.strategy(),request.optimizationPreset(),request.dietaryRestrictions(),request.allergens(),
-                OffsetDateTime.now(clock)); return toResponse(user,preferences.save(p));
+                request.theme(),OffsetDateTime.now(clock)); return toResponse(user,preferences.save(p));
     }
     @Transactional
     public void changePassword(UUID id, ChangePasswordRequest request) {
@@ -99,7 +99,7 @@ public class IdentityService {
         return new UserResponse(u.getId(),u.getNormalizedEmail(),u.getDisplayName(),u.getStatus().name(),
                 u.getRole().name(),u.getCreatedAt(),new PreferencesResponse(p.getDailyCaloriesTarget(),
                 p.getDailyProteinTarget(),p.getWeeklyBudget(),p.getNumberOfDays(),p.getMealsPerDay(),
-                p.getStrategy(),p.getPreset(),p.getDietaryRestrictions(),p.getAllergens()));
+                p.getStrategy(),p.getPreset(),p.getDietaryRestrictions(),p.getAllergens(),p.getTheme()));
     }
     public record AuthResult(UserResponse user,SessionTokens tokens){}
 }

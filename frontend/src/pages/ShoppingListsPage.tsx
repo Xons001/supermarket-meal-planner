@@ -1,5 +1,13 @@
 import { Link, useSearchParams } from 'react-router'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  activateShoppingList,
+  archiveShoppingListById,
+  restoreShoppingList,
+} from '../api/shoppingLists'
+import { queryKeys } from '../app/queryKeys'
 import { SiteHeader } from '../components/SiteHeader'
+import { useToast } from '../components/ui'
 import { useSupermarkets } from '../hooks/useCatalogQueries'
 import { useShoppingLists } from '../hooks/useShoppingListQueries'
 import type { ShoppingListFilters, ShoppingListStatus } from '../types/shoppingList'
@@ -21,6 +29,23 @@ export function ShoppingListsPage() {
   }
   const lists = useShoppingLists(filters)
   const supermarkets = useSupermarkets()
+  const queryClient = useQueryClient()
+  const notify = useToast()
+  const organize = useMutation({
+    mutationFn: (action: { id: string; type: 'archive' | 'restore' | 'activate' }) => {
+      if (action.type === 'archive') return archiveShoppingListById(action.id)
+      return action.type === 'restore'
+        ? restoreShoppingList(action.id)
+        : activateShoppingList(action.id)
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['shopping-lists'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard })
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
+      notify('Lista actualizada')
+    },
+    onError: () => notify('No se pudo actualizar la lista', 'error'),
+  })
 
   function update(key: string, value: string) {
     setParams((current) => {
@@ -133,8 +158,14 @@ export function ShoppingListsPage() {
               {lists.data.content.map((list) => (
                 <article key={list.id}>
                   <div className={styles.cardTop}>
-                    <span data-status={list.status}>
-                      {list.status === 'ARCHIVED' ? 'Archivada' : 'Generada'}
+                    <span data-status={list.freshness ?? list.status}>
+                      {list.archived
+                        ? 'Archivada'
+                        : list.active
+                          ? list.freshness === 'OUTDATED'
+                            ? 'Activa · desactualizada'
+                            : 'Activa · actual'
+                          : 'Histórica'}
                     </span>
                     <strong>
                       {list.calculationComplete ? 'Cálculo completo' : 'Cálculo parcial'}
@@ -160,6 +191,30 @@ export function ShoppingListsPage() {
                   <div className={styles.links}>
                     <Link to={`/shopping-lists/${list.id}`}>Abrir lista</Link>
                     <Link to={`/meal-plans/${list.mealPlanId}`}>Ver plan</Link>
+                    {list.archived ? (
+                      <button onClick={() => organize.mutate({ id: list.id, type: 'restore' })}>
+                        Restaurar
+                      </button>
+                    ) : (
+                      <>
+                        {!list.active && (
+                          <button
+                            onClick={() => organize.mutate({ id: list.id, type: 'activate' })}
+                          >
+                            Activar
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (window.confirm('¿Archivar esta lista? Seguirá disponible.')) {
+                              organize.mutate({ id: list.id, type: 'archive' })
+                            }
+                          }}
+                        >
+                          Archivar
+                        </button>
+                      </>
+                    )}
                   </div>
                 </article>
               ))}

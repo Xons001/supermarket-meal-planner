@@ -1,0 +1,41 @@
+services:
+  postgres:
+    restart: "no"
+    ports: !override []
+    volumes:
+      - e2e_postgres_data:/var/lib/postgresql/data
+
+  backend:
+    restart: "no"
+    environment:
+      APP_AUTH_ARGON2_MEMORY_KB: 8192
+      APP_AUTH_ARGON2_ITERATIONS: 1
+      APP_AUTH_ALLOWED_ORIGINS: http://localhost:15173
+      APP_AUTH_RATE_REGISTER_PER_HOUR: 100
+    ports: !override []
+
+  frontend:
+    restart: "no"
+    ports: !override []
+
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.55.1-noble
+    profiles: ["e2e"]
+    working_dir: /workspace/frontend
+    command: ["sh", "-c", "npm ci && npm run test:e2e"]
+    environment:
+      E2E_BASE_URL: http://frontend
+    volumes:
+      - .:/workspace
+      - e2e_node_modules:/workspace/frontend/node_modules
+      - e2e_npm_cache:/root/.npm
+    networks:
+      - app_network
+    depends_on:
+      frontend:
+        condition: service_healthy
+
+volumes:
+  e2e_postgres_data:
+  e2e_node_modules:
+  e2e_npm_cache:

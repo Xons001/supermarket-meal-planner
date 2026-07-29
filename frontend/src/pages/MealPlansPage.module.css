@@ -42,6 +42,38 @@
   font-weight: 850;
   text-decoration: none;
 }
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+}
+.links button {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 0.55rem;
+  padding: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+.duplicateForm {
+  display: grid;
+  gap: 0.85rem;
+}
+.duplicateForm label {
+  display: grid;
+  gap: 0.35rem;
+}
+.duplicateForm input {
+  min-height: 2.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.6rem;
+  padding: 0.55rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
 .filters {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

@@ -29,7 +29,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     resolver: zodResolver(schema),
     defaultValues: { displayName: '', email: '', password: '' },
   })
-  if (user) return <Navigate to="/meal-plans" replace />
+  if (user) return <Navigate to="/dashboard" replace />
   const submit = handleSubmit(async (values) => {
     setError('')
     try {
@@ -48,7 +48,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
         state.from.startsWith('/') &&
         !state.from.startsWith('//')
           ? state.from
-          : '/meal-plans'
+          : '/dashboard'
       navigate(destination, { replace: true })
     } catch (reason) {
       setError(reason instanceof ApiError ? reason.message : 'No se pudo completar la operación')

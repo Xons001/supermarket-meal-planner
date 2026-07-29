@@ -1,5 +1,6 @@
 export type OptimizationPreset = 'BALANCED' | 'LOWER_PURCHASE_COST' | 'LOWER_WASTE' | 'MORE_REUSE'
 export type GenerationStrategy = 'PURCHASE_AWARE_SCORING' | 'SCORING'
+export type ThemePreference = 'LIGHT' | 'DARK' | 'SYSTEM'
 
 export interface UserPreferences {
   dailyCaloriesTarget: number
@@ -11,6 +12,7 @@ export interface UserPreferences {
   optimizationPreset: OptimizationPreset | null
   dietaryRestrictions: string[]
   allergens: string[]
+  theme?: ThemePreference
 }
 
 export interface AuthUser {
