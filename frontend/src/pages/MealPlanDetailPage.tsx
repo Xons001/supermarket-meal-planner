@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { MealPlanResult } from '../features/mealPlans/MealPlanResult'
+import { MealPlanEditingPanel } from '../features/mealPlans/MealPlanEditingPanel'
 import { ShoppingListPanel } from '../features/shoppingLists/ShoppingListPanel'
 import {
   useArchiveMealPlan,
@@ -61,6 +62,7 @@ export function MealPlanDetailPage() {
           <button onClick={() => navigate('/meal-plans')}>Volver</button>
         </div>
       </header>
+      <MealPlanEditingPanel plan={plan.data} />
       <ShoppingListPanel mealPlanId={id} />
       <MealPlanResult plan={plan.data} />
     </Shell>

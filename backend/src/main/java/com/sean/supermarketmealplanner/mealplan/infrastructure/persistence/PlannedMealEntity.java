@@ -3,6 +3,7 @@ package com.sean.supermarketmealplanner.mealplan.infrastructure.persistence;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.supermarketmealplanner.mealplan.application.GeneratedMealPlanResult;
+import com.sean.supermarketmealplanner.mealplan.domain.MealSelectionSource;
 import com.sean.supermarketmealplanner.mealtemplate.domain.MealType;
 import com.sean.supermarketmealplanner.mealtemplate.infrastructure.persistence.MealTemplateEntity;
 import jakarta.persistence.Column;
@@ -15,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -64,6 +66,19 @@ public class PlannedMealEntity {
     private boolean calculationComplete;
     @Column(name = "warnings_json", nullable = false, columnDefinition = "TEXT")
     private String warningsJson;
+    @Column(nullable = false)
+    private boolean locked;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "selection_source", nullable = false, length = 30)
+    private MealSelectionSource selectionSource;
+    @Column(name = "edit_version", nullable = false)
+    private long editVersion;
+    @Column(name = "modified_at")
+    private OffsetDateTime modifiedAt;
+    @Column(name = "original_meal_template_id")
+    private UUID originalMealTemplateId;
+    @Column(name = "partial_generation_seed")
+    private Long partialGenerationSeed;
 
     protected PlannedMealEntity() {
     }
@@ -76,7 +91,7 @@ public class PlannedMealEntity {
         if (template == null) {
             throw new IllegalArgumentException("Meal template snapshot reference is missing");
         }
-        this.id = UUID.randomUUID();
+        this.id = meal.plannedMealId() == null ? UUID.randomUUID() : meal.plannedMealId();
         this.mealPlanDay = day;
         this.mealTemplate = template;
         this.templateName = meal.templateName();
@@ -95,6 +110,14 @@ public class PlannedMealEntity {
         this.score = meal.score();
         this.calculationComplete = meal.calculationComplete();
         this.warningsJson = json(meal.warnings());
+        this.locked = meal.locked();
+        this.selectionSource = meal.selectionSource() == null
+                ? MealSelectionSource.GENERATED
+                : meal.selectionSource();
+        this.editVersion = meal.editVersion();
+        this.modifiedAt = meal.modifiedAt();
+        this.originalMealTemplateId = meal.originalMealTemplateId();
+        this.partialGenerationSeed = meal.partialGenerationSeed();
     }
 
     private String json(Object value) {
@@ -104,4 +127,54 @@ public class PlannedMealEntity {
             throw new IllegalArgumentException("Could not serialize planned meal snapshot", exception);
         }
     }
+
+    public void setLocked(boolean value, long version, OffsetDateTime now) {
+        this.locked = value;
+        this.editVersion = version;
+        this.modifiedAt = now;
+    }
+
+    public void replace(
+            MealTemplateEntity template,
+            GeneratedMealPlanResult.PlannedMealResult meal,
+            MealSelectionSource source,
+            long version,
+            Long seed,
+            OffsetDateTime now
+    ) {
+        if (originalMealTemplateId == null) {
+            originalMealTemplateId = mealTemplate.getId();
+        }
+        this.mealTemplate = template;
+        this.templateName = meal.templateName();
+        this.mealType = MealType.valueOf(meal.mealType());
+        this.servings = meal.servings();
+        this.ingredientsJson = json(meal.ingredients());
+        this.calories = meal.nutrition().calories();
+        this.protein = meal.nutrition().protein();
+        this.carbohydrates = meal.nutrition().carbohydrates();
+        this.fat = meal.nutrition().fat();
+        this.fiber = meal.nutrition().fiber();
+        this.sugar = meal.nutrition().sugar();
+        this.salt = meal.nutrition().salt();
+        this.consumedCost = meal.consumedCost();
+        this.score = meal.score();
+        this.calculationComplete = meal.calculationComplete();
+        this.warningsJson = json(meal.warnings());
+        this.selectionSource = source;
+        this.editVersion = version;
+        this.modifiedAt = now;
+        this.partialGenerationSeed = seed;
+    }
+
+    public UUID getId() { return id; }
+    public MealPlanDayEntity getMealPlanDay() { return mealPlanDay; }
+    public MealTemplateEntity getMealTemplate() { return mealTemplate; }
+    public int getPosition() { return position; }
+    public boolean isLocked() { return locked; }
+    public MealSelectionSource getSelectionSource() { return selectionSource; }
+    public long getEditVersion() { return editVersion; }
+    public OffsetDateTime getModifiedAt() { return modifiedAt; }
+    public UUID getOriginalMealTemplateId() { return originalMealTemplateId; }
+    public Long getPartialGenerationSeed() { return partialGenerationSeed; }
 }

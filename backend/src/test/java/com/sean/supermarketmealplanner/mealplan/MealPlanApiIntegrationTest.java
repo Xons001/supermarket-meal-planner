@@ -277,7 +277,8 @@ class MealPlanApiIntegrationTest extends AbstractIntegrationTest {
         var saved = result(request);
 
         assertThat(saved.get("persisted").asBoolean()).isTrue();
-        assertThat(saved.at("/days").toString()).isEqualTo(preview.at("/days").toString());
+        assertThat(withoutPersistentIds(saved.at("/days")).toString())
+                .isEqualTo(withoutPersistentIds(preview.at("/days")).toString());
         assertThat(saved.at("/scoreBreakdown").toString())
                 .isEqualTo(preview.at("/scoreBreakdown").toString());
         assertThat(saved.get("generationToken").asText())
@@ -459,6 +460,170 @@ class MealPlanApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.scoreBreakdown.purchaseCostScore").doesNotExist());
     }
 
+    @Test
+    void editsOneMealWithVersionsLocksHistoryAndUndo() throws Exception {
+        var preview = result(baseRequest(6060L, false));
+        var request = baseRequest(6060L, true);
+        request.put("generationToken", preview.get("generationToken").asText());
+        var saved = result(request);
+        var planId = saved.get("mealPlanId").asText();
+        var meal = saved.at("/days/0/meals/0");
+        var mealId = meal.get("plannedMealId").asText();
+        var originalTemplate = meal.get("templateId").asText();
+
+        var locked = edit(
+                patch("/api/v1/meal-plans/{planId}/meals/{mealId}/lock", planId, mealId),
+                Map.of("locked", true, "expectedEditVersion", 0)
+        );
+        assertThat(locked.get("editVersion").asLong()).isEqualTo(1);
+        assertThat(locked.get("contentVersion").asLong()).isZero();
+        assertThat(locked.at("/days/0/meals/0/locked").asBoolean()).isTrue();
+
+        var unlocked = edit(
+                patch("/api/v1/meal-plans/{planId}/meals/{mealId}/lock", planId, mealId),
+                Map.of("locked", false, "expectedEditVersion", 1)
+        );
+        assertThat(unlocked.get("editVersion").asLong()).isEqualTo(2);
+        assertThat(unlocked.get("contentVersion").asLong()).isZero();
+
+        var alternatives = objectMapper.readTree(mockMvc.perform(
+                        get("/api/v1/meal-plans/{planId}/meals/{mealId}/alternatives", planId, mealId)
+                                .param("seed", "9191")
+                )
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+        assertThat(alternatives.size()).isPositive();
+
+        var replacementPreview = edit(
+                post("/api/v1/meal-plans/{planId}/meals/{mealId}/replacement-previews",
+                        planId, mealId),
+                Map.of(
+                        "mealTemplateId", alternatives.get(0).get("mealTemplateId").asText(),
+                        "expectedEditVersion", 2,
+                        "seed", 9191
+                )
+        );
+        var replaced = edit(
+                post("/api/v1/meal-plans/{planId}/meals/{mealId}/replacements", planId, mealId),
+                Map.of(
+                        "previewToken", replacementPreview.get("previewToken").asText(),
+                        "expectedEditVersion", 2
+                )
+        );
+        assertThat(replaced.get("editVersion").asLong()).isEqualTo(3);
+        assertThat(replaced.get("contentVersion").asLong()).isEqualTo(1);
+        assertThat(replaced.at("/days/0/meals/0/templateId").asText())
+                .isNotEqualTo(originalTemplate);
+        assertThat(replaced.get("canUndo").asBoolean()).isTrue();
+
+        mockMvc.perform(get("/api/v1/meal-plans/{planId}/changes", planId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].type").value("MEAL_REPLACED"));
+
+        var restored = edit(
+                post("/api/v1/meal-plans/{planId}/undo", planId),
+                Map.of("expectedEditVersion", 3)
+        );
+        assertThat(restored.get("editVersion").asLong()).isEqualTo(4);
+        assertThat(restored.get("contentVersion").asLong()).isEqualTo(2);
+        assertThat(restored.at("/days/0/meals/0/templateId").asText())
+                .isEqualTo(originalTemplate);
+        assertThat(restored.at("/days/0/meals/0/locked").asBoolean()).isFalse();
+    }
+
+    @Test
+    void regeneratesAndUndoesAWholeDayWithOneVersionIncrement() throws Exception {
+        var preview = result(baseRequest(7070L, false));
+        var request = baseRequest(7070L, true);
+        request.put("generationToken", preview.get("generationToken").asText());
+        var saved = result(request);
+        var planId = saved.get("mealPlanId").asText();
+        var dayId = saved.at("/days/0/dayId").asText();
+        var originalDay = templateSequence(saved).subList(0, 4);
+
+        var dayPreview = edit(
+                post("/api/v1/meal-plans/{planId}/days/{dayId}/regeneration-previews",
+                        planId, dayId),
+                Map.of("expectedEditVersion", 0, "seed", 8181)
+        );
+        assertThat(dayPreview.at("/afterMeals").size()).isEqualTo(4);
+
+        var regenerated = edit(
+                post("/api/v1/meal-plans/{planId}/days/{dayId}/regenerations", planId, dayId),
+                Map.of(
+                        "previewToken", dayPreview.get("previewToken").asText(),
+                        "expectedEditVersion", 0
+                )
+        );
+        assertThat(regenerated.get("editVersion").asLong()).isEqualTo(1);
+        assertThat(regenerated.get("contentVersion").asLong()).isEqualTo(1);
+        assertThat(templateSequence(regenerated).subList(0, 4)).isNotEqualTo(originalDay);
+
+        var restored = edit(
+                post("/api/v1/meal-plans/{planId}/undo", planId),
+                Map.of("expectedEditVersion", 1)
+        );
+        assertThat(restored.get("editVersion").asLong()).isEqualTo(2);
+        assertThat(restored.get("contentVersion").asLong()).isEqualTo(2);
+        assertThat(templateSequence(restored).subList(0, 4)).isEqualTo(originalDay);
+    }
+
+    @Test
+    void returnsStableProblemCodesForMalformedTokensVersionsAndLocks() throws Exception {
+        var preview = result(baseRequest(9090L, false));
+        var request = baseRequest(9090L, true);
+        request.put("generationToken", preview.get("generationToken").asText());
+        var saved = result(request);
+        var planId = saved.get("mealPlanId").asText();
+        var mealId = saved.at("/days/0/meals/0/plannedMealId").asText();
+
+        mockMvc.perform(post("/api/v1/meal-plans/{planId}/meals/{mealId}/replacements",
+                        planId, mealId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "previewToken", "malformed",
+                                "expectedEditVersion", 0
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.errorCode").value("EDIT_PREVIEW_TOKEN_MALFORMED"));
+
+        mockMvc.perform(patch("/api/v1/meal-plans/{planId}/meals/{mealId}/lock",
+                        planId, mealId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "locked", true,
+                                "expectedEditVersion", 99
+                        ))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorCode").value("MEAL_PLAN_VERSION_CONFLICT"));
+
+        edit(
+                patch("/api/v1/meal-plans/{planId}/meals/{mealId}/lock", planId, mealId),
+                Map.of("locked", true, "expectedEditVersion", 0)
+        );
+        mockMvc.perform(post(
+                        "/api/v1/meal-plans/{planId}/meals/{mealId}/regeneration-previews",
+                        planId, mealId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("expectedEditVersion", 1))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("PLANNED_MEAL_LOCKED"));
+    }
+
+    private JsonNode edit(
+            org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder builder,
+            Object body
+    ) throws Exception {
+        var response = mockMvc.perform(builder
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(body)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(response);
+    }
+
     private org.springframework.test.web.servlet.ResultActions generate(Map<String, Object> request)
             throws Exception {
         return mockMvc.perform(post("/api/v1/meal-plans/generate")
@@ -548,6 +713,15 @@ class MealPlanApiIntegrationTest extends AbstractIntegrationTest {
         response.at("/days").forEach(day -> day.at("/meals")
                 .forEach(meal -> result.add(meal.get("templateId").asText())));
         return result;
+    }
+
+    private JsonNode withoutPersistentIds(JsonNode days) {
+        var copy = days.deepCopy();
+        copy.forEach(day -> {
+            ((ObjectNode) day).remove("dayId");
+            day.at("/meals").forEach(meal -> ((ObjectNode) meal).remove("plannedMealId"));
+        });
+        return copy;
     }
 
     private int count(String table, UUID planId) {

@@ -28,6 +28,9 @@ app:
     demo-resource: classpath:data/mock/meal-templates.json
     seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
   meal-plans:
+    editing:
+      preview-hmac-secret: ${MEAL_PLAN_PREVIEW_HMAC_SECRET}
+      preview-ttl: ${MEAL_PLAN_PREVIEW_TTL:PT15M}
     purchase-aware:
       reference-cost-per-meal: 2.50
       purchase-cost-score-slope: 35

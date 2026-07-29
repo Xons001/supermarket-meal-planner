@@ -159,6 +159,20 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
     void regeneratesTransactionallyAndArchivesPreviousList() throws Exception {
         var planId = savedPlan(5003L);
         var first = create(planId);
+        jdbcTemplate.update(
+                "UPDATE meal_plans SET content_version = content_version + 1 WHERE id = ?",
+                planId
+        );
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/v1/meal-plans/{id}/shopping-list", planId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(first.get("id").asText()))
+                .andExpect(jsonPath("$.status").value("GENERATED"))
+                .andExpect(jsonPath("$.freshness").value("OUTDATED"));
+        assertThat(repository.findById(UUID.fromString(first.get("id").asText()))
+                .orElseThrow().getStatus().name()).isEqualTo("GENERATED");
+
         var replacement = json(mockMvc.perform(post(
                         "/api/v1/meal-plans/{id}/shopping-list/regenerate",
                         planId
@@ -171,6 +185,11 @@ class ShoppingListApiIntegrationTest extends AbstractIntegrationTest {
                 .orElseThrow().getStatus().name()).isEqualTo("ARCHIVED");
         assertThat(repository.findByMealPlanIdAndArchivedFalse(planId)
                 .orElseThrow().getId().toString()).isEqualTo(replacement.get("id").asText());
+        assertThat(replacement.get("freshness").asText()).isEqualTo("CURRENT");
+        mockMvc.perform(get("/api/v1/shopping-lists/{id}", first.get("id").asText()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(first.get("id").asText()))
+                .andExpect(jsonPath("$.freshness").value("OUTDATED"));
     }
 
     @Test

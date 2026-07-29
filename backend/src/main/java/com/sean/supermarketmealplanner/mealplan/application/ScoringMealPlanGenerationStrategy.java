@@ -716,7 +716,14 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                         money(candidate.cost()),
                         mealScore,
                         candidate.complete(),
-                        candidate.warnings()
+                        candidate.warnings(),
+                        null,
+                        false,
+                        com.sean.supermarketmealplanner.mealplan.domain.MealSelectionSource.GENERATED,
+                        0,
+                        null,
+                        null,
+                        null
                 ));
                 if (!candidate.complete()) {
                     var warning = new GeneratedMealPlanResult.PlanWarning(
@@ -776,7 +783,8 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                     calorieDeviationPercentage.setScale(2, RoundingMode.HALF_UP),
                     nutrient(proteinDeviation),
                     best.score().dailyScores().getOrDefault(dayIndex, BigDecimal.ZERO),
-                    List.copyOf(dayWarnings)
+                    List.copyOf(dayWarnings),
+                    null
             ));
             weeklyNutrition = MealPlanScoringService.addNutrition(weeklyNutrition, dayNutrition);
             weeklyCost = weeklyCost.add(dayCost);
@@ -902,6 +910,12 @@ public class ScoringMealPlanGenerationStrategy implements MealPlanGenerationStra
                         purchaseAware ? best.purchaseScore().weights() : Map.of()
                 ),
                 null,
+                null,
+                0,
+                0,
+                com.sean.supermarketmealplanner.mealplan.domain.ShoppingListFreshness.NONE,
+                null,
+                false,
                 null
         );
     }

@@ -322,7 +322,10 @@ npm run build
   predeterminada calcula durante el beam coste real, paquetes y desperdicio.
 - Un plan guardado antes de la FASE 4 carece de snapshots de formato y precio;
   su lista se genera como parcial y explica qué artículos no puede calcular.
-- No existe sustitución de comidas ni edición manual de un plan guardado.
+- Los planes persistidos admiten sustitución y regeneración parcial, bloqueos,
+  preview antes/después, historial y undo del último cambio de contenido.
+- `editVersion` protege todas las operaciones; `contentVersion` solo cambia
+  cuando cambia el contenido y determina si la lista activa queda desactualizada.
 - El filtrado de plantillas se calcula en memoria tras cargar el pequeño conjunto
   de demostración; se migrará a consulta SQL cuando el volumen lo justifique.
 - No hay autenticación, IA, scraping, Open Food Facts, Redis, Airflow funcional
@@ -337,8 +340,21 @@ npm run build
 
 ## Roadmap
 
-La FASE 5 incorpora optimización por compra real y mantiene el algoritmo
-clásico como baseline. La siguiente fase permanece sin implementar y debe
-definirse antes de iniciar sustituciones o sincronización externa.
+La FASE 6 incorpora edición parcial transaccional y mantiene ambas estrategias
+de generación. La siguiente fase es la sincronización Airflow y no forma parte
+del runtime actual.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.
+
+## Seguridad de previews de edición
+
+El backend exige `MEAL_PLAN_PREVIEW_HMAC_SECRET` con al menos 32 bytes. No hay
+valor predeterminado ni secreto incluido en el repositorio. Para desarrollo:
+
+```bash
+openssl rand -base64 48
+```
+
+Guarda el resultado solo en tu `.env` local. Docker Compose falla antes de
+arrancar el backend si falta. Los tokens expiran a los 15 minutos por defecto y
+nunca deben escribirse completos en logs.

@@ -143,5 +143,8 @@ comprado y puede mejorar el candidato.
 Detalles completos en
 [optimización del plan por compra real](purchase-aware-meal-plan-optimization.md).
 
-Límites actuales: no hay sustituciones, edición manual del plan, IA, OR-Tools
-ni recomendaciones médicas.
+La edición parcial reutiliza la preparación, filtrado y evaluación de
+candidatos. La estrategia y sus pesos originales se conservan en cada plan y
+el reevaluador recalcula el resultado completo después de una edición.
+
+Límites actuales: no hay IA, OR-Tools ni recomendaciones médicas.

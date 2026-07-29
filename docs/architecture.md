@@ -99,6 +99,14 @@ El adaptador actual lee JSON local. Un adaptador específico futuro vivirá dent
 de infraestructura y podrá sustituirse sin alterar el dominio o la API. No se
 presupone ninguna API oficial ni endpoint privado.
 
+## Edición parcial
+
+El módulo `mealplan` coordina búsqueda determinista, reevaluación exacta,
+versiones y `meal_plan_changes`. Un preview firmado no escribe datos; su
+confirmación verifica plan, objetivo y versión antes de actualizar en una sola
+transacción el agregado persistido y su historial. Las listas comparan su
+`sourcePlanContentVersion` al leer y no se archivan durante la edición.
+
 ## Airflow futuro
 
 `supermarket_catalog_sync` ejecutará extracción, normalización, validación,

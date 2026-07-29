@@ -5,6 +5,7 @@ import {
   generateMealPlan,
   getMealPlan,
   getMealPlans,
+  getMealPlanChanges,
 } from '../api/mealPlans'
 import type { GenerateMealPlanRequest, MealPlanFilters, MealPlanStatus } from '../types/mealPlan'
 
@@ -55,4 +56,23 @@ export function useArchiveMealPlan(id: string) {
       void queryClient.invalidateQueries({ queryKey: ['meal-plan', id] })
     },
   })
+}
+
+export function useMealPlanChanges(id: string) {
+  return useQuery({
+    queryKey: ['meal-plan-changes', id],
+    queryFn: () => getMealPlanChanges(id),
+    enabled: Boolean(id),
+  })
+}
+
+export function useRefreshEditedPlan(id: string) {
+  const queryClient = useQueryClient()
+  return (plan?: import('../types/mealPlan').GeneratedMealPlan) => {
+    if (plan) queryClient.setQueryData(['meal-plan', id], plan)
+    void queryClient.invalidateQueries({ queryKey: ['meal-plan', id] })
+    void queryClient.invalidateQueries({ queryKey: ['meal-plan-changes', id] })
+    void queryClient.invalidateQueries({ queryKey: ['shopping-list', 'meal-plan', id] })
+    void queryClient.invalidateQueries({ queryKey: ['shopping-lists'] })
+  }
 }

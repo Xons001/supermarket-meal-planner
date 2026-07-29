@@ -2,6 +2,7 @@ import type { PageResponse } from './api'
 
 export type ShoppingListStatus = 'GENERATED' | 'ARCHIVED'
 export type MeasurementType = 'WEIGHT' | 'VOLUME' | 'UNIT'
+export type ShoppingListFreshness = 'CURRENT' | 'OUTDATED'
 
 export interface ShoppingListWarning {
   code: string
@@ -85,6 +86,9 @@ export interface ShoppingList {
   warnings: ShoppingListWarning[]
   demoData: boolean
   generationDurationMilliseconds: number
+  sourcePlanContentVersion?: number
+  currentPlanContentVersion?: number
+  freshness?: ShoppingListFreshness
 }
 
 export interface ShoppingListSummary {
@@ -107,6 +111,9 @@ export interface ShoppingListSummary {
   calculationComplete: boolean
   warningCount: number
   demoData: boolean
+  sourcePlanContentVersion?: number
+  currentPlanContentVersion?: number
+  freshness?: ShoppingListFreshness
 }
 
 export type ShoppingListPage = PageResponse<ShoppingListSummary>

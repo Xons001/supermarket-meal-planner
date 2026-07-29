@@ -6,6 +6,7 @@ import com.sean.supermarketmealplanner.mealtemplate.application.InvalidMealTempl
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateNotFoundException;
 import com.sean.supermarketmealplanner.mealtemplate.application.MealTemplateValidationException;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanGenerationException;
+import com.sean.supermarketmealplanner.mealplan.application.MealPlanEditingException;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanNotFoundException;
 import com.sean.supermarketmealplanner.mealplan.application.MealPlanValidationException;
 import com.sean.supermarketmealplanner.shoppinglist.application.ShoppingListException;
@@ -99,6 +100,27 @@ public class ApiExceptionHandler {
             problem.setProperty("unitsDetected", exception.unitsDetected());
             problem.setProperty("expectedMeasurementType", exception.expectedMeasurementType());
         }
+        return problem;
+    }
+
+    @ExceptionHandler(MealPlanEditingException.class)
+    public ProblemDetail handleMealPlanEditing(
+            MealPlanEditingException exception,
+            HttpServletRequest request
+    ) {
+        var status = HttpStatus.valueOf(exception.status());
+        var problem = createProblem(
+                status,
+                switch (status) {
+                    case NOT_FOUND -> "Meal-plan editing resource not found";
+                    case CONFLICT -> "Meal-plan editing conflict";
+                    case UNPROCESSABLE_ENTITY -> "Meal-plan editing rule violation";
+                    default -> "Invalid meal-plan editing request";
+                },
+                exception.getMessage(),
+                request
+        );
+        problem.setProperty("errorCode", exception.errorCode());
         return problem;
     }
 

@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -121,6 +122,13 @@ public class MealPlanEntity {
     private OffsetDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+    @Column(name = "edit_version", nullable = false)
+    private long editVersion;
+    @Column(name = "content_version", nullable = false)
+    private long contentVersion;
+    @Version
+    @Column(name = "row_version", nullable = false)
+    private long rowVersion;
 
     @OneToMany(mappedBy = "mealPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("dayIndex ASC")
@@ -183,6 +191,8 @@ public class MealPlanEntity {
         this.archived = false;
         this.createdAt = result.createdAt();
         this.updatedAt = result.updatedAt();
+        this.editVersion = result.editVersion();
+        this.contentVersion = result.contentVersion();
         result.days().forEach(day -> this.days.add(new MealPlanDayEntity(this, day, templates)));
         var daysByIndex = this.days.stream()
                 .collect(java.util.stream.Collectors.toMap(
@@ -210,6 +220,44 @@ public class MealPlanEntity {
         this.resultJson = updatedResultJson;
     }
 
+    public VersionChange nextVersion(boolean contentChanged) {
+        var before = new VersionChange(editVersion, contentVersion);
+        editVersion++;
+        if (contentChanged) {
+            contentVersion++;
+        }
+        return before;
+    }
+
+    public void updateEditedSnapshot(
+            GeneratedMealPlanResult result,
+            String updatedResultJson,
+            OffsetDateTime changedAt
+    ) {
+        this.resultJson = updatedResultJson;
+        this.totalCalories = result.weeklyNutrition().calories();
+        this.totalProtein = result.weeklyNutrition().protein();
+        this.totalCarbohydrates = result.weeklyNutrition().carbohydrates();
+        this.totalFat = result.weeklyNutrition().fat();
+        this.totalFiber = result.weeklyNutrition().fiber();
+        this.totalSugar = result.weeklyNutrition().sugar();
+        this.totalSalt = result.weeklyNutrition().salt();
+        this.totalConsumedCost = result.totalConsumedCost();
+        this.overallScore = result.overallScore();
+        this.calorieScore = result.scoreBreakdown().calorieScore();
+        this.proteinScore = result.scoreBreakdown().proteinScore();
+        this.budgetScore = result.scoreBreakdown().budgetScore();
+        this.varietyScore = result.scoreBreakdown().varietyScore();
+        this.repetitionScore = result.scoreBreakdown().repetitionScore();
+        this.completenessScore = result.scoreBreakdown().completenessScore();
+        this.preparationScore = result.scoreBreakdown().preparationScore();
+        this.uniqueTemplates = result.varietyMetrics().uniqueTemplates();
+        this.repeatedTemplates = result.varietyMetrics().repeatedTemplates();
+        this.maximumObservedRepetition = result.varietyMetrics().maximumObservedRepetition();
+        this.calculationComplete = result.calculationComplete();
+        this.updatedAt = changedAt;
+    }
+
     public UUID getId() { return id; }
     public SupermarketEntity getSupermarket() { return supermarket; }
     public String getName() { return name; }
@@ -231,4 +279,11 @@ public class MealPlanEntity {
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public List<MealPlanWarningEntity> getWarnings() { return List.copyOf(warnings); }
+    public List<MealPlanDayEntity> getDays() { return List.copyOf(days); }
+    public long getEditVersion() { return editVersion; }
+    public long getContentVersion() { return contentVersion; }
+    public long getRowVersion() { return rowVersion; }
+
+    public record VersionChange(long editVersion, long contentVersion) {
+    }
 }

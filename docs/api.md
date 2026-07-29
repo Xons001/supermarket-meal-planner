@@ -525,5 +525,39 @@ Ejemplo parcial:
 
 ## Contratos futuros no implementados
 
-Las sustituciones, autenticación, sincronización Airflow, OR-Tools e IA
-opcional permanecen fuera del runtime actual.
+La autenticación, sincronización Airflow, OR-Tools e IA opcional permanecen
+fuera del runtime actual.
+
+## Edición parcial de planes persistidos
+
+Todos los objetivos usan los UUID persistentes de día y comida. Las
+confirmaciones aceptan exclusivamente `{previewToken, expectedEditVersion}`.
+
+```text
+GET  /api/v1/meal-plans/{planId}/meals/{plannedMealId}/alternatives
+POST /api/v1/meal-plans/{planId}/meals/{plannedMealId}/replacement-previews
+POST /api/v1/meal-plans/{planId}/meals/{plannedMealId}/replacements
+POST /api/v1/meal-plans/{planId}/meals/{plannedMealId}/regeneration-previews
+POST /api/v1/meal-plans/{planId}/meals/{plannedMealId}/regenerations
+POST /api/v1/meal-plans/{planId}/days/{dayId}/regeneration-previews
+POST /api/v1/meal-plans/{planId}/days/{dayId}/regenerations
+PATCH /api/v1/meal-plans/{planId}/meals/{plannedMealId}/lock
+POST /api/v1/meal-plans/{planId}/undo
+GET  /api/v1/meal-plans/{planId}/changes?page=0&size=20
+```
+
+El bloqueo recibe `{locked, expectedEditVersion}`. Los previews incluyen
+comidas y métricas antes/después/delta, razones, advertencias, seed, TTL y token.
+El detalle expone `editVersion`, `contentVersion`, IDs persistentes, bloqueos,
+origen de selección, estado de lista, `canUndo` y último cambio.
+
+Problem Details usa códigos estables:
+
+- 400: `EDIT_PREVIEW_TOKEN_MALFORMED`,
+  `EDIT_PREVIEW_TOKEN_INVALID_SIGNATURE`.
+- 409: `MEAL_PLAN_VERSION_CONFLICT`, `EDIT_PREVIEW_STALE`,
+  `EDIT_CONCURRENT_MODIFICATION`.
+- 422: `NO_VALID_ALTERNATIVE`, `PLANNED_MEAL_LOCKED`,
+  `MEAL_PLAN_NOT_EDITABLE`, `EDIT_RULE_VIOLATION`.
+- 404: `MEAL_PLAN_NOT_FOUND`, `MEAL_PLAN_DAY_NOT_FOUND`,
+  `PLANNED_MEAL_NOT_FOUND`.

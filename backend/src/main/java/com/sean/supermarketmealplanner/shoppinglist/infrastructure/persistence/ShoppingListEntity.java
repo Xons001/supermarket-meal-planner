@@ -78,6 +78,8 @@ public class ShoppingListEntity {
     private OffsetDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+    @Column(name = "source_plan_content_version", nullable = false)
+    private long sourcePlanContentVersion;
 
     @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
@@ -116,6 +118,7 @@ public class ShoppingListEntity {
         this.generatedAt = now;
         this.createdAt = now;
         this.updatedAt = now;
+        this.sourcePlanContentVersion = mealPlan.getContentVersion();
         calculation.items().forEach(item -> items.add(new ShoppingListItemEntity(this, item, now)));
         var byId = items.stream().collect(Collectors.toMap(
                 ShoppingListItemEntity::getId,
@@ -166,4 +169,8 @@ public class ShoppingListEntity {
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public List<ShoppingListItemEntity> getItems() { return List.copyOf(items); }
     public List<ShoppingListWarningEntity> getWarnings() { return List.copyOf(warnings); }
+    public long getSourcePlanContentVersion() { return sourcePlanContentVersion; }
+    public boolean isCurrentForPlan() {
+        return sourcePlanContentVersion == mealPlan.getContentVersion();
+    }
 }

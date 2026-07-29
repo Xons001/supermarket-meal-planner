@@ -67,7 +67,7 @@ public class MealPlanDayEntity {
             GeneratedMealPlanResult.DayResult day,
             Map<UUID, MealTemplateEntity> templates
     ) {
-        this.id = UUID.randomUUID();
+        this.id = day.dayId() == null ? UUID.randomUUID() : day.dayId();
         this.mealPlan = plan;
         this.dayIndex = day.dayIndex();
         this.date = day.date();
@@ -91,5 +91,23 @@ public class MealPlanDayEntity {
 
     public int getDayIndex() {
         return dayIndex;
+    }
+
+    public UUID getId() { return id; }
+    public LocalDate getDate() { return date; }
+    public List<PlannedMealEntity> getMeals() { return List.copyOf(meals); }
+
+    public void updateTotals(GeneratedMealPlanResult.DayResult day) {
+        this.totalCalories = day.totalNutrition().calories();
+        this.totalProtein = day.totalNutrition().protein();
+        this.totalCarbohydrates = day.totalNutrition().carbohydrates();
+        this.totalFat = day.totalNutrition().fat();
+        this.totalFiber = day.totalNutrition().fiber();
+        this.totalSugar = day.totalNutrition().sugar();
+        this.totalSalt = day.totalNutrition().salt();
+        this.totalConsumedCost = day.totalConsumedCost();
+        this.calorieDeviation = day.calorieDeviation();
+        this.proteinDeviation = day.proteinDeviation();
+        this.dailyScore = day.dailyScore();
     }
 }

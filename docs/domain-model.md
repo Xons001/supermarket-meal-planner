@@ -264,3 +264,15 @@ con presupuesto. También guardan razones deterministas y completitud.
 `OptimizationPreset` admite `BALANCED`, `LOWER_PURCHASE_COST`, `LOWER_WASTE` y
 `MORE_REUSE`. Estrategia, preset, pesos y versión forman parte del snapshot y
 del token. En planes históricos estas propiedades son opcionales.
+
+## Edición persistente
+
+`MealPlan` mantiene `editVersion`, `contentVersion` y `rowVersion`. Sus
+`MealPlanDay` y `PlannedMeal` tienen UUID persistentes canónicos. Una comida
+añade `locked`, `selectionSource`, versión de edición, fecha de modificación,
+plantilla original y seed parcial.
+
+`MealPlanChange` registra operación, versiones, objetivos, snapshots y métricas
+estructuradas, seed, estrategia, preset, motivo y relación de undo.
+`ShoppingList.sourcePlanContentVersion` permite derivar `CURRENT` u `OUTDATED`
+sin modificar la lista cuando se edita el plan.

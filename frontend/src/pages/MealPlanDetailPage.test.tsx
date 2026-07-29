@@ -48,7 +48,7 @@ describe('MealPlanDetailPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: 'Plan semanal demo' })).toBeInTheDocument()
-    expect(screen.getByText('Arroz con pollo')).toBeInTheDocument()
+    expect(screen.getAllByText('Arroz con pollo').length).toBeGreaterThan(0)
     expect(screen.getByText(/presupuesto usa coste consumido/i)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Archivar' }))
     expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'DELETE')).toBe(true)

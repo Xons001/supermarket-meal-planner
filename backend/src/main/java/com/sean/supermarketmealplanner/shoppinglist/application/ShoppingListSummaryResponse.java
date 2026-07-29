@@ -24,6 +24,9 @@ public record ShoppingListSummaryResponse(
         boolean budgetCalculationComplete,
         boolean calculationComplete,
         int warningCount,
-        boolean demoData
+        boolean demoData,
+        long sourcePlanContentVersion,
+        long currentPlanContentVersion,
+        String freshness
 ) {
 }

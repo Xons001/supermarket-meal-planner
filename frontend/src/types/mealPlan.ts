@@ -4,6 +4,11 @@ export type MealPlanStatus = 'DRAFT' | 'GENERATED' | 'ARCHIVED'
 export type VarietyPreference = 'LOW' | 'MEDIUM' | 'HIGH'
 export type MealPlanGenerationStrategy = 'SCORING' | 'PURCHASE_AWARE_SCORING'
 export type OptimizationPreset = 'BALANCED' | 'LOWER_PURCHASE_COST' | 'LOWER_WASTE' | 'MORE_REUSE'
+export type MealSelectionSource =
+  'GENERATED' | 'MANUALLY_REPLACED' | 'PARTIALLY_REGENERATED' | 'DAY_REGENERATED'
+export type ShoppingListFreshness = 'CURRENT' | 'OUTDATED' | 'NONE'
+export type AlternativePriority =
+  'BEST_BALANCE' | 'LOWER_PURCHASE_COST' | 'LOWER_WASTE' | 'MORE_VARIETY'
 
 export interface GenerateMealPlanRequest {
   supermarketCode: string
@@ -39,6 +44,7 @@ export interface MealPlanWarning {
 }
 
 export interface PlannedMeal {
+  plannedMealId?: string | null
   position: number
   mealType: MealType
   templateId: string
@@ -69,9 +75,16 @@ export interface PlannedMeal {
   score: number
   calculationComplete: boolean
   warnings: string[]
+  locked?: boolean
+  selectionSource?: MealSelectionSource
+  editVersion?: number
+  modifiedAt?: string | null
+  originalMealTemplateId?: string | null
+  partialGenerationSeed?: number | null
 }
 
 export interface MealPlanDay {
+  dayId?: string | null
   dayIndex: number
   date: string
   meals: PlannedMeal[]
@@ -181,7 +194,103 @@ export interface GeneratedMealPlan {
   }
   createdAt: string | null
   updatedAt: string | null
+  editVersion?: number
+  contentVersion?: number
+  shoppingListStatus?: ShoppingListFreshness
+  activeShoppingListId?: string | null
+  canUndo?: boolean
+  lastChangeSummary?: {
+    changeId: string
+    type: MealPlanChangeType
+    description: string
+    changedAt: string
+    editVersion: number
+  } | null
 }
+
+export type MealPlanChangeType =
+  | 'MEAL_REPLACED'
+  | 'MEAL_REGENERATED'
+  | 'DAY_REGENERATED'
+  | 'MEAL_LOCKED'
+  | 'MEAL_UNLOCKED'
+  | 'CHANGE_UNDONE'
+
+export interface EditMetrics {
+  calories: number
+  protein: number
+  consumedCost: number
+  purchaseCost: number | null
+  wasteCost: number | null
+  wastePercentage: number | null
+  packages: number | null
+  uniqueProducts: number | null
+  varietyScore: number
+  repetitionScore: number
+  overallScore: number
+  budgetDifference: number | null
+  budgetExceeded: boolean | null
+}
+
+export interface MealAlternative {
+  rank: number
+  mealTemplateId: string
+  name: string
+  mainIngredients: string[]
+  calories: number
+  protein: number
+  consumedCost: number
+  marginalPurchaseCost: number
+  purchaseCostDelta: number
+  wasteCostDelta: number
+  packageDelta: number
+  uniqueProductDelta: number
+  varietyDelta: number
+  repetitionDelta: number
+  estimatedScore: number
+  reasons: string[]
+  warnings: string[]
+  seed: number
+}
+
+export interface EditPreview {
+  operation: string
+  planId: string
+  targetId: string
+  editVersion: number
+  seed: number
+  beforeMeals: PlannedMeal[]
+  afterMeals: PlannedMeal[]
+  before: EditMetrics
+  after: EditMetrics
+  delta: EditMetrics
+  reasons: string[]
+  warnings: string[]
+  previewToken: string
+  expiresAt: string
+  durationMilliseconds: number
+}
+
+export interface MealPlanChange {
+  id: string
+  sequence: number
+  type: MealPlanChangeType
+  editVersion: number
+  contentVersion: number
+  dayId: string | null
+  plannedMealId: string | null
+  before: EditMetrics | null
+  after: EditMetrics | null
+  delta: EditMetrics | null
+  seed: number | null
+  strategy: string | null
+  preset: string | null
+  reason: string | null
+  undone: boolean
+  createdAt: string
+}
+
+export type MealPlanChangePage = PageResponse<MealPlanChange>
 
 export interface MealPlanSummary {
   id: string

@@ -36,6 +36,8 @@ services:
       DB_USER: ${POSTGRES_USER:-meal_planner}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local}
       CATALOG_SEED_ENABLED: "true"
+      MEAL_PLAN_PREVIEW_HMAC_SECRET: ${MEAL_PLAN_PREVIEW_HMAC_SECRET:?MEAL_PLAN_PREVIEW_HMAC_SECRET is required}
+      MEAL_PLAN_PREVIEW_TTL: ${MEAL_PLAN_PREVIEW_TTL:-PT15M}
     ports:
       - "${BACKEND_HOST_PORT:-8081}:8080"
     networks:

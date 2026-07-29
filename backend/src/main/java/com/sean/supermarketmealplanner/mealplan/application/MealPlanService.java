@@ -29,13 +29,15 @@ public class MealPlanService {
     private final MealTemplateRepository templateRepository;
     private final SupermarketRepository supermarketRepository;
     private final ObjectMapper objectMapper;
+    private final MealPlanSnapshotService snapshotService;
 
     public MealPlanService(
             java.util.List<MealPlanGenerationStrategy> strategies,
             MealPlanRepository repository,
             MealTemplateRepository templateRepository,
             SupermarketRepository supermarketRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            MealPlanSnapshotService snapshotService
     ) {
         this.strategies = strategies.stream().collect(Collectors.toUnmodifiableMap(
                 MealPlanGenerationStrategy::supportedStrategy,
@@ -45,6 +47,7 @@ public class MealPlanService {
         this.templateRepository = templateRepository;
         this.supermarketRepository = supermarketRepository;
         this.objectMapper = objectMapper;
+        this.snapshotService = snapshotService;
     }
 
     @Transactional
@@ -95,7 +98,10 @@ public class MealPlanService {
                 templates
         );
         repository.saveAndFlush(entity);
-        return persisted;
+        var enriched = snapshotService.decorate(entity, persisted);
+        entity.updateEditedSnapshot(enriched, json(enriched), now);
+        repository.saveAndFlush(entity);
+        return enriched;
     }
 
     @Transactional(readOnly = true)
@@ -136,7 +142,7 @@ public class MealPlanService {
 
     @Transactional(readOnly = true)
     public GeneratedMealPlanResult findById(UUID id) {
-        return parse(findEntity(id).getResultJson());
+        return snapshotService.read(findEntity(id));
     }
 
     @Transactional
@@ -145,7 +151,7 @@ public class MealPlanService {
             throw new MealPlanValidationException("A persisted plan cannot return to DRAFT");
         }
         var entity = findEntity(id);
-        var current = parse(entity.getResultJson());
+        var current = snapshotService.read(entity);
         var now = OffsetDateTime.now();
         var updated = copyWithPersistence(current, id, status, current.createdAt(), now);
         var json = json(updated);
@@ -231,7 +237,13 @@ public class MealPlanService {
                 value.rejectedCandidateStatistics(),
                 value.generationMetadata(),
                 createdAt,
-                updatedAt
+                updatedAt,
+                value.editVersion(),
+                value.contentVersion(),
+                value.shoppingListStatus(),
+                value.activeShoppingListId(),
+                value.canUndo(),
+                value.lastChangeSummary()
         );
     }
 

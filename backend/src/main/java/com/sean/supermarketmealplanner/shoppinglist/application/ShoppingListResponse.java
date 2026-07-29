@@ -32,7 +32,10 @@ public record ShoppingListResponse(
         boolean calculationComplete,
         List<ShoppingWarning> warnings,
         boolean demoData,
-        long generationDurationMilliseconds
+        long generationDurationMilliseconds,
+        long sourcePlanContentVersion,
+        long currentPlanContentVersion,
+        String freshness
 ) {
     public record SupermarketSnapshot(
             UUID id,

@@ -120,13 +120,17 @@ artículos no calculables, muestra los tres resúmenes de magnitud y ofrece:
 ## Límites
 
 - Los precios y productos son datos de demostración.
-- No hay edición manual, sustituciones ni consolidación entre planes.
+- No hay consolidación entre planes.
 - El coste consumido agregado se deriva con el calculador compartido a partir
   de cantidades, formato y precio del snapshot. Puede diferir unos céntimos de
   `MealPlan.totalConsumedCost`, que conserva la suma histórica redondeada por
   comida; para consistencia se usa `purchaseMetrics.estimatedConsumedCost`.
 - No se optimizan formatos alternativos ni ofertas.
 - No se consulta disponibilidad en tiempo real.
+
+Una lista guarda la versión de contenido que la originó. Las ediciones dejan
+la lista activa accesible pero `OUTDATED`; solo una generación explícita crea
+la nueva lista `CURRENT` y retira la anterior como activa.
 
 ## Consistencia con la optimización
 
