@@ -27,7 +27,7 @@ jobs:
         working-directory: frontend
       - run: pip install -r airflow/requirements.txt && pip-audit -r airflow/requirements-runtime.txt
       - run: ./backend/mvnw -f backend/pom.xml org.owasp:dependency-check-maven:12.1.8:check -DfailBuildOnCVSS=8
-      - uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with: { scan-type: fs, scan-ref: ., severity: HIGH,CRITICAL, exit-code: "1" }
       - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
