@@ -1,0 +1,1 @@
+{"scenario":"NEW_PRODUCT","changes":[{"operation":"ADD","externalId":"demo-mercadona-fase9-new","categoryExternalId":"demo-cat-produce","name":"Producto nuevo de prueba","currentPrice":1.99,"unitPrice":3.98,"packageQuantity":500,"packageUnit":"G","available":true}]}

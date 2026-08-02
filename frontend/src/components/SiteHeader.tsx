@@ -50,6 +50,8 @@ export function SiteHeader() {
         ['/#como-funcionara', 'Cómo funciona'],
       ]
 
+  if (user?.role === 'ADMIN') links.push(['/admin/catalog-sync', 'Sincronización'])
+
   return (
     <header className={styles.header}>
       <Link className={styles.brand} to="/" aria-label="Supermarket Meal Planner, inicio">

@@ -44,6 +44,11 @@ const DashboardPage = lazy(() =>
 const ActivityPage = lazy(() =>
   import('../pages/ActivityPage').then((module) => ({ default: module.ActivityPage })),
 )
+const CatalogSyncAdminPage = lazy(() =>
+  import('../pages/CatalogSyncAdminPage').then((module) => ({
+    default: module.CatalogSyncAdminPage,
+  })),
+)
 
 const queryClient = createQueryClient()
 const privateRoute = (page: ReactNode) => (
@@ -94,6 +99,16 @@ export function App() {
                 element={privateRoute(<ShoppingListDetailPage />)}
               />
               <Route path="/activity" element={privateRoute(<ActivityPage />)} />
+              <Route
+                path="/admin/catalog-sync"
+                element={
+                  <AdminRoute>
+                    <Suspense fallback={<RouteLoading />}>
+                      <CatalogSyncAdminPage />
+                    </Suspense>
+                  </AdminRoute>
+                }
+              />
               <Route path="/profile" element={privateRoute(<ProfilePage />)} />
               <Route path="/login" element={<AuthPage mode="login" />} />
               <Route path="/register" element={<AuthPage mode="register" />} />

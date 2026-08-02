@@ -83,6 +83,12 @@ public class ProductEntity {
     @Column(name = "last_synced_at", nullable = false)
     private OffsetDateTime lastSyncedAt;
 
+    @Column(name = "last_seen_at")
+    private OffsetDateTime lastSeenAt;
+
+    @Column(name = "unavailable_since")
+    private OffsetDateTime unavailableSince;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -104,6 +110,7 @@ public class ProductEntity {
         this.createdAt = now;
         this.updatedAt = now;
         this.lastSyncedAt = now;
+        this.lastSeenAt = now;
     }
 
     public void update(
@@ -136,11 +143,14 @@ public class ProductEntity {
         this.available = available;
         this.source = source;
         this.lastSyncedAt = syncedAt;
+        this.lastSeenAt = syncedAt;
+        this.unavailableSince = available ? null : (this.unavailableSince == null ? syncedAt : this.unavailableSince);
         this.updatedAt = syncedAt;
     }
 
     public void markUnavailable(OffsetDateTime syncedAt) {
         this.available = false;
+        this.unavailableSince = this.unavailableSince == null ? syncedAt : this.unavailableSince;
         this.lastSyncedAt = syncedAt;
         this.updatedAt = syncedAt;
     }
@@ -220,6 +230,10 @@ public class ProductEntity {
     public OffsetDateTime getLastSyncedAt() {
         return lastSyncedAt;
     }
+
+    public OffsetDateTime getLastSeenAt() { return lastSeenAt; }
+
+    public OffsetDateTime getUnavailableSince() { return unavailableSince; }
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;

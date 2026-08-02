@@ -6,4 +6,7 @@ export const queryKeys = {
   mealPlan: (id: string) => ['meal-plan', id] as const,
   shoppingLists: (filters?: unknown) => ['shopping-lists', filters] as const,
   shoppingList: (id: string) => ['shopping-list', id] as const,
+  catalogSyncOverview: ['admin', 'catalog-sync', 'overview'] as const,
+  catalogSyncRuns: (filters: unknown) => ['admin', 'catalog-sync', 'runs', filters] as const,
+  catalogSyncErrors: (id: string) => ['admin', 'catalog-sync', 'errors', id] as const,
 }

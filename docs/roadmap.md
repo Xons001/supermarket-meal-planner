@@ -44,9 +44,9 @@ límites de intentos y aislamiento completo por propietario.
 Landing pública, navegación contextual, dashboard privado, actividad combinada,
 tema, organización de planes y listas, duplicación histórica y E2E aislado.
 
-## FASE 9 — Airflow y sincronización
+## FASE 9 — Airflow y sincronización ✅
 
-DAGs idempotentes de catálogo, precios, bajas lógicas e informes.
+DAGs idempotentes de catálogo, precios, bajas lógicas, staging, informes y panel ADMIN.
 
 ## FASE 10 — Nutrición externa
 

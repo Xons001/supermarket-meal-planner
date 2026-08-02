@@ -20,16 +20,22 @@ class DashboardMigrationIntegrationTest extends AbstractIntegrationTest {
     @Autowired private JdbcTemplate jdbc;
 
     @Test
-    void v11CreatesOrganizationThemeAndActivitySchema() {
+    void latestMigrationCreatesOrganizationAndCatalogSyncSchema() {
         var version = jdbc.queryForObject(
                 "SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1",
                 String.class);
-        assertThat(version).isEqualTo("11");
+        assertThat(version).isEqualTo("12");
         assertThat(column("meal_plans", "favorite")).isTrue();
         assertThat(column("meal_plans", "estimated_purchase_cost")).isTrue();
         assertThat(column("shopping_lists", "active")).isTrue();
         assertThat(column("user_preferences", "theme")).isTrue();
         assertThat(column("user_activity_events", "origin")).isTrue();
+        assertThat(column("products", "last_seen_at")).isTrue();
+        assertThat(column("products", "unavailable_since")).isTrue();
+        assertThat(column("product_price_history", "sync_run_id")).isTrue();
+        assertThat(table("catalog_sync_runs")).isTrue();
+        assertThat(table("catalog_sync_errors")).isTrue();
+        assertThat(table("staging_products")).isTrue();
         assertThat(jdbc.queryForObject(
                 "SELECT theme FROM user_preferences WHERE user_id = "
                         + "'00000000-0000-4000-8000-000000000007'", String.class))
@@ -55,5 +61,12 @@ class DashboardMigrationIntegrationTest extends AbstractIntegrationTest {
                     WHERE table_schema = 'public' AND table_name = ? AND column_name = ?
                 )
                 """, Boolean.class, table, column));
+    }
+
+    private boolean table(String table) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS (SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = ?)
+                """, Boolean.class, table));
     }
 }

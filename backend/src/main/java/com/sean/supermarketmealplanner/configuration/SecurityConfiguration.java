@@ -48,6 +48,7 @@ public class SecurityConfiguration {
                     a.requestMatchers("/v3/api-docs/**","/swagger-ui/**").access((auth,ctx)->
                             new org.springframework.security.authorization.AuthorizationDecision(p.swaggerEnabled()));
                     a.requestMatchers("/api/v1/meal-templates/**").hasRole("ADMIN");
+                    a.requestMatchers("/api/v1/admin/**").hasRole("ADMIN");
                     a.anyRequest().authenticated();
                 })
                 .exceptionHandling(e->e.authenticationEntryPoint((req,res,ex)->

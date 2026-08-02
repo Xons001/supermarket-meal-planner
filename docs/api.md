@@ -525,7 +525,17 @@ Ejemplo parcial:
 
 ## Contratos futuros no implementados
 
-La sincronización Airflow, nutrición externa, OR-Tools e IA opcional permanecen
+La nutrición externa, OR-Tools e IA opcional permanecen
+
+## Administración de sincronizaciones (ADMIN)
+
+- `GET /api/v1/admin/catalog-syncs/overview`: salud, proveedor, horarios y último run.
+- `GET /api/v1/admin/catalog-syncs`: historial paginado con filtros `supermarketCode`, `status` y `syncType`.
+- `GET /api/v1/admin/catalog-syncs/{id}` y `/{id}/errors`: detalle e incidencias.
+- `POST /api/v1/admin/catalog-syncs`: acepta `{supermarketCode, syncType}` y responde `202`.
+- `POST /api/v1/admin/catalog-syncs/{id}/retry`: crea un run nuevo y responde `202`.
+
+Las operaciones mutables requieren cookie autenticada, rol `ADMIN` y CSRF. Una ejecución solapada responde `409 CATALOG_SYNC_ALREADY_RUNNING`; indisponibilidad o credenciales rechazadas por Airflow responden `503` y conservan el run fallido.
 fuera del runtime actual.
 
 ## Edición parcial de planes persistidos

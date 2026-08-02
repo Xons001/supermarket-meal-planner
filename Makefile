@@ -12,6 +12,7 @@ frontend:
 test:
 	docker compose --profile tools run --rm --build backend-test
 	docker compose --profile tools run --rm --build frontend-test
+	docker compose --profile tools run --rm --build airflow-test
 
 e2e:
 	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-e2e.ps1

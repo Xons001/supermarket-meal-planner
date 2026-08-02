@@ -24,6 +24,8 @@ frontend/test-results/
 airflow/logs/
 airflow/airflow.db
 airflow/airflow.cfg
+airflow/catalog-tmp/
+data/providers/runtime/
 
 # Local data and temporary files
 *.tmp

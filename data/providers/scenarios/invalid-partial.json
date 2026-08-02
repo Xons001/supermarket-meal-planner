@@ -1,0 +1,1 @@
+{"scenario":"INVALID_PARTIAL","changes":[{"operation":"ADD","externalId":"invalid-without-required-fields"}],"expectedStatus":"PARTIAL_SUCCESS"}

@@ -1,5 +1,7 @@
 # Supermarket Meal Planner
 
+> FASE 9 disponible: sincronización idempotente de catálogo y precios mediante Apache Airflow 3.3. Consulta [la guía operativa](docs/catalog-and-price-synchronization.md).
+
 Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.

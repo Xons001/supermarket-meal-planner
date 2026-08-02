@@ -10,13 +10,27 @@ services:
     environment:
       APP_AUTH_ARGON2_MEMORY_KB: 8192
       APP_AUTH_ARGON2_ITERATIONS: 1
-      APP_AUTH_ALLOWED_ORIGINS: http://localhost:15173
+      APP_AUTH_ALLOWED_ORIGINS: http://frontend
+      APP_AUTH_RATE_LOGIN_PER_MINUTE: 100
       APP_AUTH_RATE_REGISTER_PER_HOUR: 100
     ports: !override []
 
   frontend:
     restart: "no"
     ports: !override []
+
+  airflow-apiserver:
+    restart: "no"
+    ports: !override []
+
+  airflow-scheduler:
+    restart: "no"
+
+  airflow-dag-processor:
+    restart: "no"
+
+  airflow-triggerer:
+    restart: "no"
 
   e2e:
     image: mcr.microsoft.com/playwright:v1.55.1-noble
@@ -25,6 +39,8 @@ services:
     command: ["sh", "-c", "npm ci && npm run test:e2e"]
     environment:
       E2E_BASE_URL: http://frontend
+      E2E_ADMIN_EMAIL: ${APP_ADMIN_EMAIL}
+      E2E_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD}
     volumes:
       - .:/workspace
       - e2e_node_modules:/workspace/frontend/node_modules

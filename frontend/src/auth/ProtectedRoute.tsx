@@ -32,6 +32,6 @@ export function AdminRoute({ children }: { children: ReactNode }) {
         <p role="status">Restaurando sesión…</p>
       </main>
     )
-  if (user?.role !== 'ADMIN') return <Navigate to="/meal-templates" replace />
+  if (user?.role !== 'ADMIN') return <Navigate to="/forbidden" replace />
   return children
 }

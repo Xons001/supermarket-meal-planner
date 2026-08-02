@@ -22,9 +22,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.sean.supermarketmealplanner.identity.application.IdentityException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import com.sean.supermarketmealplanner.catalogsync.application.CatalogSyncException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(CatalogSyncException.class)
+    ResponseEntity<ProblemDetail> catalogSync(CatalogSyncException exception, HttpServletRequest request) {
+        var problem=createProblem(exception.status(),"Catalog synchronization failed",exception.getMessage(),request);
+        problem.setProperty("code",exception.code()); problem.setProperty("errorCode",exception.code());
+        return ResponseEntity.status(exception.status()).body(problem);
+    }
     @ExceptionHandler(IdentityException.class)
     ResponseEntity<ProblemDetail> identity(IdentityException exception) {
         var problem = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());

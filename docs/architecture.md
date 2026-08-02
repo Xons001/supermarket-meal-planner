@@ -19,7 +19,8 @@ flowchart LR
     LocalNutrition["JSON nutricional"] --> NutritionProvider["NutritionDataProvider"]
     CatalogProvider --> Application
     NutritionProvider --> Application
-    Airflow["Airflow futuro"] -. sincronización por lotes .-> Staging[(Staging futuro)]
+    Airflow["Apache Airflow 3.3 / LocalExecutor"] --> Staging[(Staging de catálogo y precios)]
+    Staging --> PostgreSQL
     Staging -. carga idempotente .-> PostgreSQL
 ```
 
@@ -107,7 +108,9 @@ confirmación verifica plan, objetivo y versión antes de actualizar en una sola
 transacción el agregado persistido y su historial. Las listas comparan su
 `sourcePlanContentVersion` al leer y no se archivan durante la edición.
 
-## Airflow futuro
+## Airflow y sincronización de catálogo
+
+La FASE 9 ejecuta `catalog_full_sync`, `catalog_price_sync` y `catalog_sync_cleanup` con metadatos PostgreSQL aislados. Los proveedores Python normalizan antes de staging y los merges son idempotentes. El backend solo crea el run y dispara la API REST v2; no procesa el catálogo en la petición HTTP.
 
 `supermarket_catalog_sync` ejecutará extracción, normalización, validación,
 carga, histórico, bajas lógicas e informe. `nutrition_enrichment` buscará datos,

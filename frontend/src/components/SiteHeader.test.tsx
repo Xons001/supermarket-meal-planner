@@ -93,4 +93,15 @@ describe('SiteHeader', () => {
     expect(await screen.findByLabelText(/Abrir.*cuenta/)).toHaveTextContent('Sean')
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument()
   })
+
+  it('shows catalog synchronization only to administrators', () => {
+    const { unmount } = renderHeader(user)
+    expect(screen.queryByRole('link', { name: 'Sincronización' })).not.toBeInTheDocument()
+    unmount()
+    renderHeader({ ...user, role: 'ADMIN' })
+    expect(screen.getByRole('link', { name: 'Sincronización' })).toHaveAttribute(
+      'href',
+      '/admin/catalog-sync',
+    )
+  })
 })

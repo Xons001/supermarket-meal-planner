@@ -31,6 +31,12 @@ public class ProductPriceHistoryEntity {
     @Column(name = "recorded_at", nullable = false)
     private OffsetDateTime recordedAt;
 
+    @Column(name = "sync_run_id")
+    private UUID syncRunId;
+
+    @Column(length = 50)
+    private String source;
+
     protected ProductPriceHistoryEntity() {
     }
 
@@ -45,6 +51,7 @@ public class ProductPriceHistoryEntity {
         this.price = price;
         this.unitPrice = unitPrice;
         this.recordedAt = recordedAt;
+        this.source = "LOCAL_JSON";
     }
 
     public UUID getId() {
@@ -66,4 +73,8 @@ public class ProductPriceHistoryEntity {
     public OffsetDateTime getRecordedAt() {
         return recordedAt;
     }
+
+    public UUID getSyncRunId() { return syncRunId; }
+
+    public String getSource() { return source; }
 }

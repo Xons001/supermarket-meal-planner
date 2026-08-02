@@ -56,6 +56,17 @@ app:
   catalog:
     demo-resource: classpath:data/mock/mercadona-catalog.json
     seed-enabled: ${CATALOG_SEED_ENABLED:true}
+  catalog-sync:
+    enabled: ${APP_CATALOG_SYNC_ENABLED:false}
+    provider: ${APP_CATALOG_SYNC_PROVIDER:LOCAL_JSON}
+    airflow-base-url: ${APP_AIRFLOW_BASE_URL:http://localhost:8082}
+    airflow-public-url: ${APP_AIRFLOW_PUBLIC_URL:}
+    airflow-username: ${AIRFLOW_ADMIN_USERNAME:admin}
+    airflow-password: ${AIRFLOW_ADMIN_PASSWORD:disabled-local-placeholder}
+    full-schedule: ${APP_CATALOG_FULL_SYNC_SCHEDULE:0 3 * * *}
+    price-schedule: ${APP_CATALOG_PRICE_SYNC_SCHEDULE:0 */6 * * *}
+    manual-rate-per-hour: ${APP_CATALOG_SYNC_MANUAL_RATE_PER_HOUR:10}
+    staging-retention-days: ${APP_CATALOG_SYNC_STAGING_RETENTION_DAYS:7}
   meal-templates:
     demo-resource: classpath:data/mock/meal-templates.json
     seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
@@ -168,7 +179,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   endpoint:
     health:
       probes:

@@ -5,7 +5,9 @@ const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:15173'
 export default defineConfig({
   testDir: './e2e',
   timeout: 45_000,
-  fullyParallel: true,
+  // The isolated ADMIN fixture is intentionally shared by viewport projects;
+  // serialize authentication so the real login rate limiter is not bypassed.
+  fullyParallel: false,
   retries: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {

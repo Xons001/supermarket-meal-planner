@@ -36,7 +36,9 @@ La clave `(supermarket_id, external_id)` es única.
 `packageQuantity`, `packageUnit`, `available`, `source`, `lastSyncedAt`,
 `measurementType`, `costDataComplete`, `createdAt`, `updatedAt`.
 
-Un producto ausente en una sincronización se conserva con `available=false`.
+Un producto ausente se conserva con `available=false` y `unavailableSince`, pero solo después de una sincronización completa sin errores. `lastSeenAt` distingue observación del cambio funcional.
+
+`CatalogSyncRun` es la raíz operativa de una importación y separa `syncType` de `triggeredBy`. Conserva estado, contadores, configuración e informe JSON. `CatalogSyncError` registra incidencias deduplicadas; las tres tablas staging conservan el dato observado hasta la limpieza por retención. El historial de precios referencia opcionalmente el run y su proveedor.
 La clave `(supermarket_id, external_id)` evita duplicados.
 
 ### Nutrition
