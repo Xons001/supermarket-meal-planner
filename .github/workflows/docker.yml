@@ -27,7 +27,7 @@ jobs:
       - run: docker compose -f docker-compose.prod.yml config >/dev/null
       - run: docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml config >/dev/null
       - run: docker compose build backend frontend airflow-test
-      - uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with: { scan-type: fs, scan-ref: ., format: cyclonedx, output: image-context-sbom.cdx.json }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with: { name: container-sbom, path: image-context-sbom.cdx.json, retention-days: 14 }
