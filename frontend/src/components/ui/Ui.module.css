@@ -88,6 +88,25 @@
   animation: shimmer 1.4s infinite;
 }
 
+.skeleton[data-height='4rem'] {
+  min-height: 4rem;
+}
+.skeleton[data-height='5rem'] {
+  min-height: 5rem;
+}
+.skeleton[data-height='7rem'] {
+  min-height: 7rem;
+}
+.skeleton[data-height='8rem'] {
+  min-height: 8rem;
+}
+.skeleton[data-height='14rem'] {
+  min-height: 14rem;
+}
+.skeleton[data-height='18rem'] {
+  min-height: 18rem;
+}
+
 .filterBar {
   display: flex;
   flex-wrap: wrap;

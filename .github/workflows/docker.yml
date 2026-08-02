@@ -1,0 +1,33 @@
+name: Docker
+on: { pull_request: {}, workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  build-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AIRFLOW_ADMIN_USERNAME: ci-admin
+      APP_AUTH_ISSUER: https://ci.example.test
+      APP_AUTH_ALLOWED_ORIGINS: https://ci.example.test
+      PUBLIC_BASE_URL: https://ci.example.test
+      TLS_CERT_PATH: /tmp/tls/fullchain.pem
+      TLS_KEY_PATH: /tmp/tls/privkey.pem
+      GRAFANA_ADMIN_USER: ci-admin
+      GRAFANA_ADMIN_PASSWORD: ci-grafana-000000000000000000000001
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Generate ephemeral CI secrets
+        shell: bash
+        run: |
+          for name in POSTGRES_PASSWORD AIRFLOW_METADATA_DB_PASSWORD AIRFLOW_API_JWT_SECRET AIRFLOW_WEBSERVER_SECRET_KEY AIRFLOW_ADMIN_PASSWORD APP_AUTH_ACCESS_TOKEN_SECRET APP_AUTH_REFRESH_TOKEN_SECRET MEAL_PLAN_PREVIEW_HMAC_SECRET APP_OBSERVABILITY_USER_HASH_SECRET GRAFANA_ADMIN_PASSWORD; do
+            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          done
+          echo "AIRFLOW_FERNET_KEY=$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '\n')" >> "$GITHUB_ENV"
+      - run: docker compose config >/dev/null
+      - run: docker compose -f docker-compose.prod.yml config >/dev/null
+      - run: docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml config >/dev/null
+      - run: docker compose build backend frontend airflow-test
+      - uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with: { scan-type: fs, scan-ref: ., format: cyclonedx, output: image-context-sbom.cdx.json }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with: { name: container-sbom, path: image-context-sbom.cdx.json, retention-days: 14 }

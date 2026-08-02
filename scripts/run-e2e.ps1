@@ -27,6 +27,7 @@ $env:APP_ADMIN_ENABLED = "true"
 $env:APP_ADMIN_EMAIL = "e2e-admin@example.test"
 $env:APP_ADMIN_PASSWORD = New-E2eSecret
 $projectName = "supermarket-meal-planner-e2e"
+$env:COMPOSE_PROJECT_NAME = $projectName
 $e2eExitCode = 0
 
 try {

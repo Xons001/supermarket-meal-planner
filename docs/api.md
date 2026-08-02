@@ -3,6 +3,19 @@
 Base: `/api/v1`. Swagger en `/swagger-ui/index.html` es la fuente ejecutable del
 contrato. Los precios y productos de esta fase son ficticios.
 
+Todas las respuestas del backend incluyen `X-Request-ID`. Los Problem Details contienen `code` y `correlationId`; un fallo no controlado usa `500 INTERNAL_ERROR` sin detalle técnico.
+
+## Exportación personal
+
+`GET /api/v1/users/me/export` requiere sesión, devuelve `application/json` como adjunto y `Cache-Control: no-store`. Incluye perfil, preferencias, planes, listas y actividad del propietario, pero excluye hashes, sesiones, tokens, secretos y auditoría interna. Se permiten dos exportaciones por usuario y hora; el exceso devuelve `429 RATE_LIMIT_EXCEEDED`.
+
+## Salud interna y pública
+
+- `/healthz`: estado público mínimo `UP|DOWN` a través del proxy.
+- `/actuator/health/liveness` y `/actuator/health/readiness`: internos.
+- `/actuator/info`: nombre, versión, commit y build.
+- `/actuator/prometheus`: solo red privada de observabilidad.
+
 ## Supermercados
 
 ```http

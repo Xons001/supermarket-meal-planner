@@ -30,3 +30,7 @@ data/providers/runtime/
 # Local data and temporary files
 *.tmp
 *.swp
+backups/
+certificates/
+*.dump
+*.sha256

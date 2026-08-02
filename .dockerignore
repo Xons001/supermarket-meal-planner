@@ -6,5 +6,8 @@
 **/target
 **/coverage
 **/*.log
+backups
+certificates
+.github
 .idea
 .vscode

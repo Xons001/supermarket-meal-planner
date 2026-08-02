@@ -41,14 +41,16 @@ public class NutritionEnrichmentService {
         String provider=request.provider()==null||request.provider().isBlank()?properties.provider():request.provider().toUpperCase(Locale.ROOT);
         if(!Set.of("LOCAL_JSON","OPEN_FOOD_FACTS").contains(provider))throw problem(HttpStatus.SERVICE_UNAVAILABLE,"NUTRITION_PROVIDER_UNAVAILABLE","Proveedor no soportado");
         if(provider.equals("OPEN_FOOD_FACTS")&&!properties.openFoodFacts().enabled())throw problem(HttpStatus.SERVICE_UNAVAILABLE,"NUTRITION_PROVIDER_UNAVAILABLE","Open Food Facts está deshabilitado");
-        var actor=users.require();limiter.check("nutrition-enrichment",actor.userId().toString(),properties.manualRatePerHour(),Duration.ofHours(1));var now=OffsetDateTime.now(clock);var run=new NutritionEnrichmentRunEntity(provider,TriggeredBy.MANUAL,actor.userId(),json.createObjectNode(),now);
+        var actor=users.require();limiter.check("nutrition-enrichment",actor.userId().toString(),properties.manualRatePerHour(),Duration.ofHours(1));var now=OffsetDateTime.now(clock);
+        var configuration=json.createObjectNode();var requestId=MDC.get("requestId");if(requestId!=null)configuration.put("requestId",requestId);
+        var run=new NutritionEnrichmentRunEntity(provider,TriggeredBy.MANUAL,actor.userId(),configuration,now);
         try{runs.saveAndFlush(run);}catch(DataIntegrityViolationException exception){throw problem(HttpStatus.CONFLICT,"NUTRITION_ENRICHMENT_ALREADY_RUNNING","Ya existe un enriquecimiento activo");}
         String dagRunId="manual__nutrition__"+run.getId();
         try{airflow.trigger("nutrition_enrichment",dagRunId,Map.of("runId",run.getId().toString(),"provider",provider,
             "batchSize",properties.batchSize(),"autoAcceptThreshold",properties.autoAcceptThreshold(),
             "manualReviewThreshold",properties.manualReviewThreshold()));run.accepted(dagRunId,now);runs.save(run);
             metrics.counter("nutrition.enrichment.requests","provider",provider).increment();
-            log.info("nutrition_enrichment_requested run={} provider={} actor={}",run.getId(),provider,actor.userId());
+            log.info("nutrition_enrichment_requested run={} provider={}",run.getId(),provider);
             return new NutritionAdminDtos.Accepted(run.getId(),dagRunId,run.getStatus(),run.getCreatedAt());
         }catch(CatalogSyncException exception){run.failed(json.createObjectNode().put("code",exception.code()).put("message",exception.getMessage()),OffsetDateTime.now(clock));runs.save(run);
             throw problem(HttpStatus.SERVICE_UNAVAILABLE,"NUTRITION_ENRICHMENT_FAILED","Airflow no aceptó el enriquecimiento");}
@@ -68,17 +70,17 @@ public class NutritionEnrichmentService {
             actor.userId(),request.reason()==null?"Candidato aceptado manualmente":request.reason(),"CANDIDATE_ACCEPTED");
         try{candidate.accept(actor.userId(),OffsetDateTime.now(clock));candidates.save(candidate);}catch(IllegalStateException exception){throw reviewed();}
         metrics.counter("nutrition.candidates.reviewed","decision","accepted").increment();
-        log.info("nutrition_candidate_accepted candidate={} product={} actor={}",id,candidate.getProduct().getId(),actor.userId());
+        log.info("nutrition_candidate_accepted candidate={} product={}",id,candidate.getProduct().getId());
         return NutritionAdminDtos.NutritionSnapshot.from(candidate.getProduct().getNutrition());}
     @Transactional public void reject(UUID id,NutritionAdminDtos.RejectRequest request){var actor=users.require();var candidate=findCandidate(id);
         ensureVersion(candidate,request.expectedVersion());ensureFresh(candidate);try{candidate.reject(actor.userId(),request.reason(),OffsetDateTime.now(clock));candidates.save(candidate);}
         catch(IllegalStateException exception){throw reviewed();}metrics.counter("nutrition.candidates.reviewed","decision","rejected").increment();
-        log.info("nutrition_candidate_rejected candidate={} product={} actor={}",id,candidate.getProduct().getId(),actor.userId());}
+        log.info("nutrition_candidate_rejected candidate={} product={}",id,candidate.getProduct().getId());}
     @Transactional public NutritionAdminDtos.NutritionSnapshot manual(UUID productId,NutritionAdminDtos.ManualRequest request,boolean create){
         var actor=users.require();var product=products.findById(productId).orElseThrow(()->problem(HttpStatus.NOT_FOUND,"RESOURCE_NOT_FOUND","Producto no encontrado"));
         if(create&&product.getNutrition()!=null)throw problem(HttpStatus.CONFLICT,"NUTRITION_MATCH_CONFLICT","El producto ya tiene nutrición");
         apply(product,request.nutrition(),"MANUAL","MANUAL_OVERRIDE",BigDecimal.valueOf(100),null,actor.userId(),request.reason(),"MANUAL");
-        metrics.counter("nutrition.manual.overrides").increment();log.info("nutrition_manual_override product={} actor={}",productId,actor.userId());
+        metrics.counter("nutrition.manual.overrides").increment();log.info("nutrition_manual_override product={}",productId);
         return NutritionAdminDtos.NutritionSnapshot.from(product.getNutrition());}
     public List<NutritionAdminDtos.History> history(UUID productId){products.findById(productId).orElseThrow(()->problem(HttpStatus.NOT_FOUND,"RESOURCE_NOT_FOUND","Producto no encontrado"));
         return jdbc.query("select id,previous_snapshot_json,new_snapshot_json,change_source,provider,confidence_score,changed_at,reason from product_nutrition_history where product_id=? order by changed_at desc",

@@ -27,7 +27,9 @@ def canonical_hash(value: Any) -> str:
 
 def normalize_name(value: str | None) -> str:
     text = unicodedata.normalize("NFKD", value or "").encode("ascii", "ignore").decode()
-    text = re.sub(r"\b(?:pack|paquete|bote|bolsa|lata|botella|formato)\b", " ", text.lower())
+    text = re.sub(
+        r"\b(?:pack|paquete|bote|bolsa|lata|botella|formato)\b", " ", text.lower()
+    )
     text = re.sub(r"\b\d+(?:[.,]\d+)?\s*(?:kg|g|ml|l|ud|uds)\b", " ", text)
     return " ".join(re.sub(r"[^a-z0-9]+", " ", text).split())
 
@@ -48,13 +50,20 @@ def _nutrition_payload(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _valid(payload: dict[str, Any]) -> bool:
-    present = [value for key, value in payload.items() if key != "basis" and value is not None]
-    return bool(present) and all(isinstance(value, (int, float)) and value >= 0 for value in present)
+    present = [
+        value for key, value in payload.items() if key != "basis" and value is not None
+    ]
+    return bool(present) and all(
+        isinstance(value, (int, float)) and value >= 0 for value in present
+    )
 
 
 def start_run(conf: dict[str, Any], dag_run_id: str) -> dict[str, str]:
     requested = conf.get("runId")
-    provider = str(conf.get("provider") or os.getenv("NUTRITION_PROVIDER", "LOCAL_JSON")).upper()
+    provider = str(
+        conf.get("provider") or os.getenv("NUTRITION_PROVIDER", "LOCAL_JSON")
+    ).upper()
+    request_id = str(conf.get("requestId") or "")[:64]
     with connection() as conn, conn.cursor() as cursor:
         if requested:
             run_id = uuid.UUID(requested)
@@ -69,30 +78,55 @@ def start_run(conf: dict[str, Any], dag_run_id: str) -> dict[str, str]:
             run_id = uuid.uuid4()
             cursor.execute(
                 "INSERT INTO nutrition_enrichment_runs(id,provider,status,triggered_by,airflow_dag_run_id,"
-                "report_json,created_at,updated_at,started_at) VALUES(%s,%s,'RUNNING','SCHEDULED',%s,'{}',%s,%s,%s)",
-                (str(run_id), provider, dag_run_id, now(), now(), now()),
+                "report_json,created_at,updated_at,started_at) VALUES(%s,%s,'RUNNING','SCHEDULED',%s,%s,%s,%s,%s)",
+                (
+                    str(run_id),
+                    provider,
+                    dag_run_id,
+                    Json({"requestId": request_id or None}),
+                    now(),
+                    now(),
+                    now(),
+                ),
             )
-    return {"runId": str(run_id), "provider": provider}
+    return {"runId": str(run_id), "provider": provider, "requestId": request_id}
 
 
 def scan_products(ref: dict[str, str]) -> dict[str, str]:
     with connection() as conn, conn.cursor() as cursor:
-        cursor.execute("UPDATE nutrition_match_candidates SET status='EXPIRED',row_version=row_version+1 WHERE status='PENDING' AND expires_at<=%s", (now(),))
+        cursor.execute(
+            "UPDATE nutrition_match_candidates SET status='EXPIRED',row_version=row_version+1 WHERE status='PENDING' AND expires_at<=%s",
+            (now(),),
+        )
         cursor.execute(
             "SELECT count(*) FROM products p LEFT JOIN nutrition n ON n.product_id=p.id "
             "WHERE p.available=true AND (n.id IS NULL OR n.verification_status IN ('DEMO','UNVERIFIED') "
             "OR n.completeness<>'COMPLETE' OR n.confidence_score<75)"
         )
         count = cursor.fetchone()[0]
-        cursor.execute("UPDATE nutrition_enrichment_runs SET products_scanned=%s,updated_at=%s WHERE id=%s", (count, now(), ref["runId"]))
+        cursor.execute(
+            "UPDATE nutrition_enrichment_runs SET products_scanned=%s,updated_at=%s WHERE id=%s",
+            (count, now(), ref["runId"]),
+        )
     return ref
 
 
 def _fixture() -> list[dict[str, Any]]:
-    path = Path(os.getenv("NUTRITION_PROVIDER_FILE", "/opt/airflow/data/mock/mercadona-catalog.json"))
+    path = Path(
+        os.getenv(
+            "NUTRITION_PROVIDER_FILE", "/opt/airflow/data/mock/mercadona-catalog.json"
+        )
+    )
     payload = json.loads(path.read_text(encoding="utf-8"))
-    products = list(payload.get("products", payload if isinstance(payload, list) else []))
-    overrides = Path(os.getenv("NUTRITION_OVERRIDE_FILE", "/opt/airflow/data/providers/nutrition/local-nutrition-overrides.json"))
+    products = list(
+        payload.get("products", payload if isinstance(payload, list) else [])
+    )
+    overrides = Path(
+        os.getenv(
+            "NUTRITION_OVERRIDE_FILE",
+            "/opt/airflow/data/providers/nutrition/local-nutrition-overrides.json",
+        )
+    )
     if overrides.exists():
         extra = json.loads(overrides.read_text(encoding="utf-8"))
         products.extend(extra.get("products", extra if isinstance(extra, list) else []))
@@ -101,12 +135,16 @@ def _fixture() -> list[dict[str, Any]]:
 
 def lookup_and_score(ref: dict[str, str]) -> dict[str, str]:
     if ref["provider"] != "LOCAL_JSON":
-        raise ValueError("The Airflow enrichment worker only enables the reproducible LOCAL_JSON provider")
+        raise ValueError(
+            "The Airflow enrichment worker only enables the reproducible LOCAL_JSON provider"
+        )
     source = _fixture()
     by_barcode = {item.get("barcode"): item for item in source if item.get("barcode")}
     accepted = float(os.getenv("NUTRITION_AUTO_ACCEPT_THRESHOLD", "95"))
     review = float(os.getenv("NUTRITION_MANUAL_REVIEW_THRESHOLD", "75"))
-    expires = now() + timedelta(days=int(os.getenv("NUTRITION_REJECTION_COOLDOWN_DAYS", "30")))
+    expires = now() + timedelta(
+        days=int(os.getenv("NUTRITION_REJECTION_COOLDOWN_DAYS", "30"))
+    )
     barcode_matches = name_matches = errors = 0
     with connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -125,11 +163,29 @@ def lookup_and_score(ref: dict[str, str]) -> dict[str, str]:
             else:
                 normalized = normalize_name(name)
                 ranked = sorted(
-                    ((SequenceMatcher(None, normalized, normalize_name(candidate.get("name"))).ratio(), candidate) for candidate in source if _valid(_nutrition_payload(candidate))),
+                    (
+                        (
+                            SequenceMatcher(
+                                None, normalized, normalize_name(candidate.get("name"))
+                            ).ratio(),
+                            candidate,
+                        )
+                        for candidate in source
+                        if _valid(_nutrition_payload(candidate))
+                    ),
                     key=lambda pair: (-pair[0], str(pair[1].get("externalId", ""))),
                 )
                 ratio, item = ranked[0] if ranked else (0.0, None)
-                score = round(ratio * 85 + (10 if item and normalize_name(brand) == normalize_name(item.get("brand")) else 0), 2)
+                score = round(
+                    ratio * 85
+                    + (
+                        10
+                        if item
+                        and normalize_name(brand) == normalize_name(item.get("brand"))
+                        else 0
+                    ),
+                    2,
+                )
                 if score >= review:
                     name_matches += 1
             if not item or score < review:
@@ -137,15 +193,26 @@ def lookup_and_score(ref: dict[str, str]) -> dict[str, str]:
             payload = _nutrition_payload(item)
             if not _valid(payload):
                 message = f"Invalid nutrition fixture for {item.get('externalId')}"
-                error_hash = hashlib.sha256(f"{product_id}:{message}".encode()).hexdigest()
+                error_hash = hashlib.sha256(
+                    f"{product_id}:{message}".encode()
+                ).hexdigest()
                 cursor.execute(
                     "INSERT INTO nutrition_enrichment_errors(id,run_id,product_id,code,message,retryable,error_hash,created_at) "
                     "VALUES(%s,%s,%s,'NUTRITION_DATA_INVALID',%s,false,%s,%s) ON CONFLICT(run_id,error_hash) DO NOTHING",
-                    (str(uuid.uuid4()), ref["runId"], product_id, message, error_hash, now()),
+                    (
+                        str(uuid.uuid4()),
+                        ref["runId"],
+                        product_id,
+                        message,
+                        error_hash,
+                        now(),
+                    ),
                 )
                 errors += 1
                 continue
-            reference = str(item.get("externalId") or item.get("barcode") or item.get("name"))
+            reference = str(
+                item.get("externalId") or item.get("barcode") or item.get("name")
+            )
             source_hash = canonical_hash(payload)
             status = "AUTO_ACCEPTED" if score >= accepted else "PENDING"
             cursor.execute(
@@ -155,10 +222,30 @@ def lookup_and_score(ref: dict[str, str]) -> dict[str, str]:
                 "ON CONFLICT(product_id,provider,external_reference,source_hash) DO UPDATE SET "
                 "run_id=excluded.run_id,expires_at=excluded.expires_at,status=excluded.status "
                 "WHERE nutrition_match_candidates.status IN ('PENDING','AUTO_ACCEPTED','EXPIRED')",
-                (str(uuid.uuid4()), ref["runId"], product_id, ref["provider"], reference, item.get("barcode"),
-                 item.get("name") or name, normalize_name(item.get("name")), item.get("brand"), Json(payload), method,
-                 score, Json({"deterministicScore": score, "barcode": method == "BARCODE_EXACT"}), status,
-                 source_hash, expires, now()),
+                (
+                    str(uuid.uuid4()),
+                    ref["runId"],
+                    product_id,
+                    ref["provider"],
+                    reference,
+                    item.get("barcode"),
+                    item.get("name") or name,
+                    normalize_name(item.get("name")),
+                    item.get("brand"),
+                    Json(payload),
+                    method,
+                    score,
+                    Json(
+                        {
+                            "deterministicScore": score,
+                            "barcode": method == "BARCODE_EXACT",
+                        }
+                    ),
+                    status,
+                    source_hash,
+                    expires,
+                    now(),
+                ),
             )
         cursor.execute(
             "UPDATE nutrition_enrichment_runs SET barcode_matches=%s,name_matches=%s,errors=errors+%s,updated_at=%s WHERE id=%s",
@@ -175,22 +262,57 @@ def apply_auto_accepted(ref: dict[str, str]) -> dict[str, str]:
             "n.calories_per_100g,n.protein_per_100g,n.carbohydrates_per_100g,n.fat_per_100g,n.fiber_per_100g,"
             "n.sugar_per_100g,n.salt_per_100g,n.saturated_fat_per_100g,n.data_source,n.verification_status "
             "FROM nutrition_match_candidates c LEFT JOIN nutrition n ON n.product_id=c.product_id "
-            "WHERE c.run_id=%s AND c.status='AUTO_ACCEPTED' ORDER BY c.product_id", (ref["runId"],)
+            "WHERE c.run_id=%s AND c.status='AUTO_ACCEPTED' ORDER BY c.product_id",
+            (ref["runId"],),
         )
         for row in cursor.fetchall():
-            product_id, payload, confidence, reference, source_hash, nutrition_id, *old_values = row
-            number = lambda value: float(value) if value is not None else None
-            before = None if nutrition_id is None else {
-                "calories": number(old_values[0]), "protein": number(old_values[1]), "carbohydrates": number(old_values[2]),
-                "fat": number(old_values[3]), "fiber": number(old_values[4]), "sugars": number(old_values[5]), "salt": number(old_values[6]),
-                "saturatedFat": number(old_values[7]), "dataSource": old_values[8], "verificationStatus": old_values[9],
-            }
+            (
+                product_id,
+                payload,
+                confidence,
+                reference,
+                source_hash,
+                nutrition_id,
+                *old_values,
+            ) = row
+
+            def number(value):
+                return float(value) if value is not None else None
+
+            before = (
+                None
+                if nutrition_id is None
+                else {
+                    "calories": number(old_values[0]),
+                    "protein": number(old_values[1]),
+                    "carbohydrates": number(old_values[2]),
+                    "fat": number(old_values[3]),
+                    "fiber": number(old_values[4]),
+                    "sugars": number(old_values[5]),
+                    "salt": number(old_values[6]),
+                    "saturatedFat": number(old_values[7]),
+                    "dataSource": old_values[8],
+                    "verificationStatus": old_values[9],
+                }
+            )
             if nutrition_id is not None and old_values[9] == "MANUAL_OVERRIDE":
                 unchanged += 1
                 continue
-            values = (payload.get("calories"), payload.get("protein"), payload.get("carbohydrates"), payload.get("fat"),
-                      payload.get("fiber"), payload.get("sugars"), payload.get("salt"), payload.get("saturatedFat"))
-            completeness = "COMPLETE" if sum(value is not None for value in values) >= 7 else "PARTIAL"
+            values = (
+                payload.get("calories"),
+                payload.get("protein"),
+                payload.get("carbohydrates"),
+                payload.get("fat"),
+                payload.get("fiber"),
+                payload.get("sugars"),
+                payload.get("salt"),
+                payload.get("saturatedFat"),
+            )
+            completeness = (
+                "COMPLETE"
+                if sum(value is not None for value in values) >= 7
+                else "PARTIAL"
+            )
             nutrition_id = nutrition_id or uuid.uuid4()
             cursor.execute(
                 "INSERT INTO nutrition(id,product_id,calories_per_100g,protein_per_100g,carbohydrates_per_100g,fat_per_100g,"
@@ -204,16 +326,41 @@ def apply_auto_accepted(ref: dict[str, str]) -> dict[str, str]:
                 "nutrition_basis=excluded.nutrition_basis,completeness=excluded.completeness,source_reference=excluded.source_reference,"
                 "source_updated_at=excluded.source_updated_at,updated_at=excluded.updated_at,row_version=nutrition.row_version+1 "
                 "WHERE nutrition.verification_status<>'MANUAL_OVERRIDE'",
-                (str(nutrition_id), product_id, *values, ref["provider"], confidence, payload.get("basis", "PER_100_GRAMS"),
-                 completeness, reference, now(), now(), now()),
+                (
+                    str(nutrition_id),
+                    product_id,
+                    *values,
+                    ref["provider"],
+                    confidence,
+                    payload.get("basis", "PER_100_GRAMS"),
+                    completeness,
+                    reference,
+                    now(),
+                    now(),
+                    now(),
+                ),
             )
-            after = {**payload, "dataSource": ref["provider"], "verificationStatus": "VERIFIED", "confidenceScore": float(confidence)}
+            after = {
+                **payload,
+                "dataSource": ref["provider"],
+                "verificationStatus": "VERIFIED",
+                "confidenceScore": float(confidence),
+            }
             cursor.execute(
                 "INSERT INTO product_nutrition_history(id,product_id,previous_snapshot_json,new_snapshot_json,change_source,provider,"
                 "confidence_score,changed_at,reason,snapshot_hash) VALUES(%s,%s,%s,%s,'AUTOMATIC',%s,%s,%s,%s,%s) "
                 "ON CONFLICT(product_id,snapshot_hash) DO NOTHING",
-                (str(uuid.uuid4()), product_id, Json(before) if before else None, Json(after), ref["provider"], confidence,
-                 now(), "Automatic deterministic nutrition enrichment", source_hash),
+                (
+                    str(uuid.uuid4()),
+                    product_id,
+                    Json(before) if before else None,
+                    Json(after),
+                    ref["provider"],
+                    confidence,
+                    now(),
+                    "Automatic deterministic nutrition enrichment",
+                    source_hash,
+                ),
             )
             updated += 1
         cursor.execute(
@@ -227,7 +374,10 @@ def apply_auto_accepted(ref: dict[str, str]) -> dict[str, str]:
 
 def finish(ref: dict[str, str]) -> dict[str, str]:
     with connection() as conn, conn.cursor() as cursor:
-        cursor.execute("SELECT started_at,errors FROM nutrition_enrichment_runs WHERE id=%s", (ref["runId"],))
+        cursor.execute(
+            "SELECT started_at,errors FROM nutrition_enrichment_runs WHERE id=%s",
+            (ref["runId"],),
+        )
         started, errors = cursor.fetchone()
         status = "PARTIAL_SUCCESS" if errors else "SUCCESS"
         ended = now()
@@ -236,8 +386,16 @@ def finish(ref: dict[str, str]) -> dict[str, str]:
             "UPDATE nutrition_enrichment_runs SET status=%s,finished_at=%s,duration_ms=%s,updated_at=%s,"
             "report_json=jsonb_build_object('status',%s,'provider',provider,'productsScanned',products_scanned,"
             "'barcodeMatches',barcode_matches,'nameMatches',name_matches,'autoAccepted',auto_accepted,"
-            "'pendingReview',pending_review,'updatedProducts',updated_products,'unchangedProducts',unchanged_products,'errors',errors) WHERE id=%s",
-            (status, ended, duration, ended, status, ref["runId"]),
+            "'pendingReview',pending_review,'updatedProducts',updated_products,'unchangedProducts',unchanged_products,'errors',errors,'requestId',%s) WHERE id=%s",
+            (
+                status,
+                ended,
+                duration,
+                ended,
+                status,
+                ref.get("requestId") or None,
+                ref["runId"],
+            ),
         )
     return {**ref, "status": status}
 

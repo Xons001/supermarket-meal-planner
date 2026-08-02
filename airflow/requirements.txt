@@ -1,2 +1,2 @@
-psycopg2-binary==2.9.10
-pytest==8.4.2
+-r requirements-runtime.txt
+-r requirements-test.txt

@@ -1,0 +1,20 @@
+name: Release
+on:
+  push: { tags: ["[0-9]+.[0-9]+.[0-9]+"] }
+  workflow_dispatch: {}
+permissions: { contents: read, packages: write }
+jobs:
+  images:
+    if: vars.PUBLISH_GHCR == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - run: |
+          version="${GITHUB_REF_NAME:-0.11.0-dev}"
+          for component in backend frontend airflow; do
+            dockerfile="$component/Dockerfile"
+            docker build --target runtime --build-arg APP_VERSION="$version" --build-arg VCS_REF="$GITHUB_SHA" -f "$dockerfile" -t "ghcr.io/${GITHUB_REPOSITORY,,}-$component:$version" .
+            docker push "ghcr.io/${GITHUB_REPOSITORY,,}-$component:$version"
+          done

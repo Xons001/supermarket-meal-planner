@@ -1,0 +1,22 @@
+name: Backend
+on: { push: { branches: [main] }, pull_request: {} }
+permissions: { contents: read }
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-java@d7793b545071e98d581d3bf084a51c3213318a07 # v4
+        with: { distribution: temurin, java-version: "21", cache: maven }
+      - run: echo "APP_VERSION=$(bash ../scripts/resolve-version.sh)" >> "$GITHUB_ENV"
+        working-directory: backend
+      - run: ./mvnw --batch-mode -Drevision="$APP_VERSION" verify
+        working-directory: backend
+        env:
+          APP_AUTH_ACCESS_TOKEN_SECRET: ci-access-0000000000000000000000000001
+          APP_AUTH_REFRESH_TOKEN_SECRET: ci-refresh-000000000000000000000000001
+          MEAL_PLAN_PREVIEW_HMAC_SECRET: ci-preview-000000000000000000000000001
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with: { name: backend-reports-sbom, path: "backend/target/{surefire-reports,failsafe-reports,backend-sbom.json}", retention-days: 14 }

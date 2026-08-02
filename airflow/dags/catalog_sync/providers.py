@@ -26,9 +26,12 @@ class CatalogProvider(ABC):
 
 class LocalJsonCatalogProvider(CatalogProvider):
     def __init__(self, path: str | None = None):
-        self.path = Path(path or os.environ.get(
-            "CATALOG_PROVIDER_FILE", "/opt/airflow/data/mock/mercadona-catalog.json"
-        ))
+        self.path = Path(
+            path
+            or os.environ.get(
+                "CATALOG_PROVIDER_FILE", "/opt/airflow/data/mock/mercadona-catalog.json"
+            )
+        )
 
     def fetch_catalog(self, supermarket_code: str) -> dict[str, Any]:
         document = json.loads(self.path.read_text(encoding="utf-8"))
@@ -39,7 +42,10 @@ class LocalJsonCatalogProvider(CatalogProvider):
 
 class ExperimentalMercadonaProvider(CatalogProvider):
     def fetch_catalog(self, supermarket_code: str) -> dict[str, Any]:
-        if os.environ.get("MERCADONA_EXPERIMENTAL_PROVIDER_ENABLED", "false").lower() != "true":
+        if (
+            os.environ.get("MERCADONA_EXPERIMENTAL_PROVIDER_ENABLED", "false").lower()
+            != "true"
+        ):
             raise RuntimeError("Experimental Mercadona provider is disabled")
         raise NotImplementedError("Real external extraction is outside FASE 9")
 

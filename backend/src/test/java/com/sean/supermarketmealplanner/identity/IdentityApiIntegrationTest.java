@@ -5,9 +5,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.supermarketmealplanner.AbstractIntegrationTest;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 @AutoConfigureMockMvc
 @Transactional
@@ -132,6 +135,33 @@ class IdentityApiIntegrationTest extends AbstractIntegrationTest {
                         .content(json.writeValueAsBytes(Map.of("email","casesensitive@example.test",
                                 "password","contraseña nueva 456"))))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void exportsOnlyOwnedDataWithNoStoreCorrelationAndRateLimit() throws Exception {
+        var user = register("export-owner@example.test");
+        var first = mvc.perform(get("/api/v1/users/me/export").with(anonymous()).cookie(user.access())
+                        .header("X-Request-ID", "export-request-1"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.request().asyncStarted())
+                .andReturn();
+        mvc.perform(asyncDispatch(first))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Request-ID", "export-request-1"))
+                .andExpect(header().string("Cache-Control", containsString("no-store")))
+                .andExpect(header().string("Content-Disposition", containsString("attachment")))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(containsString("export-owner@example.test")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("password_hash"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("refresh_token"))));
+        var second = mvc.perform(get("/api/v1/users/me/export").with(anonymous()).cookie(user.access()))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.request().asyncStarted())
+                .andReturn();
+        mvc.perform(asyncDispatch(second)).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/users/me/export").with(anonymous()).cookie(user.access()))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
+                .andExpect(jsonPath("$.correlationId").isNotEmpty());
     }
 
     private Registration register(String email) throws Exception {

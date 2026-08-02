@@ -246,3 +246,59 @@ El dashboard y los listados consultan columnas resumen sincronizadas con
 las ediciones de FASE 6.
 
 Consulta [dashboard-and-organization.md](dashboard-and-organization.md).
+
+## Despliegue productivo
+
+```mermaid
+flowchart TB
+  Internet --> Edge[Nginx HTTPS]
+  subgraph EdgeNet[edge]
+    Edge --> Frontend[React Nginx 8080]
+    Edge --> Backend[Spring Boot 8080]
+  end
+  subgraph AppNet[application privada]
+    Backend --> AppDb[(PostgreSQL aplicación)]
+    Airflow[Airflow LocalExecutor] --> AppDb
+  end
+  subgraph AirflowNet[airflow privada]
+    Airflow --> AirflowDb[(PostgreSQL metadatos)]
+  end
+  subgraph ObsNet[observability privada]
+    Prometheus -->|9090 / prometheus| Backend
+    Grafana --> Prometheus
+  end
+```
+
+## Pipelines de datos
+
+```mermaid
+sequenceDiagram
+  participant Scheduler as Airflow scheduler
+  participant Provider as Proveedor configurado
+  participant Stage as Staging PostgreSQL
+  participant Catalog as Catálogo canónico
+  Scheduler->>Provider: extraer lote + requestId
+  Provider-->>Scheduler: datos normalizados
+  Scheduler->>Stage: validar y escribir lote
+  Stage->>Catalog: merge idempotente
+  Catalog-->>Scheduler: contadores e informe
+  Note over Scheduler,Catalog: Catálogo y nutrición usan runs separados y no transportan lotes completos por XCom
+```
+
+## CI/CD
+
+```mermaid
+flowchart LR
+  PR[Pull request] --> BackendCI[Verify + Testcontainers + SBOM]
+  PR --> FrontendCI[TypeScript + lint + Vitest + build + SBOM]
+  PR --> AirflowCI[pytest + Ruff + DAGs + SBOM]
+  PR --> Security[Dependency review + auditorías + Trivy + Gitleaks]
+  PR --> DockerCI[Compose + imágenes + smoke]
+  BackendCI --> Gate[Protección de main]
+  FrontendCI --> Gate
+  AirflowCI --> Gate
+  Security --> Gate
+  DockerCI --> Gate
+  Gate --> Tag[Tag SemVer]
+  Tag --> Release[Imágenes opcionales; publicación deshabilitada por defecto]
+```

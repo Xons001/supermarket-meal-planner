@@ -217,4 +217,6 @@ export interface ProblemDetails {
   detail?: string
   instance?: string
   errorCode?: string
+  code?: string
+  correlationId?: string
 }

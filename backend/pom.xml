@@ -13,13 +13,15 @@
 
     <groupId>com.sean</groupId>
     <artifactId>supermarket-meal-planner-backend</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <name>Supermarket Meal Planner Backend</name>
     <description>Backend for the Supermarket Meal Planner platform</description>
 
     <properties>
+        <revision>0.11.0-dev</revision>
         <java.version>21</java.version>
         <springdoc.version>2.8.17</springdoc.version>
+        <logstash-logback.version>8.1</logstash-logback.version>
     </properties>
 
     <dependencies>
@@ -37,6 +39,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
@@ -46,11 +52,24 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.81</version>
+            <version>1.84</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -119,6 +138,15 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <parameters>true</parameters>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <outputFormat>json</outputFormat>
+                    <outputName>backend-sbom</outputName>
                 </configuration>
             </plugin>
         </plugins>

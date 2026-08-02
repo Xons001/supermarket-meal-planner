@@ -48,6 +48,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                         .filter(s->s.isUsableAt(OffsetDateTime.now(clock)))
                         .filter(s->s.getUser().getStatus()==UserStatus.ACTIVE).ifPresent(s->{
                             var principal=new AuthPrincipal(userId,sessionId,s.getUser().getRole());
+                            request.setAttribute(AuthPrincipal.class.getName(), principal);
                             SecurityContextHolder.getContext().setAuthentication(
                                     new UsernamePasswordAuthenticationToken(principal,null,
                                             List.of(new SimpleGrantedAuthority("ROLE_"+s.getUser().getRole().name()))));

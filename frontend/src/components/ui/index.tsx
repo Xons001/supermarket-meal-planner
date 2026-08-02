@@ -40,7 +40,7 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
 }
 
 export function Skeleton({ height = '1rem' }: { height?: string }) {
-  return <div className={styles.skeleton} style={{ minHeight: height }} aria-hidden="true" />
+  return <div className={styles.skeleton} data-height={height} aria-hidden="true" />
 }
 
 export function FilterBar({ children }: { children: ReactNode }) {

@@ -4,6 +4,7 @@ x-airflow-common: &airflow-common
   build:
     context: .
     dockerfile: airflow/Dockerfile
+    target: runtime
   restart: unless-stopped
   user: "${AIRFLOW_UID:-50000}:0"
   environment: &airflow-environment
@@ -154,7 +155,7 @@ services:
       target: runtime
     restart: unless-stopped
     ports:
-      - "${FRONTEND_HOST_PORT:-5173}:80"
+      - "${FRONTEND_HOST_PORT:-5173}:8080"
     networks:
       - app_network
     depends_on:
@@ -168,7 +169,7 @@ services:
           "--quiet",
           "--tries=1",
           "--spider",
-          "http://127.0.0.1/",
+          "http://127.0.0.1:8080/",
         ]
       interval: 10s
       timeout: 5s
@@ -273,6 +274,10 @@ services:
 
   airflow-test:
     <<: *airflow-common
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+      target: test
     profiles: ["tools"]
     restart: "no"
     entrypoint: []

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { changePassword, disableAccount, updatePreferences, updateProfile } from '../api/auth'
-import { ApiError } from '../api/client'
+import { ApiError, downloadUserExport } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
 import { SiteHeader } from '../components/SiteHeader'
 import type { GenerationStrategy, OptimizationPreset } from '../types/auth'
@@ -58,6 +58,13 @@ export function ProfilePage() {
           </label>
           <button>Guardar nombre</button>
         </form>
+        <section className={styles.card}>
+          <h2>Descargar mis datos</h2>
+          <p>Genera un JSON con tu perfil, preferencias, planes, listas y actividad.</p>
+          <button type="button" onClick={() => void run(downloadUserExport)}>
+            Descargar exportación JSON
+          </button>
+        </section>
         <form
           className={styles.card}
           onSubmit={(event) => {

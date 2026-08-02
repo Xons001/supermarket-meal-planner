@@ -49,6 +49,7 @@ public class ShoppingListService {
     }
 
     @Transactional
+    @io.micrometer.core.annotation.Timed(value = "shopping.list.creation", histogram = true)
     public ShoppingListResponse create(UUID mealPlanId) {
         var plan = findPlan(mealPlanId);
         if (repository.existsByMealPlanIdAndActiveTrue(mealPlanId)) {
@@ -74,6 +75,7 @@ public class ShoppingListService {
     }
 
     @Transactional
+    @io.micrometer.core.annotation.Timed(value = "shopping.list.regeneration", histogram = true)
     public ShoppingListResponse regenerate(UUID mealPlanId) {
         var plan = findPlan(mealPlanId);
         var current = repository.findByMealPlanIdAndOwnerIdAndActiveTrue(

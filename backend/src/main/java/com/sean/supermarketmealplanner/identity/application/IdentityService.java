@@ -43,6 +43,7 @@ public class IdentityService {
         return new AuthResult(toResponse(user,pref),sessions.create(user,userAgent));
     }
     @Transactional
+    @io.micrometer.core.annotation.Timed(value = "authentication.login", histogram = true)
     public AuthResult login(LoginRequest request,String userAgent) {
         var normalized=UserAccountEntity.normalizeEmail(request.email());
         var user=users.findByNormalizedEmail(normalized).orElseThrow(()->{

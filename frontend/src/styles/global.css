@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --font-display: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --color-background: #f5f7f2;
@@ -29,6 +30,7 @@
 }
 
 :root[data-theme='dark'] {
+  color-scheme: dark;
   --color-background: #0d1915;
   --color-surface: #14231e;
   --color-surface-muted: #1a2d26;

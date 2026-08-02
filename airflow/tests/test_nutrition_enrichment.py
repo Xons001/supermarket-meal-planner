@@ -4,11 +4,16 @@ from nutrition_pipeline.runtime import canonical_hash, normalize_name
 
 
 def test_name_normalization_removes_accents_package_and_measurement():
-    assert normalize_name("  Lácteos: Yogur natural, pack 4 x 125 g ") == "lacteos yogur natural 4 x"
+    assert (
+        normalize_name("  Lácteos: Yogur natural, pack 4 x 125 g ")
+        == "lacteos yogur natural 4 x"
+    )
 
 
 def test_source_hash_is_deterministic_for_key_order():
-    assert canonical_hash({"protein": 10, "calories": 100}) == canonical_hash({"calories": 100, "protein": 10})
+    assert canonical_hash({"protein": 10, "calories": 100}) == canonical_hash(
+        {"calories": 100, "protein": 10}
+    )
 
 
 def test_nutrition_dag_has_expected_observable_steps():

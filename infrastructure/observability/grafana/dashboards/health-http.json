@@ -1,0 +1,1 @@
+{"annotations":{"list":[]},"editable":false,"panels":[{"type":"timeseries","title":"Peticiones HTTP","targets":[{"expr":"sum(rate(http_server_requests_seconds_count[5m])) by (method, status)","legendFormat":"{{method}} {{status}}"}],"gridPos":{"h":9,"w":24,"x":0,"y":0}}],"schemaVersion":41,"tags":["health","http"],"title":"Salud y HTTP","uid":"smp-health-http","version":1}

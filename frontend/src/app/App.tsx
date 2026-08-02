@@ -12,6 +12,9 @@ import { AdminRoute, ProtectedRoute } from '../auth/ProtectedRoute'
 import { AuthPage } from '../pages/AuthPage'
 import { StatePage } from '../pages/StatePage'
 import { Skeleton, ToastProvider } from '../components/ui'
+import { LegalPage } from '../pages/LegalPage'
+import { RouteMetadata } from './RouteMetadata'
+import styles from './App.module.css'
 
 const MealTemplateFormPage = lazy(() =>
   import('../pages/MealTemplateFormPage').then((module) => ({
@@ -66,6 +69,7 @@ export function App() {
       <ToastProvider>
         <AuthProvider>
           <BrowserRouter>
+            <RouteMetadata />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/products" element={<ProductsPage />} />
@@ -125,6 +129,8 @@ export function App() {
               <Route path="/profile" element={privateRoute(<ProfilePage />)} />
               <Route path="/login" element={<AuthPage mode="login" />} />
               <Route path="/register" element={<AuthPage mode="register" />} />
+              <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+              <Route path="/terms" element={<LegalPage kind="terms" />} />
               <Route
                 path="/forbidden"
                 element={
@@ -175,7 +181,7 @@ export function App() {
 
 function RouteLoading() {
   return (
-    <main style={{ width: 'min(1100px, calc(100% - 2rem))', margin: '3rem auto' }}>
+    <main className={styles.routeLoading}>
       <Skeleton height="18rem" />
     </main>
   )

@@ -1,0 +1,10 @@
+{
+  "name": "Supermarket Meal Planner",
+  "short_name": "Meal Planner",
+  "description": "Planificación semanal conectada al catálogo del supermercado.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#f4f7f1",
+  "theme_color": "#12372a",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

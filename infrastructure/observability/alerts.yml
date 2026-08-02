@@ -1,0 +1,18 @@
+groups:
+  - name: supermarket-meal-planner
+    rules:
+      - alert: BackendUnavailable
+        expr: up{job="supermarket-meal-planner-backend"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "Backend no disponible para Prometheus" }
+      - alert: ElevatedServerErrors
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) > 0.1
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "Aumento sostenido de errores HTTP 5xx" }
+      - alert: DatabasePoolNearCapacity
+        expr: hikaricp_connections_active / hikaricp_connections_max > 0.85
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: "Pool de conexiones cerca de su capacidad" }

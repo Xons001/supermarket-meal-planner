@@ -1,0 +1,21 @@
+name: ${COMPOSE_PROJECT_NAME:-supermarket-meal-planner-prod-e2e}
+
+services:
+  edge:
+    ports: !override
+      - "127.0.0.1:${E2E_HTTP_PORT:-18080}:8080"
+      - "127.0.0.1:${E2E_HTTPS_PORT:-18443}:8443"
+
+  smoke:
+    image: curlimages/curl:8.18.0
+    restart: "no"
+    command:
+      - sh
+      - -ec
+      - >-
+        curl --fail --insecure --retry 30 --retry-delay 2 https://edge:8443/healthz &&
+        curl --fail --insecure https://edge:8443/ &&
+        test "$$(curl --insecure -s -o /dev/null -w '%{http_code}' https://edge:8443/actuator/prometheus)" = "404"
+    networks: [edge]
+    depends_on:
+      edge: { condition: service_healthy }

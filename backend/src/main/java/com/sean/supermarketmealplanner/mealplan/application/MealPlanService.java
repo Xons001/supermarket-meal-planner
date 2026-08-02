@@ -65,6 +65,7 @@ public class MealPlanService {
     }
 
     @Transactional
+    @io.micrometer.core.annotation.Timed(value = "meal.plan.generation", histogram = true)
     public GeneratedMealPlanResult generate(GenerateMealPlanCommand command) {
         var strategy = strategies.get(command.strategy());
         if (strategy == null) {

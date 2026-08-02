@@ -215,6 +215,10 @@ export function HomePage() {
         </div>
         <div className={styles.legal}>
           <p>
+            <Link to="/privacy">Privacidad</Link> · <Link to="/terms">Términos</Link> · Versión{' '}
+            {import.meta.env.VITE_APP_VERSION ?? '0.11.0-dev'}
+          </p>
+          <p>
             Supermarket Meal Planner es un proyecto independiente y no está afiliado, patrocinado ni
             respaldado por los supermercados mostrados en la plataforma. Los nombres y marcas
             pertenecen a sus respectivos propietarios.

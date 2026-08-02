@@ -1,0 +1,226 @@
+name: ${COMPOSE_PROJECT_NAME:-supermarket-meal-planner-prod}
+
+x-logging: &rotated-logs
+  driver: json-file
+  options: { max-size: "10m", max-file: "5" }
+
+x-airflow: &airflow
+  build:
+    context: .
+    dockerfile: airflow/Dockerfile
+    target: runtime
+    args: { APP_VERSION: "${APP_VERSION:-0.11.0-dev}", VCS_REF: "${APP_COMMIT:-unknown}", BUILD_TIME: "${APP_BUILD_TIME:-unknown}" }
+  restart: unless-stopped
+  user: "${AIRFLOW_UID:-50000}:0"
+  tmpfs: ["/tmp"]
+  logging: *rotated-logs
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Madrid
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_METADATA_DB_PASSWORD:?AIRFLOW_METADATA_DB_PASSWORD is required}@airflow-postgres:5432/airflow
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_API_JWT_SECRET:?AIRFLOW_API_JWT_SECRET is required}
+    AIRFLOW__API__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:?AIRFLOW_WEBSERVER_SECRET_KEY is required}
+    APP_DB_HOST: postgres
+    APP_DB_PORT: "5432"
+    APP_DB_NAME: ${POSTGRES_DB:-meal_planner}
+    APP_DB_USER: ${POSTGRES_USER:-meal_planner}
+    APP_DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    CATALOG_SYNC_PROVIDER: DISABLED
+    MERCADONA_EXPERIMENTAL_PROVIDER_ENABLED: "false"
+    OPEN_FOOD_FACTS_ENABLED: "false"
+    APP_VERSION: ${APP_VERSION:-0.11.0-dev}
+    APP_COMMIT: ${APP_COMMIT:-unknown}
+    AIRFLOW_LOG_RETENTION_DAYS: "14"
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags:ro
+    - airflow_logs:/opt/airflow/logs
+    - airflow_catalog_tmp:/opt/airflow/catalog-tmp
+  networks: [application, airflow]
+  depends_on:
+    airflow-postgres: { condition: service_healthy }
+    postgres: { condition: service_healthy }
+  deploy:
+    resources:
+      limits: { cpus: "${AIRFLOW_CPU_LIMIT:-1.00}", memory: "${AIRFLOW_MEMORY_LIMIT:-1G}" }
+
+services:
+  edge:
+    build:
+      context: .
+      dockerfile: infrastructure/nginx/Dockerfile
+      args: { APP_VERSION: "${APP_VERSION:-0.11.0-dev}", VCS_REF: "${APP_COMMIT:-unknown}" }
+    restart: unless-stopped
+    ports: ["80:8080", "443:8443"]
+    volumes:
+      - ${TLS_CERT_PATH:?TLS_CERT_PATH is required}:/etc/nginx/tls/fullchain.pem:ro
+      - ${TLS_KEY_PATH:?TLS_KEY_PATH is required}:/etc/nginx/tls/privkey.pem:ro
+    networks: [edge]
+    depends_on:
+      backend: { condition: service_healthy }
+      frontend: { condition: service_healthy }
+    logging: *rotated-logs
+    deploy:
+      resources:
+        limits: { cpus: "${EDGE_CPU_LIMIT:-0.50}", memory: "${EDGE_MEMORY_LIMIT:-128M}" }
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: runtime
+      args:
+        APP_VERSION: ${APP_VERSION:-0.11.0-dev}
+        VCS_REF: ${APP_COMMIT:-unknown}
+        BUILD_TIME: ${APP_BUILD_TIME:-unknown}
+        PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL is required}
+    depends_on:
+      backend: { condition: service_healthy }
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp"]
+    networks: [edge]
+    logging: *rotated-logs
+    deploy:
+      resources:
+        limits: { cpus: "${FRONTEND_CPU_LIMIT:-0.50}", memory: "${FRONTEND_MEMORY_LIMIT:-128M}" }
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: runtime
+      args: { APP_VERSION: "${APP_VERSION:-0.11.0-dev}", VCS_REF: "${APP_COMMIT:-unknown}", BUILD_TIME: "${APP_BUILD_TIME:-unknown}" }
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp"]
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meal_planner}
+      DB_USER: ${POSTGRES_USER:-meal_planner}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      APP_AUTH_ACCESS_TOKEN_SECRET: ${APP_AUTH_ACCESS_TOKEN_SECRET:?APP_AUTH_ACCESS_TOKEN_SECRET is required}
+      APP_AUTH_REFRESH_TOKEN_SECRET: ${APP_AUTH_REFRESH_TOKEN_SECRET:?APP_AUTH_REFRESH_TOKEN_SECRET is required}
+      MEAL_PLAN_PREVIEW_HMAC_SECRET: ${MEAL_PLAN_PREVIEW_HMAC_SECRET:?MEAL_PLAN_PREVIEW_HMAC_SECRET is required}
+      APP_OBSERVABILITY_USER_HASH_SECRET: ${APP_OBSERVABILITY_USER_HASH_SECRET:?APP_OBSERVABILITY_USER_HASH_SECRET is required}
+      APP_AUTH_ISSUER: ${APP_AUTH_ISSUER:?APP_AUTH_ISSUER is required}
+      APP_AUTH_ALLOWED_ORIGINS: ${APP_AUTH_ALLOWED_ORIGINS:?APP_AUTH_ALLOWED_ORIGINS is required}
+      APP_AUTH_COOKIE_SECURE: "true"
+      APP_AUTH_COOKIE_SAME_SITE: ${APP_AUTH_COOKIE_SAME_SITE:-Lax}
+      APP_AUTH_SWAGGER_ENABLED: "false"
+      APP_DEMO_ENABLED: "false"
+      APP_ADMIN_ENABLED: "false"
+      CATALOG_SEED_ENABLED: "false"
+      MEAL_TEMPLATE_SEED_ENABLED: "false"
+      APP_CATALOG_SYNC_ENABLED: "false"
+      APP_CATALOG_SYNC_PROVIDER: DISABLED
+      APP_NUTRITION_ENRICHMENT_ENABLED: "false"
+      APP_NUTRITION_PROVIDER: DISABLED
+      APP_AIRFLOW_BASE_URL: http://airflow-apiserver:8080
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:?AIRFLOW_ADMIN_USERNAME is required}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:?AIRFLOW_ADMIN_PASSWORD is required}
+      APP_VERSION: ${APP_VERSION:-0.11.0-dev}
+      APP_COMMIT: ${APP_COMMIT:-unknown}
+      APP_BUILD_TIME: ${APP_BUILD_TIME:-unknown}
+    networks: [edge, application, observability]
+    depends_on:
+      postgres: { condition: service_healthy }
+    logging: *rotated-logs
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/actuator/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    deploy:
+      resources:
+        limits: { cpus: "${BACKEND_CPU_LIMIT:-1.50}", memory: "${BACKEND_MEMORY_LIMIT:-1G}" }
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-meal_planner}
+      POSTGRES_USER: ${POSTGRES_USER:-meal_planner}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    networks: [application]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meal_planner} -d ${POSTGRES_DB:-meal_planner}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *rotated-logs
+    deploy:
+      resources:
+        limits: { cpus: "${POSTGRES_CPU_LIMIT:-1.00}", memory: "${POSTGRES_MEMORY_LIMIT:-1G}" }
+
+  airflow-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${AIRFLOW_METADATA_DB_PASSWORD:?AIRFLOW_METADATA_DB_PASSWORD is required}
+    volumes: ["airflow_postgres_data:/var/lib/postgresql/data"]
+    networks: [airflow]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *rotated-logs
+    deploy:
+      resources:
+        limits: { cpus: "${AIRFLOW_DB_CPU_LIMIT:-0.75}", memory: "${AIRFLOW_DB_MEMORY_LIMIT:-768M}" }
+
+  airflow-init:
+    <<: *airflow
+    restart: "no"
+    read_only: false
+    command: ["bash", "-ec", "airflow db migrate && airflow users create --username \"$${AIRFLOW_ADMIN_USERNAME}\" --password \"$${AIRFLOW_ADMIN_PASSWORD}\" --firstname Production --lastname Administrator --role Admin --email airflow-admin@localhost || true"]
+    environment:
+      <<: *airflow-env
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:?AIRFLOW_ADMIN_USERNAME is required}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:?AIRFLOW_ADMIN_PASSWORD is required}
+
+  airflow-apiserver:
+    <<: *airflow
+    command: api-server
+    depends_on: { airflow-init: { condition: service_completed_successfully } }
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/monitor/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  airflow-scheduler:
+    <<: *airflow
+    command: scheduler
+    depends_on: { airflow-init: { condition: service_completed_successfully } }
+
+  airflow-dag-processor:
+    <<: *airflow
+    command: dag-processor
+    depends_on: { airflow-init: { condition: service_completed_successfully } }
+
+  airflow-triggerer:
+    <<: *airflow
+    command: triggerer
+    depends_on: { airflow-init: { condition: service_completed_successfully } }
+
+networks:
+  edge: { driver: bridge }
+  application: { driver: bridge, internal: true }
+  airflow: { driver: bridge, internal: true }
+  observability: { driver: bridge, internal: true }
+
+volumes:
+  postgres_data:
+  airflow_postgres_data:
+  airflow_logs:
+  airflow_catalog_tmp:

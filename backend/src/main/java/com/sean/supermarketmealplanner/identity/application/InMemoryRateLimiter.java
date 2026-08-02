@@ -8,13 +8,21 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class InMemoryRateLimiter {
     private final Clock clock;
+    private final io.micrometer.core.instrument.MeterRegistry metrics;
     private final ConcurrentHashMap<String, Window> windows = new ConcurrentHashMap<>();
-    public InMemoryRateLimiter(Clock clock) { this.clock = clock; }
+    @Autowired
+    public InMemoryRateLimiter(Clock clock, io.micrometer.core.instrument.MeterRegistry metrics) {
+        this.clock = clock; this.metrics = metrics;
+    }
+    public InMemoryRateLimiter(Clock clock) {
+        this(clock, new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+    }
     public void check(String scope, String identifier, int limit, Duration duration) {
         var key = scope + ":" + fingerprint(identifier);
         var now = clock.instant();
@@ -25,6 +33,7 @@ public class InMemoryRateLimiter {
             return new Window(previous.started(), previous.count() + 1);
         });
         if (current.count() > limit) {
+            metrics.counter("application.rate.limit.rejected", "scope", scope).increment();
             throw new IdentityException(HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED",
                     "Demasiados intentos. Inténtalo de nuevo más tarde");
         }

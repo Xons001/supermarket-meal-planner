@@ -1,0 +1,39 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    restart: unless-stopped
+    read_only: true
+    user: "65534:65534"
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=15d"]
+    volumes:
+      - ./infrastructure/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    networks: [observability]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  grafana:
+    image: grafana/grafana:12.4.1
+    restart: unless-stopped
+    user: "472:0"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    ports: ["127.0.0.1:${GRAFANA_HOST_PORT:-3000}:3000"]
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks: [observability]
+    depends_on: [prometheus]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+volumes:
+  prometheus_data:
+  grafana_data:

@@ -12,22 +12,28 @@ public class AirflowClient {
     private final RestClient client;
     private final CatalogSyncProperties properties;
     public AirflowClient(RestClient.Builder builder, CatalogSyncProperties properties) {
-        this.properties=properties; this.client=builder
-                .requestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory())
+        this.properties=properties;
+        var requestFactory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(2_000);requestFactory.setReadTimeout(5_000);
+        this.client=builder.requestFactory(requestFactory)
                 .baseUrl(properties.airflowBaseUrl()).build();
     }
     public void trigger(String dagId, String dagRunId, Map<String,Object> conf) {
         try {
+            var requestId=org.slf4j.MDC.get("requestId");
             var token=client.post().uri("/auth/token")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Map.of("username",properties.airflowUsername(),"password",properties.airflowPassword()))
                 .retrieve().body(TokenResponse.class);
             if(token==null || token.accessToken()==null || token.accessToken().isBlank())
                 throw new CatalogSyncException(HttpStatus.BAD_GATEWAY,"AIRFLOW_RESPONSE_INVALID","Airflow no devolvió un token válido");
+            var propagatedConf=new java.util.LinkedHashMap<String,Object>(conf);
+            if(requestId!=null)propagatedConf.put("requestId",requestId);
             var request=new java.util.LinkedHashMap<String,Object>();
-            request.put("dag_run_id",dagRunId); request.put("logical_date",null); request.put("conf",conf);
+            request.put("dag_run_id",dagRunId); request.put("logical_date",null); request.put("conf",propagatedConf);
             client.post().uri("/api/v2/dags/{dagId}/dagRuns",dagId)
                 .header("Authorization","Bearer "+token.accessToken())
+                .headers(headers->{if(requestId!=null)headers.set("X-Request-ID",requestId);})
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve().toBodilessEntity();

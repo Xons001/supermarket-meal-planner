@@ -24,9 +24,12 @@ import com.sean.supermarketmealplanner.nutrition.application.NutritionException;
 import com.sean.supermarketmealplanner.identity.application.IdentityException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import com.sean.supermarketmealplanner.catalogsync.application.CatalogSyncException;
+import com.sean.supermarketmealplanner.configuration.RequestObservabilityFilter;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
     @ExceptionHandler(NutritionException.class)
     ResponseEntity<ProblemDetail> nutrition(NutritionException exception, HttpServletRequest request) {
         var problem=createProblem(exception.status(),"Nutrition enrichment failed",exception.getMessage(),request);
@@ -40,10 +43,10 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(exception.status()).body(problem);
     }
     @ExceptionHandler(IdentityException.class)
-    ResponseEntity<ProblemDetail> identity(IdentityException exception) {
-        var problem = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
-        problem.setTitle(exception.getMessage());
+    ResponseEntity<ProblemDetail> identity(IdentityException exception, HttpServletRequest request) {
+        var problem = createProblem(exception.getStatus(), exception.getMessage(), exception.getMessage(), request);
         problem.setProperty("code", exception.getCode());
+        problem.setProperty("errorCode", exception.getCode());
         return ResponseEntity.status(exception.getStatus())
                 .cacheControl(org.springframework.http.CacheControl.noStore()).body(problem);
     }
@@ -99,6 +102,7 @@ public class ApiExceptionHandler {
         problem.setProperty("rejectedByReason", exception.getRejectedByReason());
         problem.setProperty("conflictingConstraints", exception.getConflictingConstraints());
         problem.setProperty("suggestions", exception.getSuggestions());
+        problem.setProperty("code", "MEAL_PLAN_GENERATION_IMPOSSIBLE");
         problem.setProperty("errorCode", "MEAL_PLAN_GENERATION_IMPOSSIBLE");
         return problem;
     }
@@ -117,6 +121,7 @@ public class ApiExceptionHandler {
                 exception.getMessage(),
                 request
         );
+        problem.setProperty("code", exception.errorCode());
         problem.setProperty("errorCode", exception.errorCode());
         if (exception.productId() != null) {
             problem.setProperty("productId", exception.productId());
@@ -144,8 +149,22 @@ public class ApiExceptionHandler {
                 exception.getMessage(),
                 request
         );
+        problem.setProperty("code", exception.errorCode());
         problem.setProperty("errorCode", exception.errorCode());
         return problem;
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ProblemDetail> unexpected(Exception exception, HttpServletRequest request) {
+        var requestId = correlationId(request);
+        log.error("unhandled_request_error correlationId={} method={} path={}", requestId,
+                request.getMethod(), request.getRequestURI(), exception);
+        var problem = createProblem(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error",
+                "No se ha podido completar la solicitud", request);
+        problem.setProperty("code", "INTERNAL_ERROR");
+        problem.setProperty("errorCode", "INTERNAL_ERROR");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .cacheControl(org.springframework.http.CacheControl.noStore()).body(problem);
     }
 
     private ProblemDetail createProblem(
@@ -158,6 +177,13 @@ public class ApiExceptionHandler {
         problem.setTitle(title);
         problem.setInstance(URI.create(request.getRequestURI()));
         problem.setProperty("errorCode", status.name());
+        problem.setProperty("code", status.name());
+        problem.setProperty("correlationId", correlationId(request));
         return problem;
+    }
+
+    private String correlationId(HttpServletRequest request) {
+        var value = request.getAttribute(RequestObservabilityFilter.REQUEST_ID_ATTRIBUTE);
+        return value == null ? "unknown" : value.toString();
     }
 }

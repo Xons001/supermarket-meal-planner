@@ -5,7 +5,15 @@ from datetime import datetime
 
 from airflow.sdk import dag, task
 
-from catalog_sync.runtime import dag_failure_callback, extract_catalog, finalize, merge_catalog, normalize_and_validate, stage, start_run
+from catalog_sync.runtime import (
+    dag_failure_callback,
+    extract_catalog,
+    finalize,
+    merge_catalog,
+    normalize_and_validate,
+    stage,
+    start_run,
+)
 
 
 @dag(
@@ -20,7 +28,12 @@ from catalog_sync.runtime import dag_failure_callback, extract_catalog, finalize
 def catalog_full_sync():
     @task
     def start_sync_run(**context):
-        return start_run(context["dag_run"].conf or {}, "FULL_CATALOG", "catalog_full_sync", context["dag_run"].run_id)
+        return start_run(
+            context["dag_run"].conf or {},
+            "FULL_CATALOG",
+            "catalog_full_sync",
+            context["dag_run"].run_id,
+        )
 
     @task
     def fetch_categories(ref):
@@ -60,10 +73,29 @@ def catalog_full_sync():
 
     @task
     def publish_sync_report(ref):
-        return {"syncRunId": ref["syncRunId"], "status": ref["status"]}
+        return {
+            "syncRunId": ref["syncRunId"],
+            "status": ref["status"],
+            "requestId": ref.get("requestId"),
+        }
 
-    publish_sync_report(mark_unavailable(update_price_history(merge_products(merge_categories(load_staging(
-        validate_data(normalize_data(fetch_products(fetch_categories(start_sync_run()))))))))))
+    publish_sync_report(
+        mark_unavailable(
+            update_price_history(
+                merge_products(
+                    merge_categories(
+                        load_staging(
+                            validate_data(
+                                normalize_data(
+                                    fetch_products(fetch_categories(start_sync_run()))
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
 
 
 catalog_full_sync()

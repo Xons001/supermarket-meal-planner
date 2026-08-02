@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    default: development
   application:
     name: supermarket-meal-planner-backend
   autoconfigure:
@@ -38,10 +40,10 @@ app:
     access-ttl: ${APP_AUTH_ACCESS_TTL:PT15M}
     refresh-ttl: ${APP_AUTH_REFRESH_TTL:P30D}
     cookie:
-      secure: ${APP_AUTH_COOKIE_SECURE:false}
+      secure: ${APP_AUTH_COOKIE_SECURE:true}
       same-site: ${APP_AUTH_COOKIE_SAME_SITE:Lax}
-    allowed-origins: ${APP_AUTH_ALLOWED_ORIGINS:http://localhost:5173}
-    swagger-enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
+    allowed-origins: ${APP_AUTH_ALLOWED_ORIGINS:}
+    swagger-enabled: ${APP_AUTH_SWAGGER_ENABLED:false}
     argon2:
       salt-length: ${APP_AUTH_ARGON2_SALT_LENGTH:16}
       hash-length: ${APP_AUTH_ARGON2_HASH_LENGTH:32}
@@ -55,20 +57,20 @@ app:
       password-change-per-hour: ${APP_AUTH_RATE_PASSWORD_PER_HOUR:5}
   catalog:
     demo-resource: classpath:data/mock/mercadona-catalog.json
-    seed-enabled: ${CATALOG_SEED_ENABLED:true}
+    seed-enabled: ${CATALOG_SEED_ENABLED:false}
   catalog-sync:
     enabled: ${APP_CATALOG_SYNC_ENABLED:false}
     provider: ${APP_CATALOG_SYNC_PROVIDER:LOCAL_JSON}
     airflow-base-url: ${APP_AIRFLOW_BASE_URL:http://localhost:8082}
     airflow-public-url: ${APP_AIRFLOW_PUBLIC_URL:}
     airflow-username: ${AIRFLOW_ADMIN_USERNAME:admin}
-    airflow-password: ${AIRFLOW_ADMIN_PASSWORD:disabled-local-placeholder}
+    airflow-password: ${AIRFLOW_ADMIN_PASSWORD:}
     full-schedule: ${APP_CATALOG_FULL_SYNC_SCHEDULE:0 3 * * *}
     price-schedule: ${APP_CATALOG_PRICE_SYNC_SCHEDULE:0 */6 * * *}
     manual-rate-per-hour: ${APP_CATALOG_SYNC_MANUAL_RATE_PER_HOUR:10}
     staging-retention-days: ${APP_CATALOG_SYNC_STAGING_RETENTION_DAYS:7}
   nutrition-enrichment:
-    enabled: ${APP_NUTRITION_ENRICHMENT_ENABLED:true}
+    enabled: ${APP_NUTRITION_ENRICHMENT_ENABLED:false}
     cron: ${APP_NUTRITION_ENRICHMENT_CRON:0 4 * * 1}
     provider: ${APP_NUTRITION_PROVIDER:LOCAL_JSON}
     batch-size: ${APP_NUTRITION_BATCH_SIZE:100}
@@ -86,7 +88,13 @@ app:
       request-delay-ms: ${APP_OPENFOODFACTS_REQUEST_DELAY_MS:6500}
   meal-templates:
     demo-resource: classpath:data/mock/meal-templates.json
-    seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
+    seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:false}
+  observability:
+    environment: ${APP_ENVIRONMENT:unknown}
+    user-hash-secret: ${APP_OBSERVABILITY_USER_HASH_SECRET:}
+    version: ${APP_VERSION:0.11.0-dev}
+    commit: ${APP_COMMIT:unknown}
+    build-time: ${APP_BUILD_TIME:unknown}
   meal-plans:
     editing:
       preview-hmac-secret: ${MEAL_PLAN_PREVIEW_HMAC_SECRET}
@@ -196,18 +204,38 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       probes:
         enabled: true
       show-details: never
+      status:
+        order: down,out-of-service,degraded,unknown,up
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db,flywayReadiness
+  info:
+    env:
+      enabled: true
+  tracing:
+    sampling:
+      probability: ${APP_TRACING_SAMPLE_PROBABILITY:1.0}
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: ${APP_VERSION:0.11.0-dev}
+    commit: ${APP_COMMIT:unknown}
+    buildTime: ${APP_BUILD_TIME:unknown}
 
 springdoc:
   api-docs:
-    enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
+    enabled: ${APP_AUTH_SWAGGER_ENABLED:false}
   swagger-ui:
-    enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
+    enabled: ${APP_AUTH_SWAGGER_ENABLED:false}
     path: /swagger-ui/index.html
     operations-sorter: method
 

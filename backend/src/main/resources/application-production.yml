@@ -1,0 +1,52 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+app:
+  demo:
+    enabled: false
+  admin:
+    enabled: false
+  auth:
+    issuer: ${APP_AUTH_ISSUER}
+    cookie:
+      secure: true
+      same-site: ${APP_AUTH_COOKIE_SAME_SITE:Lax}
+    allowed-origins: ${APP_AUTH_ALLOWED_ORIGINS}
+    swagger-enabled: false
+  catalog:
+    seed-enabled: false
+  meal-templates:
+    seed-enabled: false
+  catalog-sync:
+    provider: ${APP_CATALOG_SYNC_PROVIDER:DISABLED}
+  nutrition-enrichment:
+    enabled: ${APP_NUTRITION_ENRICHMENT_ENABLED:false}
+    provider: ${APP_NUTRITION_PROVIDER:DISABLED}
+  observability:
+    environment: production
+
+management:
+  server:
+    port: 9090
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+server:
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+logging:
+  config: classpath:logback-spring.xml
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

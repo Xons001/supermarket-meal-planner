@@ -1,0 +1,28 @@
+app:
+  auth:
+    cookie:
+      secure: false
+    allowed-origins: http://localhost:5173
+    swagger-enabled: true
+  catalog:
+    seed-enabled: true
+  catalog-sync:
+    airflow-password: test-airflow-password-at-least-thirty-two-bytes
+  meal-templates:
+    seed-enabled: true
+  nutrition-enrichment:
+    enabled: true
+  observability:
+    environment: test
+    user-hash-secret: test-observability-secret-at-least-thirty-two-bytes
+
+logging:
+  level:
+    root: WARN
+    com.sean.supermarketmealplanner: INFO
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

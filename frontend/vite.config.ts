@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    build: { sourcemap: false },
     server: {
       host: true,
       port: 5173,

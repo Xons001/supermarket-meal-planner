@@ -54,18 +54,8 @@ Proveedor local reproducible y Open Food Facts opcional, matching determinista p
 
 ## FASE 11 — Producción, observabilidad y portfolio
 
-Pendiente. No forma parte de esta entrega.
-
-Evaluación de Open Food Facts, matching y confianza verificable.
-
-## FASE 11 — OR-Tools
-
-Optimización avanzada como estrategia intercambiable.
+✅ Perfiles seguros, proxy HTTPS, redes privadas, logs correlacionados, Prometheus/Grafana opcional, backups/restore, CI/CD, SBOM, exportación personal y documentación profesional.
 
 ## FASE 12 — IA opcional
 
-Interpretación de lenguaje natural sin delegar cálculos de negocio.
-
-## FASE 13 — CI/CD, despliegue y Kubernetes
-
-Pipeline, observabilidad, despliegue reproducible y demostración Kubernetes.
+Fuera del alcance actual. Cualquier optimización avanzada o interpretación de lenguaje natural seguirá siendo intercambiable y no sustituirá los cálculos deterministas.

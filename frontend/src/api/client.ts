@@ -8,7 +8,7 @@ export class ApiError extends Error {
   readonly problem?: ProblemDetails
 
   constructor(status: number, message: string, problem?: ProblemDetails) {
-    super(message)
+    super(problem?.correlationId ? `${message} (referencia: ${problem.correlationId})` : message)
     this.name = 'ApiError'
     this.status = status
     this.problem = problem
@@ -37,6 +37,7 @@ async function request<T>(
       ...(!['GET', 'HEAD', 'OPTIONS'].includes(method)
         ? { 'X-XSRF-TOKEN': csrfCookie() ?? '' }
         : {}),
+      'X-Request-ID': createRequestId(),
       ...init?.headers,
     },
   })
@@ -63,6 +64,24 @@ async function request<T>(
   return response.json() as Promise<T>
 }
 
+export async function downloadUserExport(): Promise<void> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/users/me/export`, {
+    credentials: 'include',
+    headers: { Accept: 'application/json', 'X-Request-ID': createRequestId() },
+  })
+  if (!response.ok) {
+    const problem = await readProblemDetails(response)
+    throw new ApiError(response.status, problem?.detail ?? 'No se pudo exportar', problem)
+  }
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `supermarket-meal-planner-export-${new Date().toISOString().slice(0, 10)}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 function refreshExcluded(path: string): boolean {
   return [
     '/api/v1/auth/csrf',
@@ -84,6 +103,15 @@ function csrfCookie(): string | undefined {
     .split('; ')
     .find((value) => value.startsWith('XSRF-TOKEN='))
     ?.slice('XSRF-TOKEN='.length)
+}
+
+function createRequestId(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80
+  const value = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`
 }
 
 async function refreshOnce(): Promise<boolean> {

@@ -1,0 +1,1 @@
+{"annotations":{"list":[]},"editable":false,"panels":[{"type":"timeseries","title":"Eventos de autenticación","targets":[{"expr":"sum(rate(authentication_events_total[5m])) by (event, outcome)","legendFormat":"{{event}} {{outcome}}"}],"gridPos":{"h":9,"w":24,"x":0,"y":0}}],"schemaVersion":41,"tags":["security"],"title":"Autenticación","uid":"smp-authentication","version":1}

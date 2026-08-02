@@ -28,6 +28,11 @@
   box-shadow: 0 0 0 4px rgb(178 65 65 / 12%);
 }
 
+.degraded {
+  background: var(--color-warning);
+  box-shadow: 0 0 0 4px rgb(190 134 39 / 12%);
+}
+
 .checking {
   background: var(--color-warning);
   animation: pulse 1.2s ease-in-out infinite;

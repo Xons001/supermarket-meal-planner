@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: Supermarket Meal Planner
+    folder: Supermarket Meal Planner
+    type: file
+    disableDeletion: true
+    editable: false
+    options:
+      path: /var/lib/grafana/dashboards

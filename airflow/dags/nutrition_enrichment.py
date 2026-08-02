@@ -5,7 +5,14 @@ from datetime import datetime
 
 from airflow.sdk import dag, task
 
-from nutrition_pipeline.runtime import apply_auto_accepted, failure_callback, finish, lookup_and_score, scan_products, start_run
+from nutrition_pipeline.runtime import (
+    apply_auto_accepted,
+    failure_callback,
+    finish,
+    lookup_and_score,
+    scan_products,
+    start_run,
+)
 
 
 @dag(
@@ -68,7 +75,11 @@ def nutrition_enrichment():
 
     @task
     def generate_enrichment_report(ref):
-        return {"runId": ref["runId"], "status": ref["status"]}
+        return {
+            "runId": ref["runId"],
+            "status": ref["status"],
+            "requestId": ref.get("requestId"),
+        }
 
     ref = start_enrichment_run()
     ref = find_products_without_nutrition(ref)

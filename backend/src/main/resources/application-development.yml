@@ -1,0 +1,20 @@
+app:
+  auth:
+    cookie:
+      secure: ${APP_AUTH_COOKIE_SECURE:false}
+    allowed-origins: ${APP_AUTH_ALLOWED_ORIGINS:http://localhost:5173}
+    swagger-enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
+  catalog:
+    seed-enabled: ${CATALOG_SEED_ENABLED:true}
+  meal-templates:
+    seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}
+  nutrition-enrichment:
+    enabled: ${APP_NUTRITION_ENRICHMENT_ENABLED:true}
+  observability:
+    environment: development
+
+springdoc:
+  api-docs:
+    enabled: ${APP_AUTH_SWAGGER_ENABLED:true}
+  swagger-ui:
+    enabled: ${APP_AUTH_SWAGGER_ENABLED:true}

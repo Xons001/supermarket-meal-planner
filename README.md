@@ -1,12 +1,12 @@
 # Supermarket Meal Planner
 
-> FASE 10 disponible: enriquecimiento nutricional trazable, matching determinista, revisión administrativa e historial mediante Apache Airflow. Consulta [la guía nutricional](docs/nutrition-enrichment.md).
+> FASE 11 preparada: despliegue HTTPS en una máquina, observabilidad, backups verificados, CI/CD, privacidad y documentación de portfolio.
 
 Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
 objetivos nutricionales, presupuesto y aprovechamiento de paquetes.
 
-> **Estado:** FASE 7 — Usuarios, autenticación y propiedad de datos.
+> **Estado:** FASE 11 — Producción, observabilidad, CI/CD y portfolio.
 
 La versión actual permite explorar 24 productos controlados, mantener plantillas
 de comidas y generar planes de 1 a 14 días con 1 a 6 comidas diarias. El motor
@@ -18,6 +18,11 @@ coste real de compra, sobrante y diferencia frente al presupuesto semanal.
 Cada cuenta dispone de preferencias propias y solo puede consultar o modificar
 sus planes, listas e historial. La edición parcial de FASE 6 continúa disponible
 tras autenticarse.
+
+![Dashboard privado de Supermarket Meal Planner](docs/images/dashboard.webp)
+
+Las capturas reproducibles de landing, catÃ¡logo, generador, plan, lista y
+administraciÃ³n se encuentran en [`docs/images`](docs/images/).
 
 ## Avisos importantes
 
@@ -62,6 +67,12 @@ Más detalle:
 - [Generación semanal, scoring y determinismo](docs/meal-plan-generation.md)
 - [Listas de compra, paquetes y desperdicio](docs/shopping-lists.md)
 - [Autenticación y propiedad de datos](docs/authentication-and-data-ownership.md)
+- [Despliegue de producción](docs/production-deployment.md)
+- [Observabilidad](docs/observability.md)
+- [Backups y restauración](docs/backup-and-restore.md)
+- [Releases y rollback](docs/release-and-rollback.md)
+- [Privacidad](docs/privacy.md)
+- [Case study](docs/portfolio-case-study.md)
 - [Roadmap](docs/roadmap.md)
 - [Decisiones arquitectónicas](docs/adr/)
 
@@ -96,6 +107,15 @@ Desde la raíz:
 copy .env.example .env
 docker compose up --build
 ```
+
+Producción utiliza un Compose independiente y exige configuración externa segura:
+
+```bash
+docker compose -f docker-compose.prod.yml config
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Prometheus y Grafana se incorporan solo cuando se añade `docker-compose.observability.yml`.
 
 En macOS, Linux, Git Bash o WSL:
 

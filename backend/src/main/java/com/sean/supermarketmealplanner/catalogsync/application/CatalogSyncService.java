@@ -46,6 +46,7 @@ public class CatalogSyncService {
         CatalogSyncType type,CatalogSyncTrigger trigger,UUID userId,CatalogSyncRunEntity retryOf){
         if(runs.existsBySupermarketIdAndStatusIn(supermarket.getId(),ACTIVE)) throw alreadyRunning();
         var now=OffsetDateTime.now(clock); var configuration=json.createObjectNode().put("provider",properties.provider());
+        var requestId=MDC.get("requestId"); if(requestId!=null)configuration.put("requestId",requestId);
         var run=new CatalogSyncRunEntity(supermarket,type,trigger,properties.provider(),userId,retryOf,configuration,now);
         try { runs.saveAndFlush(run); } catch(DataIntegrityViolationException exception){ throw alreadyRunning(); }
         var dag=type==CatalogSyncType.FULL_CATALOG?"catalog_full_sync":"catalog_price_sync";
@@ -55,7 +56,7 @@ public class CatalogSyncService {
                 "provider",properties.provider(),"triggeredBy",trigger.name()));
             run.accepted(dag,dagRunId,OffsetDateTime.now(clock)); runs.save(run);
             metrics.counter("catalog.sync.requests","type",type.name(),"supermarket",supermarket.getCode().name()).increment();
-            log.info("catalog_sync_requested run={} supermarket={} type={} actor={}",run.getId(),supermarket.getCode(),type,userId);
+            log.info("catalog_sync_requested run={} supermarket={} type={}",run.getId(),supermarket.getCode(),type);
             return new CatalogSyncDtos.Accepted(run.getId(),dag,dagRunId,run.getStatus(),run.getRequestedAt());
         } catch(CatalogSyncException exception){
             run.fail(json.createObjectNode().put("errorCode",exception.code()).put("message",exception.getMessage()),OffsetDateTime.now(clock));

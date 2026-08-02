@@ -38,9 +38,10 @@ services:
     working_dir: /workspace/frontend
     command: ["sh", "-c", "npm ci && npm run test:e2e"]
     environment:
-      E2E_BASE_URL: http://frontend
+      E2E_BASE_URL: http://frontend:8080
       E2E_ADMIN_EMAIL: ${APP_ADMIN_EMAIL}
       E2E_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD}
+      PORTFOLIO_CAPTURE: ${PORTFOLIO_CAPTURE:-false}
     volumes:
       - .:/workspace
       - e2e_node_modules:/workspace/frontend/node_modules

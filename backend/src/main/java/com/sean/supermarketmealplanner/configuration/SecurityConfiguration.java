@@ -41,7 +41,8 @@ public class SecurityConfiguration {
                         .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
                 .authorizeHttpRequests(a->{
                     a.requestMatchers("/api/v1/auth/csrf","/api/v1/auth/register","/api/v1/auth/login",
-                            "/api/v1/auth/refresh","/api/v1/auth/logout","/actuator/health",
+                            "/api/v1/auth/refresh","/api/v1/auth/logout","/actuator/health/**",
+                            "/actuator/info","/actuator/prometheus","/healthz",
                             "/api/v1/supermarkets/**","/api/v1/products/**","/api/v1/catalog/**",
                             "/api/v1/categories/**","/api/v1/dietary-tags/**","/api/v1/allergens/**").permitAll();
                     a.requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/meal-templates/**").permitAll();
@@ -52,8 +53,8 @@ public class SecurityConfiguration {
                     a.anyRequest().authenticated();
                 })
                 .exceptionHandling(e->e.authenticationEntryPoint((req,res,ex)->
-                        problem(json,res,401,"AUTHENTICATION_REQUIRED","Debes iniciar sesión"))
-                    .accessDeniedHandler((req,res,ex)->problem(json,res,403,
+                        problem(json,req,res,401,"AUTHENTICATION_REQUIRED","Debes iniciar sesión"))
+                    .accessDeniedHandler((req,res,ex)->problem(json,req,res,403,
                             ex instanceof CsrfException ? "CSRF_TOKEN_INVALID":"ACCESS_DENIED",
                             ex instanceof CsrfException ? "Token CSRF ausente o inválido":"Acceso denegado")))
                 .addFilterBefore(filter,UsernamePasswordAuthenticationFilter.class);
@@ -62,14 +63,17 @@ public class SecurityConfiguration {
     @Bean CorsConfigurationSource corsConfigurationSource(AuthProperties p){
         var c=new CorsConfiguration();c.setAllowedOrigins(p.allowedOrigins());
         c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        c.setAllowedHeaders(List.of("Content-Type","X-XSRF-TOKEN"));c.setAllowCredentials(true);
+        c.setAllowedHeaders(List.of("Content-Type","X-XSRF-TOKEN","X-Request-ID"));
+        c.setExposedHeaders(List.of("X-Request-ID"));c.setAllowCredentials(true);
         var source=new UrlBasedCorsConfigurationSource();source.registerCorsConfiguration("/**",c);return source;
     }
-    private static void problem(ObjectMapper json,HttpServletResponse response,int status,String code,String detail)
+    private static void problem(ObjectMapper json,jakarta.servlet.http.HttpServletRequest request,HttpServletResponse response,int status,String code,String detail)
             throws java.io.IOException{
         response.setStatus(status);response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         response.setHeader("Cache-Control","no-store");
+        var requestId=request.getAttribute(RequestObservabilityFilter.REQUEST_ID_ATTRIBUTE);
         json.writeValue(response.getOutputStream(),java.util.Map.of("type","about:blank","title",detail,
-                "status",status,"detail",detail,"code",code));
+                "status",status,"detail",detail,"code",code,
+                "correlationId",requestId==null?"unknown":requestId.toString()));
     }
 }
