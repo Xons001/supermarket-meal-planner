@@ -24,7 +24,7 @@ class DashboardMigrationIntegrationTest extends AbstractIntegrationTest {
         var version = jdbc.queryForObject(
                 "SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1",
                 String.class);
-        assertThat(version).isEqualTo("12");
+        assertThat(version).isEqualTo("13");
         assertThat(column("meal_plans", "favorite")).isTrue();
         assertThat(column("meal_plans", "estimated_purchase_cost")).isTrue();
         assertThat(column("shopping_lists", "active")).isTrue();

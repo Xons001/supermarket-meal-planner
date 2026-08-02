@@ -6,6 +6,8 @@ import com.sean.supermarketmealplanner.nutrition.application.port.NutritionDataP
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogDocument.DemoNutrition;
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogFileReader;
 import java.util.Optional;
+import java.util.List;
+import com.sean.supermarketmealplanner.nutrition.application.port.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,6 +18,9 @@ public class LocalJsonNutritionDataProvider implements NutritionDataProvider {
     public LocalJsonNutritionDataProvider(DemoCatalogFileReader fileReader) {
         this.fileReader = fileReader;
     }
+
+    @Override
+    public NutritionProviderCode supportedProvider() { return NutritionProviderCode.LOCAL_JSON; }
 
     @Override
     public Optional<ExternalNutritionData> findByBarcode(String barcode) {
@@ -30,15 +35,26 @@ public class LocalJsonNutritionDataProvider implements NutritionDataProvider {
     }
 
     @Override
-    public Optional<ExternalNutritionData> findByName(String name) {
+    public List<ExternalNutritionCandidate> searchByName(String name, NutritionSearchOptions options) {
         if (name == null || name.isBlank()) {
-            return Optional.empty();
+            return List.of();
         }
         return fileReader.read().products().stream()
-                .filter(product -> name.equalsIgnoreCase(product.name()))
+                .filter(product -> normalize(product.name()).contains(normalize(name))
+                        || normalize(name).contains(normalize(product.name())))
                 .filter(product -> product.nutrition() != null)
-                .findFirst()
-                .map(product -> mapNutrition(product.nutrition()));
+                .limit(options.maximumResults())
+                .map(product -> new ExternalNutritionCandidate(
+                        "local-json:" + product.externalId(), product.barcode(), product.name(), product.brand(),
+                        product.packageQuantity(), product.packageUnit(), product.categoryExternalId(),
+                        mapNutrition(product.nutrition())))
+                .toList();
+    }
+
+    private String normalize(String value) {
+        return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKD)
+                .replaceAll("\\p{M}", "").toLowerCase(java.util.Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", " ").trim();
     }
 
     private ExternalNutritionData mapNutrition(DemoNutrition nutrition) {

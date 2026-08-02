@@ -76,33 +76,57 @@ export function ProductDetailPage() {
                   <h2 id="nutrition-heading">Información nutricional</h2>
                 </div>
                 {product.data.nutrition ? (
-                  <dl className={styles.nutritionGrid}>
-                    <NutritionValue
-                      label="Energía"
-                      value={`${product.data.nutrition.caloriesPer100g} kcal`}
-                    />
-                    <NutritionValue
-                      label="Proteína"
-                      value={`${product.data.nutrition.proteinPer100g} g`}
-                    />
-                    <NutritionValue
-                      label="Carbohidratos"
-                      value={`${product.data.nutrition.carbohydratesPer100g} g`}
-                    />
-                    <NutritionValue
-                      label="Grasas"
-                      value={`${product.data.nutrition.fatPer100g} g`}
-                    />
-                    <NutritionValue
-                      label="Fibra"
-                      value={`${product.data.nutrition.fiberPer100g} g`}
-                    />
-                    <NutritionValue
-                      label="Azúcares"
-                      value={`${product.data.nutrition.sugarPer100g} g`}
-                    />
-                    <NutritionValue label="Sal" value={`${product.data.nutrition.saltPer100g} g`} />
-                  </dl>
+                  <>
+                    <dl className={styles.nutritionGrid}>
+                      <NutritionValue
+                        label="Energía"
+                        value={nutritionValue(product.data.nutrition.caloriesPer100g, 'kcal')}
+                      />
+                      <NutritionValue
+                        label="Proteína"
+                        value={nutritionValue(product.data.nutrition.proteinPer100g)}
+                      />
+                      <NutritionValue
+                        label="Carbohidratos"
+                        value={nutritionValue(product.data.nutrition.carbohydratesPer100g)}
+                      />
+                      <NutritionValue
+                        label="Grasas"
+                        value={nutritionValue(product.data.nutrition.fatPer100g)}
+                      />
+                      <NutritionValue
+                        label="Fibra"
+                        value={nutritionValue(product.data.nutrition.fiberPer100g)}
+                      />
+                      <NutritionValue
+                        label="Azúcares"
+                        value={nutritionValue(product.data.nutrition.sugarPer100g)}
+                      />
+                      <NutritionValue
+                        label="Sal"
+                        value={nutritionValue(product.data.nutrition.saltPer100g)}
+                      />
+                      <NutritionValue
+                        label="Grasas saturadas"
+                        value={nutritionValue(product.data.nutrition.saturatedFatPer100g)}
+                      />
+                    </dl>
+                    <p className={styles.disclaimer}>
+                      Fuente: {product.data.nutrition.dataSource} · Estado:{' '}
+                      {product.data.nutrition.verificationStatus}
+                      {' · '}Completitud: {product.data.nutrition.completeness} · Confianza:{' '}
+                      {product.data.nutrition.confidenceScore}%
+                      {product.data.nutrition.sourceUpdatedAt && (
+                        <> · Actualizada {formatDate(product.data.nutrition.sourceUpdatedAt)}</>
+                      )}
+                    </p>
+                    {product.data.nutrition.completeness !== 'COMPLETE' && (
+                      <p className={styles.missing}>
+                        Los datos nutricionales son parciales; los valores ausentes no se han
+                        estimado.
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <p className={styles.missing}>Información nutricional no disponible</p>
                 )}
@@ -178,6 +202,10 @@ export function ProductDetailPage() {
       </main>
     </div>
   )
+}
+
+function nutritionValue(value: number | null, unit = 'g') {
+  return value === null ? 'No disponible' : `${value} ${unit}`
 }
 
 function NutritionValue({ label, value }: { label: string; value: string }) {

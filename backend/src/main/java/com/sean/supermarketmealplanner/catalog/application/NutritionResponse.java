@@ -11,10 +11,15 @@ public record NutritionResponse(
         BigDecimal fiberPer100g,
         BigDecimal sugarPer100g,
         BigDecimal saltPer100g,
+        BigDecimal saturatedFatPer100g,
+        String nutritionBasis,
+        String completeness,
         NutritionPerUnitResponse perUnit,
         String dataSource,
         String verificationStatus,
         BigDecimal confidenceScore,
+        String sourceReference,
+        OffsetDateTime sourceUpdatedAt,
         OffsetDateTime updatedAt
 ) {
 }

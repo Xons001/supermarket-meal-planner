@@ -67,6 +67,23 @@ app:
     price-schedule: ${APP_CATALOG_PRICE_SYNC_SCHEDULE:0 */6 * * *}
     manual-rate-per-hour: ${APP_CATALOG_SYNC_MANUAL_RATE_PER_HOUR:10}
     staging-retention-days: ${APP_CATALOG_SYNC_STAGING_RETENTION_DAYS:7}
+  nutrition-enrichment:
+    enabled: ${APP_NUTRITION_ENRICHMENT_ENABLED:true}
+    cron: ${APP_NUTRITION_ENRICHMENT_CRON:0 4 * * 1}
+    provider: ${APP_NUTRITION_PROVIDER:LOCAL_JSON}
+    batch-size: ${APP_NUTRITION_BATCH_SIZE:100}
+    auto-accept-threshold: ${APP_NUTRITION_AUTO_ACCEPT_THRESHOLD:95}
+    manual-review-threshold: ${APP_NUTRITION_MANUAL_REVIEW_THRESHOLD:75}
+    cache-ttl: ${APP_NUTRITION_CACHE_TTL:P7D}
+    rejection-cooldown: ${APP_NUTRITION_REJECTION_COOLDOWN:P30D}
+    manual-rate-per-hour: ${APP_NUTRITION_MANUAL_RATE_PER_HOUR:10}
+    open-food-facts:
+      enabled: ${APP_OPENFOODFACTS_ENABLED:false}
+      base-url: ${APP_OPENFOODFACTS_BASE_URL:https://world.openfoodfacts.org}
+      user-agent: ${APP_OPENFOODFACTS_USER_AGENT:SupermarketMealPlanner/0.1 (local-development)}
+      timeout-seconds: ${APP_OPENFOODFACTS_TIMEOUT_SECONDS:10}
+      max-retries: ${APP_OPENFOODFACTS_MAX_RETRIES:2}
+      request-delay-ms: ${APP_OPENFOODFACTS_REQUEST_DELAY_MS:6500}
   meal-templates:
     demo-resource: classpath:data/mock/meal-templates.json
     seed-enabled: ${MEAL_TEMPLATE_SEED_ENABLED:true}

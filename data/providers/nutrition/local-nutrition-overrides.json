@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "classification": "DEMONSTRATION_DATA",
+    "purpose": "Deterministic FASE 10 name-matching and manual-review fixture"
+  },
+  "products": [
+    {
+      "externalId": "nutrition-demo-apple-name-match",
+      "barcode": null,
+      "name": "Manzana roja",
+      "brand": "Referencia nutricional demo",
+      "nutrition": {
+        "caloriesPer100g": 52,
+        "proteinPer100g": 0.3,
+        "carbohydratesPer100g": 13.8,
+        "fatPer100g": 0.2,
+        "fiberPer100g": 2.4,
+        "sugarPer100g": 10.4,
+        "saltPer100g": 0,
+        "saturatedFatPer100g": 0.03,
+        "nutritionBasis": "PER_100_GRAMS"
+      }
+    }
+  ]
+}

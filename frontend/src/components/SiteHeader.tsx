@@ -50,7 +50,10 @@ export function SiteHeader() {
         ['/#como-funcionara', 'Cómo funciona'],
       ]
 
-  if (user?.role === 'ADMIN') links.push(['/admin/catalog-sync', 'Sincronización'])
+  if (user?.role === 'ADMIN') {
+    links.push(['/admin/catalog-sync', 'Sincronización'])
+    links.push(['/admin/nutrition', 'Nutrición'])
+  }
 
   return (
     <header className={styles.header}>

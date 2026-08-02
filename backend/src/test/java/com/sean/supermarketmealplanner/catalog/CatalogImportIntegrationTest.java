@@ -11,8 +11,11 @@ import com.sean.supermarketmealplanner.catalog.infrastructure.persistence.Produc
 import com.sean.supermarketmealplanner.nutrition.infrastructure.persistence.NutritionRepository;
 import com.sean.supermarketmealplanner.shared.infrastructure.demodata.DemoCatalogFileReader;
 import com.sean.supermarketmealplanner.supermarket.infrastructure.persistence.SupermarketRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 class CatalogImportIntegrationTest extends AbstractIntegrationTest {
 
@@ -39,6 +42,8 @@ class CatalogImportIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private SupermarketRepository supermarketRepository;
+    @Autowired private JdbcTemplate jdbc;
+    @Autowired private EntityManager entityManager;
 
     @Test
     void controlledDataIsValidAndImportIsIdempotent() {
@@ -77,5 +82,22 @@ class CatalogImportIntegrationTest extends AbstractIntegrationTest {
         assertThat(productDietaryTagRepository.count()).isEqualTo(tagCount);
         assertThat(productAllergenRepository.count()).isEqualTo(allergenCount);
         assertThat(priceHistoryRepository.count()).isEqualTo(priceCount);
+    }
+
+    @Test
+    @Transactional
+    void bootstrapDoesNotOverwriteManualNutrition() {
+        var product = productRepository.findAll().stream()
+                .filter(candidate -> candidate.getNutrition() != null).findFirst().orElseThrow();
+        jdbc.update("update nutrition set protein_per_100g=99, data_source='MANUAL', verification_status='MANUAL_OVERRIDE' where product_id=?", product.getId());
+        // The manual update deliberately bypasses JPA; clear its first-level cache so
+        // the import observes the same committed state it sees in production.
+        entityManager.clear();
+
+        catalogImportService.importCatalogs();
+
+        var protectedNutrition = nutritionRepository.findByProductId(product.getId()).orElseThrow();
+        assertThat(protectedNutrition.getProteinPer100g()).isEqualByComparingTo("99");
+        assertThat(protectedNutrition.getVerificationStatus()).isEqualTo("MANUAL_OVERRIDE");
     }
 }

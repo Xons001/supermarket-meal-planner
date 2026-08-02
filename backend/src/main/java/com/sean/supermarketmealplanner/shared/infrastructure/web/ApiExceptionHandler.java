@@ -20,12 +20,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.sean.supermarketmealplanner.nutrition.application.NutritionException;
 import com.sean.supermarketmealplanner.identity.application.IdentityException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import com.sean.supermarketmealplanner.catalogsync.application.CatalogSyncException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(NutritionException.class)
+    ResponseEntity<ProblemDetail> nutrition(NutritionException exception, HttpServletRequest request) {
+        var problem=createProblem(exception.status(),"Nutrition enrichment failed",exception.getMessage(),request);
+        problem.setProperty("code",exception.code());problem.setProperty("errorCode",exception.code());
+        return ResponseEntity.status(exception.status()).body(problem);
+    }
     @ExceptionHandler(CatalogSyncException.class)
     ResponseEntity<ProblemDetail> catalogSync(CatalogSyncException exception, HttpServletRequest request) {
         var problem=createProblem(exception.status(),"Catalog synchronization failed",exception.getMessage(),request);

@@ -298,3 +298,6 @@ del plan, estrategia, preset, restricciones y alérgenos.
 `RefreshTokenSession` guarda únicamente el HMAC del token opaco, familia,
 usuario, expiración, rotación, revocación y reemplazo. `MealPlan.owner` y
 `ShoppingList.owner` son obligatorios; una FK compuesta garantiza que coinciden.
+# Nutrición enriquecida
+
+`Nutrition` admite valores parciales y conserva base, completitud, fuente, referencia, confianza y revisión. `NutritionEnrichmentRun` representa una ejecución. `NutritionMatchCandidate` representa una propuesta revisable con score y versión. `ProductNutritionHistory` es un registro append-only de snapshots. `NutritionProviderCache` evita repetir búsquedas externas dentro de su TTL.

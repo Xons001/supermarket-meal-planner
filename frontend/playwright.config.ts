@@ -8,6 +8,7 @@ export default defineConfig({
   // The isolated ADMIN fixture is intentionally shared by viewport projects;
   // serialize authentication so the real login rate limiter is not bypassed.
   fullyParallel: false,
+  workers: 1,
   retries: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {

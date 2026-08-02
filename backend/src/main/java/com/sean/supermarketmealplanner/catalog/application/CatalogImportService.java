@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -45,7 +46,7 @@ public class CatalogImportService {
 
     public CatalogImportService(
             List<SupermarketCatalogProvider> catalogProviders,
-            NutritionDataProvider nutritionDataProvider,
+            @Qualifier("localJsonNutritionDataProvider") NutritionDataProvider nutritionDataProvider,
             SupermarketRepository supermarketRepository,
             CategoryRepository categoryRepository,
             ProductRepository productRepository,
@@ -169,12 +170,15 @@ public class CatalogImportService {
         var externalNutrition = nutritionDataProvider.findByBarcode(externalProduct.barcode())
                 .or(() -> nutritionDataProvider.findByName(externalProduct.name()));
         if (externalNutrition.isEmpty()) {
-            nutritionRepository.findByProductId(product.getId()).ifPresent(nutritionRepository::delete);
-            product.setNutrition(null);
+            // Bootstrap never removes nutrition acquired or reviewed after the demo import.
             return;
         }
-        var nutrition = nutritionRepository.findByProductId(product.getId())
-                .orElseGet(() -> new NutritionEntity(product));
+        var existing = nutritionRepository.findByProductId(product.getId());
+        if (existing.isPresent()
+                && !Set.of("DEMO", "UNVERIFIED").contains(existing.get().getVerificationStatus())) {
+            return;
+        }
+        var nutrition = existing.orElseGet(() -> new NutritionEntity(product));
         var nutritionData = externalNutrition.orElseThrow();
         var perUnit = nutritionData.perUnit();
         nutrition.update(

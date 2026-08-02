@@ -612,3 +612,6 @@ estables son `AUTHENTICATION_REQUIRED`, `INVALID_CREDENTIALS`,
 Restaurar una lista nunca la activa. La activación es explícita y desactiva la
 lista anterior sin archivarla. La duplicación no hereda tokens, listas, historial
 ni actividad.
+# Administración nutricional (FASE 10)
+
+Rutas `ADMIN`: `GET|POST /api/v1/admin/nutrition-enrichment/runs`, detalle por ID, `GET /api/v1/admin/nutrition-enrichment/overview`, listado/detalle de candidatos, aceptación, rechazo, creación/corrección manual e historial por producto. Las confirmaciones usan versión optimista. Códigos estables: `NUTRITION_PROVIDER_UNAVAILABLE`, `NUTRITION_CANDIDATE_NOT_FOUND`, `NUTRITION_CANDIDATE_STALE`, `NUTRITION_CANDIDATE_ALREADY_REVIEWED`, `NUTRITION_MATCH_CONFLICT`, `NUTRITION_DATA_INVALID`, `NUTRITION_BASIS_INCOMPATIBLE`, `NUTRITION_MANUAL_OVERRIDE_PROTECTED` y `NUTRITION_ENRICHMENT_FAILED`.

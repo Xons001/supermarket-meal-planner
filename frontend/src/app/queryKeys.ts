@@ -9,4 +9,7 @@ export const queryKeys = {
   catalogSyncOverview: ['admin', 'catalog-sync', 'overview'] as const,
   catalogSyncRuns: (filters: unknown) => ['admin', 'catalog-sync', 'runs', filters] as const,
   catalogSyncErrors: (id: string) => ['admin', 'catalog-sync', 'errors', id] as const,
+  nutritionOverview: ['admin', 'nutrition', 'overview'] as const,
+  nutritionRuns: (page: number) => ['admin', 'nutrition', 'runs', page] as const,
+  nutritionCandidates: (page: number) => ['admin', 'nutrition', 'candidates', page] as const,
 }

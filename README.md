@@ -1,6 +1,6 @@
 # Supermarket Meal Planner
 
-> FASE 9 disponible: sincronización idempotente de catálogo y precios mediante Apache Airflow 3.3. Consulta [la guía operativa](docs/catalog-and-price-synchronization.md).
+> FASE 10 disponible: enriquecimiento nutricional trazable, matching determinista, revisión administrativa e historial mediante Apache Airflow. Consulta [la guía nutricional](docs/nutrition-enrichment.md).
 
 Aplicación web independiente para crear, en fases posteriores, planes de
 alimentación semanales basados en productos concretos del supermercado elegido,
@@ -41,7 +41,7 @@ momento de la consulta.
 - Testing: JUnit 5, Mockito, Testcontainers, Vitest, React Testing Library y
   Playwright.
 - Infraestructura: Docker, Docker Compose, Nginx y Makefile.
-- ETL futuro: Python y Apache Airflow; todavía no forman parte del runtime.
+- ETL: Python y Apache Airflow 3.3 con sincronización de catálogo y enriquecimiento nutricional semanal.
 
 ## Arquitectura
 
@@ -348,7 +348,7 @@ npm run build
   cuando cambia el contenido y determina si la lista activa queda desactualizada.
 - El filtrado de plantillas se calcula en memoria tras cargar el pequeño conjunto
   de demostración; se migrará a consulta SQL cuando el volumen lo justifique.
-- No hay IA, scraping, Open Food Facts, Redis, Airflow funcional ni Kubernetes.
+- No hay IA, scraping, OCR, Redis ni Kubernetes. Open Food Facts es opcional y está deshabilitado por defecto.
 - El dashboard, la actividad y los listados usan proyecciones persistidas; no
   recalculan los planes.
 - Los tres usuarios manuales y el plan privado de validación se conservan
@@ -359,8 +359,9 @@ npm run build
 
 ## Roadmap
 
-La FASE 8 incorpora dashboard, actividad, organización, temas y duplicación
-histórica. La siguiente fase es Airflow y no forma parte del runtime actual.
+Las FASES 9 y 10 incorporan Airflow para sincronización y enriquecimiento
+nutricional trazable. La FASE 11 (producción, observabilidad y portfolio) queda
+fuera de esta entrega.
 
 Consulta [docs/roadmap.md](docs/roadmap.md) para el orden completo.
 

@@ -8,13 +8,18 @@ export interface Supermarket {
 }
 
 export interface Nutrition {
-  caloriesPer100g: number
-  proteinPer100g: number
-  carbohydratesPer100g: number
-  fatPer100g: number
-  fiberPer100g: number
-  sugarPer100g: number
-  saltPer100g: number
+  caloriesPer100g: number | null
+  proteinPer100g: number | null
+  carbohydratesPer100g: number | null
+  fatPer100g: number | null
+  fiberPer100g: number | null
+  sugarPer100g: number | null
+  saltPer100g: number | null
+  saturatedFatPer100g: number | null
+  nutritionBasis: string
+  completeness: string
+  sourceReference: string | null
+  sourceUpdatedAt: string | null
   perUnit: NutritionBreakdown | null
   dataSource: string
   verificationStatus: string

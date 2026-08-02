@@ -70,6 +70,9 @@ public class ProductResponseMapper {
                 nutrition.getFiberPer100g(),
                 nutrition.getSugarPer100g(),
                 nutrition.getSaltPer100g(),
+                nutrition.getSaturatedFatPer100g(),
+                nutrition.getNutritionBasis(),
+                nutrition.getCompleteness(),
                 nutrition.getCaloriesPerUnit() == null ? null : new NutritionPerUnitResponse(
                         nutrition.getCaloriesPerUnit(),
                         nutrition.getProteinPerUnit(),
@@ -82,6 +85,8 @@ public class ProductResponseMapper {
                 nutrition.getDataSource(),
                 nutrition.getVerificationStatus(),
                 nutrition.getConfidenceScore(),
+                nutrition.getSourceReference(),
+                nutrition.getSourceUpdatedAt(),
                 nutrition.getUpdatedAt()
         );
     }

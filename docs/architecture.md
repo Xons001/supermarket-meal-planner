@@ -112,6 +112,10 @@ transacción el agregado persistido y su historial. Las listas comparan su
 
 La FASE 9 ejecuta `catalog_full_sync`, `catalog_price_sync` y `catalog_sync_cleanup` con metadatos PostgreSQL aislados. Los proveedores Python normalizan antes de staging y los merges son idempotentes. El backend solo crea el run y dispara la API REST v2; no procesa el catálogo en la petición HTTP.
 
+## Enriquecimiento nutricional
+
+La FASE 10 añade `nutrition_enrichment`. El backend administra runs y revisión; Airflow realiza el trabajo por lotes directamente contra PostgreSQL. `NutritionDataProvider` mantiene separados el proveedor local y Open Food Facts. Los candidatos persistidos evitan catálogos completos en XCom y el historial protege trazabilidad e idempotencia. Los snapshots de planes históricos permanecen inmutables.
+
 `supermarket_catalog_sync` ejecutará extracción, normalización, validación,
 carga, histórico, bajas lógicas e informe. `nutrition_enrichment` buscará datos,
 calculará confianza y almacenará únicamente coincidencias válidas.

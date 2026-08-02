@@ -48,7 +48,13 @@ tema, organización de planes y listas, duplicación histórica y E2E aislado.
 
 DAGs idempotentes de catálogo, precios, bajas lógicas, staging, informes y panel ADMIN.
 
-## FASE 10 — Nutrición externa
+## FASE 10 — Enriquecimiento nutricional ✅
+
+Proveedor local reproducible y Open Food Facts opcional, matching determinista por barcode/nombre, confianza y umbrales, datos parciales, revisión manual, prioridad de fuentes, historial, DAG semanal y panel ADMIN.
+
+## FASE 11 — Producción, observabilidad y portfolio
+
+Pendiente. No forma parte de esta entrega.
 
 Evaluación de Open Food Facts, matching y confianza verificable.
 

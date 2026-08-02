@@ -49,6 +49,9 @@ const CatalogSyncAdminPage = lazy(() =>
     default: module.CatalogSyncAdminPage,
   })),
 )
+const NutritionAdminPage = lazy(() =>
+  import('../pages/NutritionAdminPage').then((module) => ({ default: module.NutritionAdminPage })),
+)
 
 const queryClient = createQueryClient()
 const privateRoute = (page: ReactNode) => (
@@ -105,6 +108,16 @@ export function App() {
                   <AdminRoute>
                     <Suspense fallback={<RouteLoading />}>
                       <CatalogSyncAdminPage />
+                    </Suspense>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/nutrition/*"
+                element={
+                  <AdminRoute>
+                    <Suspense fallback={<RouteLoading />}>
+                      <NutritionAdminPage />
                     </Suspense>
                   </AdminRoute>
                 }

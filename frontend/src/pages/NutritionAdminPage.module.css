@@ -1,0 +1,100 @@
+.page {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 2rem auto 5rem;
+  display: grid;
+  gap: 2rem;
+}
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.hero p,
+.hero h1 {
+  margin: 0.2rem 0;
+}
+.hero p {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+}
+.overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+.overview article {
+  display: grid;
+  gap: 0.35rem;
+}
+.overview span,
+.candidateTitle span {
+  color: var(--color-text-muted);
+}
+.overview strong {
+  font-size: 1.7rem;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.candidateTitle {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.candidateTitle div {
+  display: grid;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+}
+.tableWrap th,
+.tableWrap td {
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.tableWrap th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+@media (max-width: 700px) {
+  .hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .overview,
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 430px) {
+  .page {
+    width: calc(100% - 1rem);
+  }
+  .overview,
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .actions {
+    flex-direction: column;
+  }
+}
